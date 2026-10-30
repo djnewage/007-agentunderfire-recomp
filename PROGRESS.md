@@ -10,7 +10,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK on branch agentunderfire, one commit past the fork's main 0733ba3
-- PC features: skip intro, field of view, mouse on foot confirmed by Harry; radar, 60 FPS, culling margin await Windows
+- PC features: skip intro, field of view, mouse on foot confirmed by Harry; 60 FPS and the driving culling confirmed; radar and on-foot margin await word
 - Not done: in-game PC Settings page, keyboard prompts, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
@@ -22,6 +22,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - A and D strafe on foot; driving pop-in and 60 FPS confirmed
+- Harry: the culling fix cured the driving pop-in; 60 FPS performs OK. A and D turned the view: they played the left stick's x, which the game's Setup 1
+  makes yaw. Now the right stick's x (RSLeft, RSRight), its strafe; the mouse turns. Headless, the right stick held: the command's right 0x7E (cmd +0x11),
+  forward 0, yaw unchanged. A layout saved in settings.toml's [keys] keeps what it says.
 
 ### 2026-10-30 - Driving pop-in: the world's frustum is fixed at the console's angle
 - Harry: 60 FPS fine; the pop-in shows just driving along the road.

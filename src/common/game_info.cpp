@@ -63,8 +63,8 @@ std::array<uint16_t, 2> ShooterKeys(int c) {
     switch (c) {
         case kLSUp: return {'W', 0};
         case kLSDown: return {'S', 0};
-        case kLSLeft: return {'A', 0};
-        case kLSRight: return {'D', 0};
+        case kRSLeft: return {'A', 0};       // strafe: the game's Setup 1 has the left stick's x turn, the right stick's strafe,
+        case kRSRight: return {'D', 0};      // and the mouse does the turning
         case kRT: return {kMouseLeft, 0};    // fire
         case kLT: return {kMouseRight, 0};   // manual aim
         case kA: return {'C', kLeftCtrl};    // crouch (Enter selects in the menus: menu_mouse.cpp)

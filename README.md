@@ -32,7 +32,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 
 | Control | On foot | Driving | On a mounted gun |
 | --- | --- | --- | --- |
-| Move / steer | W A S D | W gas, S brake, A D steer | |
+| Move / steer | W S forward and back, A D strafe | W gas, S brake, A D steer | |
 | Look | Mouse | | Mouse |
 | Fire | Left button | Left button | Left button |
 | Manual aim / zoom | Right button | | Right button |
