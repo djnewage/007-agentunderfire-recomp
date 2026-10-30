@@ -26,7 +26,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Field of view** - 50 to 150% of the game's, on foot and driving.
 - **Skip intro movies** - Starts without the logos.
 - **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
-- **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys.
+- **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys. On-foot menus show a pointer: the item under it highlights and a click selects it.
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.
 
 ### Keyboard and mouse

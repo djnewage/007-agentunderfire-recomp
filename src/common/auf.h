@@ -22,4 +22,9 @@ bool PlayerFree();            // bond_eng.xbe: Bond under the player's control, 
 bool ButtonPictures(uint32_t header, uint32_t palette);  // GameInfo::texture_bound (src/common/buttons.cpp)
 void RefreshButtons();        // each poll
 void MenuMouse(int port, input::Pad& p);
+// the menus' pointer, on foot (src/bond/pointer.cpp): where it is in the menus' 640x480, the buttons, and what a click does
+enum { kClickNone, kClickWait, kClickGo };
+bool PointerAt(float& x, float& y);
+uint32_t PointerButtons();
+int MenuClick();
 }  // namespace auf

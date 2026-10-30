@@ -2,10 +2,14 @@
 // and Enter selects too. While a menu is up (auf::MenuUp, each image's own test) the mouse's buttons stop playing what
 // they are bound to in play and play A and B instead; each notch of the wheel is a press of the d-pad. In play a notch
 // cycles the weapon: on foot the d-pad's down a notch down and up a notch up; in the car Black and White. On a mounted
-// gun (auf::OnGun) the left button fires and the right zooms.
+// gun (auf::OnGun) the left button fires and the right zooms. On foot the menus show the Windows cursor, and the left
+// button selects what it is over (src/bond/pointer.cpp); DRIVING.XBE's menu keeps no rectangles, so no cursor there.
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 #include "common/auf.h"
 #include "core/input.h"
@@ -34,12 +38,81 @@ bool KeyHeld(int vk) {
 #endif
 }
 
+// AUF_POINTER=frame:x:y:buttons,... headless: the pointer from each frame of polls on, in 640x480
+struct Forced {
+    bool on = false;
+    float x = 0, y = 0;
+    uint32_t buttons = 0;
+};
+Forced g_forced;
+void ForcedPoll() {
+    static const char* e = std::getenv("AUF_POINTER");
+    static int frame = 0;
+    if (!e || !*e) return;
+    frame++;
+    g_forced.on = true;
+    int at, used;
+    float x, y;
+    uint32_t b;
+    while (std::sscanf(e, "%d:%f:%f:%u%n", &at, &x, &y, &b, &used) == 4 && at <= frame) {
+        g_forced.x = x, g_forced.y = y, g_forced.buttons = b;
+        e += used;
+        if (*e == ',') e++;
+    }
+}
+
+#ifdef _WIN32
+// the arrow while the pointer is up: the runtime hides the cursor while the mouse looks
+WNDPROC g_proc = nullptr;
+std::atomic<bool> g_arrow{false};
+LRESULT CALLBACK PointerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+    if (msg == WM_SETCURSOR && LOWORD(lp) == HTCLIENT && g_arrow.load() && input::MouseLooking()) {
+        SetCursor(LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW)));
+        return TRUE;
+    }
+    return CallWindowProcW(g_proc, hwnd, msg, wp, lp);
+}
+void ShowArrow(bool show) {
+    HWND hwnd = static_cast<HWND>(app::Window());
+    if (!hwnd) return;
+    if (!g_proc) {
+        g_proc = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(PointerProc)));
+        LOGR("auf: the menus' pointer is ready");
+    }
+    if (g_arrow.exchange(show) != show) PostMessageW(hwnd, WM_SETCURSOR, reinterpret_cast<WPARAM>(hwnd), MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
+}
+#endif
+
 // a press of control c (a d-pad bit or an analog button)
 void Press(input::Pad& p, int c) {
     if (c < input::kA) p.buttons |= uint16_t(1u << c);
     else p.analog[c - input::kA] = 255;
 }
 }  // namespace
+
+bool PointerAt(float& x, float& y) {
+    if (g_forced.on) {
+        x = g_forced.x, y = g_forced.y;
+        return true;
+    }
+#ifdef _WIN32
+    HWND hwnd = static_cast<HWND>(app::Window());
+    POINT c;
+    RECT r;
+    if (!input::UsingKeyboard() || GetForegroundWindow() != hwnd || !GetCursorPos(&c) || !ScreenToClient(hwnd, &c) ||
+        !GetClientRect(hwnd, &r) || r.right <= 0 || r.bottom <= 0)
+        return false;
+    // the menus' 4:3 stays in the frame's middle at any width
+    x = 640 * (0.5f + (float(c.x) / r.right - 0.5f) * FrameWidth());
+    y = 480 * float(c.y) / r.bottom;
+    return true;
+#else
+    (void)x, (void)y;
+    return false;
+#endif
+}
+
+uint32_t PointerButtons() { return g_forced.on ? g_forced.buttons : input::MouseButtons(); }
 
 void MenuMouse(int port, input::Pad& p) {
     constexpr int64_t kPress = 70, kGap = 70;  // ms
@@ -50,10 +123,14 @@ void MenuMouse(int port, input::Pad& p) {
     static int64_t pulse = 0;
     static bool was_menu = false;
     int notches = input::TakeWheel();  // taken in play too, so none wait for the next menu
-    uint32_t held = input::MouseButtons();
+    ForcedPoll();
+    uint32_t held = PointerButtons();
     using namespace std::chrono;
     int64_t now = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
     bool menu = MenuUp();
+#ifdef _WIN32
+    if (kImage == kBond) ShowArrow(menu && input::UsingKeyboard());
+#endif
     static bool was = false;
     if (menu != was) LOGR("auf: %s", menu ? "a menu is up: the mouse plays A, B and the d-pad" : "out of the menus");
     was = menu;
@@ -86,7 +163,12 @@ void MenuMouse(int port, input::Pad& p) {
             if (c < input::kA) p.buttons = uint16_t(p.buttons & ~(1u << c));
             else p.analog[c - input::kA] = 0;
         }
-        if (held & 1) p.analog[0] = 255;  // A
+        // A: once the pointer's item is the current one; a press off every item does nothing until it is let go
+        static bool was_held = false, armed = false;
+        int click = MenuClick();
+        if ((held & 1) && !was_held) armed = click != kClickNone;
+        was_held = held & 1;
+        if ((held & 1) && armed && click == kClickGo) p.analog[0] = 255;
         if (held & 2) p.analog[1] = 255;  // B
     }
     // the wheel: a d-pad press a notch

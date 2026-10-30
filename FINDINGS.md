@@ -36,3 +36,4 @@ own code and data, with its addresses).
 
 ## Push buffers
 - **[game]** None in any of the three xbes.
+- **[game]** bond_eng.xbe menus: 0x56930(file) reads input each frame. File +0x44 page, +0x54 lock. Page +0x54 item count, +0x5C items (0xDC each), +0x60 current. Item +0xB0 text chain (next +0x2C8: mode +0x8C, x +0x90, y +0x94, size +0x9C), +0xC4 picture chain (next +0x1F0: mode +0x90, x +0x94, y +0x98, w +0xA0, h +0xA4); mode 1 is a fraction of 640x480. Change item: 0x37AD0(old), 0x37A30(new), store +0x60, as 0x39120.

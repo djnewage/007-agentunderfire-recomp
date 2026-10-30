@@ -23,6 +23,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - A visible pointer in the on-foot menus
+- Harry chose it after "clicking feels odd". While a menu is up in bond_eng.xbe the Windows arrow shows (a window procedure in src/common/menu_mouse.cpp; no SDK change, so no shared gate). src/bond/pointer.cpp hooks 0x56930, the menu's per-frame input, whose argument is the menu file.
+- The item under the pointer becomes current by the game's own sequence (0x37AD0, 0x37A30, page +0x60, sound 0x202E0, as 0x39120). A click waits until its item is current; a click off every item does nothing; pages of 0 or 1 items keep click anywhere.
+- Rectangles from the page's own widgets; each page's are logged. Wrong at first twice: a save row's thumbnail and caption made rows overlap (now the largest text), the pause rows' only picture is the chevron (narrow pictures give way to text).
+- Tried headless with AUF_POINTER=polls:x:y:buttons,... (16:9), read off captures: main menu hover, click off an item ignored, click opens Load Mission; device page click anywhere; slot BONDA, Yes loads the save, back at the main menu; pause menu hover 1 and 2 of 3.
+- Not seen: the arrow itself and real window coordinates (no window here, Windows code only compiled); Harry to try. Options pages, Multiplayer, ncpausemenu not tried. Select Mission's carousel and difficulty are not items: still the arrows and wheel. DRIVING.XBE's menu is another engine with no rectangles found: no pointer there.
+- wincheck and SMOKE OK.
+
 ### 2026-10-30 - The gun's spin, 1 for guns and 2 for gadgets
 - Harry: aim better; moving a mounted gun spun the camera 360 degrees; clicking in the main menus feels odd; the wheel zoom not reached yet. His save (.local/win/hdd.zip, all three mission kinds).
 - The spin, two causes: rates were set only when the mouse reported movement, so the last one kept turning (the harness's test always "reports", so it never showed); and +0x1BC, +0x1C0 are ramps a held stick builds, read as an angle.

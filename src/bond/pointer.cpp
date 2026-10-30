@@ -1,0 +1,121 @@
+// The menus' pointer: the item under the mouse is the current one, and a click selects it. 0x56930 (the argument the
+// menu file) reads the controller for a menu each frame, so this runs there, on the game's thread. A file's +0x44 is
+// the page; a page's +0x54 its items' count, +0x5C the items (0xDC each), +0x60 the current one. Pages of one item or
+// none (a briefing, the controller's picture, Select Mission) have nothing to point at: a click anywhere plays A.
+// Rectangles are the pictures' and the text's own: mode 1 is a fraction of 640x480, 0 pixels (0x56570).
+#include <atomic>
+#include <cstdint>
+
+#include "common/auf.h"
+#include "core/log.h"
+#include "kernel/kernel.h"
+#include "xdk/hle.h"
+
+X86_EXTERN_FUNC(sub_00037AD0);
+X86_EXTERN_FUNC(sub_00037A30);
+X86_EXTERN_FUNC(sub_00039CC0);
+X86_EXTERN_FUNC(sub_000202E0);
+
+namespace {
+constexpr uint32_t kPageItems = 0x54, kPageList = 0x5C, kPageCurrent = 0x60, kItemSize = 0xDC;
+constexpr uint32_t kItemText = 0xB0, kTextNext = 0x2C8, kItemPicture = 0xC4, kPictureNext = 0x1F0;
+constexpr float kTallestPicture = 60;  // a save's thumbnail is a picture of its row's item too: not its rectangle
+constexpr float kNarrowest = 40;
+constexpr float kTextWidth = 240;      // text keeps no width
+std::atomic<int> g_click{auf::kClickGo};
+
+float F(uint32_t a) { return kernel::G<float>(a); }
+
+struct Box {
+    bool any = false;
+    float x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+    void Add(float a, float b, float c, float d) {
+        if (!any) x0 = a, y0 = b, x1 = c, y1 = d, any = true;
+        x0 = a < x0 ? a : x0, y0 = b < y0 ? b : y0, x1 = c > x1 ? c : x1, y1 = d > y1 ? d : y1;
+    }
+    bool Has(float x, float y) const { return any && x >= x0 && x < x1 && y >= y0 && y < y1; }
+};
+
+Box ItemBox(uint32_t item) {
+    Box b;
+    int links = 0;
+    for (uint32_t p = kernel::R32(item + kItemPicture); p && links < 16; p = kernel::R32(p + kPictureNext), links++) {
+        bool frac = kernel::R32(p + 0x90) == 1;
+        float x = F(p + 0x94) * (frac ? 640 : 1), y = F(p + 0x98) * (frac ? 480 : 1), w = F(p + 0xA0), h = F(p + 0xA4);
+        if (h > 0 && h <= kTallestPicture && w > 0) b.Add(x, y, x + w, y + h);
+    }
+    if (b.any && b.x1 - b.x0 >= kNarrowest) return b;  // the pause menu's are only its chevron: go by the text
+    b = Box{};
+    // the largest text is the row's own (a save's row has its thumbnail's caption too); its y is near the letters' foot
+    links = 0;
+    uint32_t text = 0;
+    for (uint32_t t = kernel::R32(item + kItemText); t && links < 16; t = kernel::R32(t + kTextNext), links++)
+        if (!text || F(t + 0x9C) > F(text + 0x9C)) text = t;
+    if (text) {
+        bool frac = kernel::R32(text + 0x8C) == 1;
+        float x = F(text + 0x90) * (frac ? 640 : 1), y = F(text + 0x94) * (frac ? 480 : 1), size = F(text + 0x9C);
+        b.Add(x - 4, y - size - 4, x + kTextWidth, y + size * 0.3f);
+    }
+    return b;
+}
+
+// cdecl: the argument, the return address (the callee's ret takes it), the argument off
+void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uint32_t arg) {
+    X86_PUSH32(arg);
+    X86_PUSH32(0x56930u);
+    f(ctx, base);
+    ctx.esp += 4;
+}
+}  // namespace
+
+namespace auf {
+int MenuClick() { return g_click.load(std::memory_order_relaxed); }
+}  // namespace auf
+
+X86_EXTERN_FUNC(__imp__sub_00056930);
+X86_FUNC(sub_00056930) {
+    using namespace auf;
+    const uint32_t file = kernel::R32(ctx.esp + 4);
+    uint32_t page = file ? kernel::R32(file + 0x44) : 0;
+    uint32_t count = page ? kernel::R32(page + kPageItems) : 0;
+    float x, y;
+    int click = kClickGo;
+    if (count >= 2 && count <= 64 && PointerAt(x, y)) {
+        uint32_t list = kernel::R32(page + kPageList), current = kernel::R32(page + kPageCurrent), hit = 0;
+        for (uint32_t i = 0; i < count && !hit; i++)
+            if (ItemBox(list + i * kItemSize).Has(x, y)) hit = list + i * kItemSize;
+        static uint32_t said_page = 0;
+        if (page != said_page) {
+            said_page = page;
+            for (uint32_t i = 0; i < count; i++) {
+                Box b = ItemBox(list + i * kItemSize);
+                LOGR("auf: page %08X item %u of %u: %.0f,%.0f to %.0f,%.0f", page, i, count, b.x0, b.y0, b.x1, b.y1);
+            }
+        }
+        static float last_x = -1, last_y = -1;
+        static bool last_press = false;
+        const bool press = (PointerButtons() & 1) != 0;
+        const bool moved = x != last_x || y != last_y;
+        last_x = x, last_y = y;
+        bool free = false;
+        if (hit && hit != current && (moved || (press && !last_press)) && !kernel::R32(file + 0x54)) {
+            X86_PUSH32(0x56930u);  // no arguments: 0x40A45 asks before a press is taken
+            sub_00039CC0(ctx, base);
+            free = ctx.eax == 0;
+        }
+        if (free) {
+            // as the d-pad's left and right do at 0x39120
+            Call1(ctx, base, sub_00037AD0, current);
+            Call1(ctx, base, sub_00037A30, hit);
+            kernel::W32(page + kPageCurrent, hit);
+            static uint32_t sound = 0;
+            Call1(ctx, base, sub_000202E0, 0x15 + sound++ % 9);
+            current = hit;
+            LOGR("auf: the pointer's item is %u of %u", (hit - list) / kItemSize, count);
+        }
+        last_press = press;
+        click = !hit ? kClickNone : hit == current ? kClickGo : kClickWait;
+    }
+    g_click.store(click, std::memory_order_relaxed);
+    __imp__sub_00056930(ctx, base);
+}

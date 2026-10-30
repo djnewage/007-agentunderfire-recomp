@@ -11,6 +11,7 @@ bool MenuUp() { return false; }
 bool OnGun() { return false; }
 bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
+int MenuClick() { return kClickGo; }
 void ScopeZoom(int) {}
 }  // namespace auf
 
