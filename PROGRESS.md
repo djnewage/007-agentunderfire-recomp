@@ -22,6 +22,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - Vertex blending on the render thread (sdk)
+- Harry's capture 154810 (D3D12): the flaps gone, most of the hand and the flag missing. The render thread's state copy
+  (gpu/render_thread.cpp) carried only transforms[256], so WORLD1 to WORLD3 reached the backend as zeros and vertices weighted
+  to them collapsed. It now carries all four.
+- Proof in the harness built as the Windows exe (RT_THREAD=1 RAW=1): with the old line the frame is Harry's (thumb, fragments,
+  no flag); with the new one hand, sleeve and flag are whole. The previous entry had only tested the plain harness.
+  SMOKE OK, wincheck ok. Windows still to confirm.
+
 ### 2026-10-30 - Vertex blending: the torn hands and characters (sdk)
 - Harry: the signed lock (below) did not fix it. The earlier diagnosis was wrong: the tear is in every renderer, also the
   harness's (RAW=1, RT_THREAD=1 and neither alike); it had been read as whole in small montages. Also wrong: the "white door"

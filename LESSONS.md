@@ -128,3 +128,5 @@ or as the same class of bug in a new place.
 - Check a "Windows only" bug in a full size headless frame before theorising; a small montage hid that the harness tore too.
 - Fixed function features can simply be missing (vertex blending until this game): when geometry is wrong, compare what the
   vertex format asks for with what the generated shader reads.
+- Test renderer changes in the harness built as the Windows exe too (`RT_THREAD=1 RAW=1`, its own `-o` folder): the render
+  thread sends the backend only the state it lists, so a new field or transform in use can arrive as zeros.
