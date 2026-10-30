@@ -11,7 +11,8 @@ RT_THREAD=1 RAW=1 bash sdk/harness/build.sh -r . -g generated/driving -o .local/
   fail "DRIVING.XBE's harness did not build (.local/smoke_drv.out)"
 D=.local/run_drv
 rm -rf .local/run_bond && mkdir -p .local/run_bond/1 && cp -r .local/run/1/hdd .local/run_bond/1/ || fail "no hard disk to carry over"
-( sleep 30; printf '2A9F98 4 1\n2A5D38 4 1\n' > .local/run_bond/1/poke ) &
+# moved into place whole: the harness reads and removes poke at the next present, even an empty one
+( sleep 30; printf '2A9F98 4 1\n2A5D38 4 1\n' > .local/run_bond/poke.tmp && mv .local/run_bond/poke.tmp .local/run_bond/1/poke ) &
 bash sdk/harness/run.sh -x .local/harness_next/bond -g "${GAME:-assets}" -o .local/run_bond -t 45 -s scripts/pad/explore.txt >> .local/smoke_drv.out 2>&1
 wait
 L=.local/run_bond/1/logs/auf_001.log

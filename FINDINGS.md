@@ -30,5 +30,9 @@ own code and data, with its addresses).
 - **[game]** DRIVING.XBE's world is chosen by the list builder 0x7DC10: spheres against the frustum at 0x190640 (0x7E140; planes in columns, built by
   0x7E3C0 from the camera's half angle), then 0xAE550 (planes at 0x1C6CA0).
 
+- **[game]** DRIVING.XBE: level state [0x1BEB1C] 3 is paused or a movie; 0x1E1818 up from the level's start to the intro's end; the control file's name at 0x17FED1 tells a gun.
+- **[game]** bond_eng.xbe: game state [0x3B2414], +4 index (3 front end, 4 in play), +0x10 a pointer to its name.
+- **[game]** The gun and car camera is DRIVING.XBE 0x77A20 (rates +0x250, +0x254; targets +0x260, +0x264; turn +0x1BC).
+
 ## Push buffers
 - **[game]** None in any of the three xbes.

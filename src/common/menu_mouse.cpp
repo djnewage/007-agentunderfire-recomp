@@ -45,6 +45,7 @@ void MenuMouse(int port, input::Pad& p) {
     constexpr int64_t kPress = 70, kGap = 70;  // ms
     constexpr uint16_t kMouseBits[3] = {0x01, 0x02, 0x04};  // VK_LBUTTON VK_RBUTTON VK_MBUTTON
     if (port != 0) return;
+    RefreshButtons();  // the button pictures for the keyboard or the controller, as it changes
     static int pending = 0;  // notches to play, up positive
     static int64_t pulse = 0;
     static bool was_menu = false;
@@ -60,6 +61,9 @@ void MenuMouse(int port, input::Pad& p) {
         ScopeZoom(notches);
         notches = 0;
     }
+    // on foot Enter is the console's A everywhere, and where Bond is not the player's to move (a cutscene, a hint's "Press A") the left
+    // button too: the keyboard has A as crouch
+    if (kImage == kBond && !menu && input::UsingKeyboard() && (KeyHeld(0x0D) || (!PlayerFree() && (held & 1)))) Press(p, input::kA);
     int next = input::kRight, prev = input::kLeft;
     if (menu) next = input::kDown, prev = input::kUp;
     else if (kImage == kDriving) next = input::kBlack, prev = input::kWhite;

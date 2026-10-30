@@ -9,9 +9,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK on branch agentunderfire, one commit past the fork's main 0733ba3
+- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
 - PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
-- Not done: in-game PC Settings page, keyboard prompts, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- Not done: in-game PC Settings page, DRIVING.XBE key pictures, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -22,6 +22,22 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - Scope wheel, mounted gun aim, key pictures; SDK merged (fork main 36bb42e)
+- Harry confirmed the radar and on-foot pop-in. Gate on 36bb42e, each game's commit in a copy (.local/gate2): PGR2, NightFire, PGR1 plus repro's live race,
+  EoN (its SDK merged, -X theirs on what already conflicts), this game: SMOKE OK. Fast-forward; .gitmodules follows main.
+- Mounted guns (src/driving/mouse.cpp): the camera 0x77A20 turns by rates +0x250/+0x254 eased to targets +0x260/+0x264. Stick full: 1.55 radians in 390 frames.
+  Counts now set rates and targets directly (mouse_direct on). AUF_MOUSE_TEST 20,0: the view turned right; 0,20: down. Not felt by hand. Earlier "wrong camera"
+  readings were before the stick or in a pause: memory dumps, not gdb's slow runs, showed it. Sensitivity assumes 60 frames a second there.
+- MenuUp was wrong in both exes. DRIVING.XBE's 0x1801D8 was up in play (a coincidence of a diff), so the left button played A in the car on Windows; now [0x1BEB1C] == 3
+  or 0x1E1818: in and out at the pause and the mission's end. bond_eng.xbe compared the name's pointer's bytes, so never the front end; the menu mouse there did not work
+  before now. Fixed, in from 0.18 s to the mission at 37.3 s.
+- Scope wheel: notches multiply weapon +0x51C at 0xBD768, up to +0x524. Not run: no scope reachable headless. Whether the zoom resets on leaving is the game's: Harry to see.
+- Key pictures (src/common/buttons.cpp): bond_eng.xbe's atlas 0x837ECB80 and the Press A picture 0x8382CB80 replaced by keys while the keyboard plays, by their FNV. Drawings checked by
+  dumping them (AUF_BUTTON_DUMP): ENTER and BKSP in menus; the reference renderer does not show replacements, so not seen on screen. Only bond_eng.xbe: DRIVING.XBE's pause icons
+  are in P8 atlases 820C1580/820E2580, not done.
+- Item 6: no keypad screens exist (the safes use the Q-Decryptor). Enter is A everywhere on foot, the left button too where the player has no control (rate 0).
+- Smoke's driving part failed once: harness read poke between creation and write and removed it. Moved into place whole now.
 
 ### 2026-10-30 - A and D strafe on foot; driving pop-in and 60 FPS confirmed
 - Harry: the culling fix cured the driving pop-in; 60 FPS performs OK. A and D turned the view: they played the left stick's x, which the game's Setup 1

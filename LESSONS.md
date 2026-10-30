@@ -132,3 +132,6 @@ or as the same class of bug in a new place.
   thread sends the backend only the state it lists, so a new field or transform in use can arrive as zeros.
 - The harness's null backend answers visibility reports at once, so a poll that depends on the renderer being kicked only hangs
   on Windows. Holding reports until Flush in a temporary build reproduces such a hang headless.
+- gdb slows a run several times: check a window of frames really overlaps the input before believing "nothing changed". Memory dumps cost nothing.
+- A flag found by one memory diff is a guess: log when it flips across a whole run before relying on it.
+- A file a running harness polls must appear whole (write elsewhere, then mv).

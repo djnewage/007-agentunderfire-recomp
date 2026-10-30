@@ -15,6 +15,7 @@ bool OnGun() {
 // version of this engine has the same at its 0x234E24), or the level not in play yet (0x1E1818, set from its start to the end of
 // the intro)
 bool MenuUp() { return kernel::R32(0x1BEB1C) == 3 || kernel::R32(0x1E1818) != 0; }
+bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
 void ScopeZoom(int) {}
 }  // namespace auf

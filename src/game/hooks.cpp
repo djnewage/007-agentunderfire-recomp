@@ -9,6 +9,7 @@ namespace auf {
 extern const int kImage = kDefault;
 bool MenuUp() { return false; }
 bool OnGun() { return false; }
+bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
 void ScopeZoom(int) {}
 }  // namespace auf

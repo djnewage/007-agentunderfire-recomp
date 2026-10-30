@@ -83,6 +83,8 @@ constexpr float kNotchStep = 1.25f;
 }  // namespace
 
 namespace auf {
+// the input layer's rate: 0 when the player has no control (0xB45C0, 0xAEDC0)
+bool PlayerFree() { return GetF(kYawRate) != 0; }
 bool Zoomed() {
     uint32_t ps = kernel::R32(0x2A88B8);
     return ps && GetF(ps + 0x2E4) > 1.01f;

@@ -188,5 +188,6 @@ const app::GameInfo app::kGame = {
     .pal_console = true,                  // a PAL disc (region 4)
     .mouse_look = true,                   // the mouse looks and aims
     .mouse_direct = true,                 // src/bond/mouse.cpp, src/driving/mouse.cpp
+    .texture_bound = auf::ButtonPictures,  // the prompts' pictures as the keys (src/common/buttons.cpp)
     .default_keys = Keys,                 // a shooter's keys on foot, a driving layout in DRIVING.XBE
 };

@@ -17,5 +17,8 @@ bool MenuUp();                // a menu has the controller (each image's own tes
 bool OnGun();                 // DRIVING.XBE: a mounted gun's controls are in force, not the car's
 bool Zoomed();                // bond_eng.xbe: through a scope
 void ScopeZoom(int notches);  // bond_eng.xbe: the wheel's notches, up nearer
+bool PlayerFree();            // bond_eng.xbe: Bond under the player's control, not a cutscene or a hint waiting for A
+bool ButtonPictures(uint32_t header, uint32_t palette);  // GameInfo::texture_bound (src/common/buttons.cpp)
+void RefreshButtons();        // each poll
 void MenuMouse(int port, input::Pad& p);
 }  // namespace auf
