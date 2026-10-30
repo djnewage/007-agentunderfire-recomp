@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
-- Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 3 minutes, SMOKE OK
+- Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK branch agentunderfire pushed
 - Not done: French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
