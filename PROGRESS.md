@@ -4,7 +4,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - Milestone: 1 - plays headless. default.xbe's movies, START, bond_eng.xbe's title, menus, briefing and first mission;
-  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; see-through models being fixed.
+  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; the fix for torn models awaits a Windows run.
 - XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
@@ -22,11 +22,26 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - Vertex blending: the torn hands and characters (sdk)
+- Harry: the signed lock (below) did not fix it. The earlier diagnosis was wrong: the tear is in every renderer, also the
+  harness's (RAW=1, RT_THREAD=1 and neither alike); it had been read as whole in small montages. Also wrong: the "white door"
+  and black ground in the captures were this viewer showing the BMPs' alpha over white. Flatten them (`-alpha off`).
+- Cause: bond_eng.xbe's models are FVF 0x11C (XYZB4, stride 48) with D3DRS_VERTEXBLEND 5 (3 weights, 4 matrices): each vertex
+  has its weight on one of WORLD to WORLD3 (604 of 1272 logged vertices not on the first). Neither renderer implemented
+  vertex blending, the first game to use it. Culling off left the tear; assembling strips as fans broke the sky.
+- SDK: FixedKey::blend, FixedVertexHlsl and the reference renderer blend position and normal in view space, then project
+  (DrawConstants bwv, bwvn, vpj). Modes 1-6 written, only 5 seen. The shader cache is keyed on the source, so old entries are
+  not reused. Evidence: the harness draws hand, sleeve and the flag on the pole whole. 24 shaders compile, wincheck ok, SMOKE OK.
+- Open: one segfault in default.xbe at 0.14 s, in the movie stream ring (0x321D0, "STRM"), during a smoke run right after a
+  build; 6 runs alone and 36 runs at 6 at a time did not repeat it. A race with the streaming thread is suspected, not shown;
+  GameInfo::disc_rate (EoN) is the first thing to try if it returns.
+- Next: Harry's rebuild on Windows.
+
 ### 2026-10-30 - First Windows run; see-through models: vertex buffer locks did not wait (sdk: 4039 signs the lock's wait)
 - Harry, Windows, D3D12, RX 7900 XT: the game loads and the first mission plays to its end with no crash or hitch, but
   surfaces can be seen through. His F3 capture (.local/win/144318, 2560x1440): the hand is torn into pieces, also in the
   depth buffer, so triangles are missing rather than transparent; the ground is black.
-- Likely cause, as NightFire's FINDINGS: D3D_BlockOnNonSurfaceResource was not in 4039's table (seeded from 3948, which lacks
+- Thought then to be the cause (it was not, see above; the signing stands), as NightFire's FINDINGS: D3D_BlockOnNonSurfaceResource was not in 4039's table (seeded from 3948, which lacks
   it), so a vertex buffer lock (0x196AF0, calling 0x198080) never waited for the renderer. Windows draws on a render thread
   and reads buffers the game has already refilled; the harness has no such thread, which fits its frames being whole.
 - Now signed: default.xbe 0x45900, bond_eng.xbe 0x198080, DRIVING.XBE 0x11B030. Compared the table with 4831's and 5659's:

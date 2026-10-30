@@ -19,5 +19,9 @@ own code and data, with its addresses).
   D3D_Device 0x1A0640 in bond_eng.xbe, and game code never touches it.
 - **[console]** No DSOUND in the XBE's library table although the section is linked. No .XTLID section.
 
+- **[console]** D3DRS_VERTEXBLEND is the NV2A skin mode (setter 0x193590 pushes method 0x328): 1, 3, 5 weights with one
+  matrix more, the last taking the rest; 2, 4, 6 a weight per matrix. Blended in view space.
+- **[game]** bond_eng.xbe's characters and first person hands are FVF 0x11C, mode 5, in small indexed strips per bone set.
+
 ## Push buffers
 - **[game]** None in any of the three xbes.

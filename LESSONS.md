@@ -124,3 +124,7 @@ or as the same class of bug in a new place.
 - The launch data file is deleted by the image that boots: copy it back before each gdb run, or the run shows a
   different problem (it cost a wrong trail here).
 - A hardware watchpoint can stay silent; dumping the damaged memory and measuring how far it reaches found the row.
+- F3 capture BMPs carry alpha: flatten them (`convert x.bmp -alpha off y.png`) or a surface with low alpha looks white.
+- Check a "Windows only" bug in a full size headless frame before theorising; a small montage hid that the harness tore too.
+- Fixed function features can simply be missing (vertex blending until this game): when geometry is wrong, compare what the
+  vertex format asks for with what the generated shader reads.
