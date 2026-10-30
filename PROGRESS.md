@@ -4,7 +4,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - Milestone: 1 - plays headless. default.xbe's movies, START, bond_eng.xbe's title, menus, briefing and first mission;
-  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; models confirmed fixed by Harry; driving levels froze, fix awaits a Windows run.
+  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; Harry (2026-10-30, D3D12): plays with the driving fix, no obvious visual bugs on a first look.
 - XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
@@ -21,6 +21,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - Windows confirmed
+- Harry: the freeze and the models are fixed, the game works, no obvious visual bugs on a first look. Not yet a full
+  playthrough. Next: the SDK gate and merge, then PC features.
 
 ### 2026-10-30 - Driving levels froze on Windows: visibility reports (sdk)
 - Harry: textures fixed (D3D12). Starting the second mission froze: DRIVING.XBE drew about 11 frames, then none, F3's frame
