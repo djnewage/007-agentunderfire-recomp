@@ -1,0 +1,9 @@
+# bond_eng.xbe: START at the title (held a while), then A through the menus
+500 START 30
+900 START 30
+1300 A 30
+1700 A 30
+2100 A 30
+2500 A 30
+2900 A 30
+3300 A 30
