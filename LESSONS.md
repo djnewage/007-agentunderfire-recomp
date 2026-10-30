@@ -135,3 +135,5 @@ or as the same class of bug in a new place.
 - gdb slows a run several times: check a window of frames really overlaps the input before believing "nothing changed". Memory dumps cost nothing.
 - A flag found by one memory diff is a guess: log when it flips across a whole run before relying on it.
 - A file a running harness polls must appear whole (write elsewhere, then mv).
+- Try what a button does in play and read the HUD before binding keys to it: names from code guessed the d-pad backwards.
+- A test source that always answers hides code that only runs when input stops: make it report "no movement" as the real one does.

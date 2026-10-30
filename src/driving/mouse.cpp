@@ -19,9 +19,12 @@
 
 namespace {
 constexpr uint32_t kUpRate = 0x250, kSideRate = 0x254, kUpTarget = 0x260, kSideTarget = 0x264;
+constexpr uint32_t kRamps[] = {0x1BC, 0x1C0};  // what a held stick builds up (0x77A20)
 constexpr float kRatePerCount = 0.0008f / 0.004f;
 
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
+
+bool UsingMouse() { return std::getenv("AUF_MOUSE_TEST") || input::UsingKeyboard(); }
 
 bool Counts(float& x, float& y) {
     static const struct Test {
@@ -52,19 +55,21 @@ bool Counts(float& x, float& y) {
 X86_EXTERN_FUNC(__imp__sub_00077A20);
 X86_FUNC(sub_00077A20) {
     const uint32_t cam = ctx.ecx;
-    float x, y;
-    if (cam && auf::OnGun() && !auf::MenuUp() && Counts(x, y)) {
-        SetF(cam + kSideRate, x * kRatePerCount);
-        SetF(cam + kSideTarget, x * kRatePerCount);
-        SetF(cam + kUpRate, y * kRatePerCount);
-        SetF(cam + kUpTarget, y * kRatePerCount);
-        static bool said = false;
-        if (!said && (x || y)) {
-            said = true;
-            LOGR("auf: the mouse aims the mounted gun directly");
-        }
-    }
+    if (!cam || !auf::OnGun() || auf::MenuUp() || !UsingMouse()) return __imp__sub_00077A20(ctx, base);
+    float x = 0, y = 0;
+    Counts(x, y);  // none (no movement): the rates go to 0 all the same, or the last one keeps turning the view
+    SetF(cam + kSideRate, x * kRatePerCount);
+    SetF(cam + kSideTarget, x * kRatePerCount);
+    SetF(cam + kUpRate, y * kRatePerCount);
+    SetF(cam + kUpTarget, y * kRatePerCount);
+    for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);  // the longer a stick is held, the faster: not for a mouse
     __imp__sub_00077A20(ctx, base);
+    for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);
+    static bool said = false;
+    if (!said && (x || y)) {
+        said = true;
+        LOGR("auf: the mouse aims the mounted gun directly");
+    }
 }
 
 // Auto-aim: 0x76310 (from 0x77A20) pulls the camera's aim to the target at [0x1C6C18], by the difficulty. Off, it sees no target for

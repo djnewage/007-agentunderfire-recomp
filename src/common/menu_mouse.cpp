@@ -1,7 +1,7 @@
 // The mouse in the menus: the wheel scrolls (d-pad up and down), the left button selects (A), the right goes back (B),
 // and Enter selects too. While a menu is up (auf::MenuUp, each image's own test) the mouse's buttons stop playing what
 // they are bound to in play and play A and B instead; each notch of the wheel is a press of the d-pad. In play a notch
-// cycles the weapon: on foot the d-pad's right a notch down and left a notch up; in the car Black and White. On a mounted
+// cycles the weapon: on foot the d-pad's down a notch down and up a notch up; in the car Black and White. On a mounted
 // gun (auf::OnGun) the left button fires and the right zooms.
 #include <algorithm>
 #include <chrono>
@@ -67,6 +67,7 @@ void MenuMouse(int port, input::Pad& p) {
     int next = input::kRight, prev = input::kLeft;
     if (menu) next = input::kDown, prev = input::kUp;
     else if (kImage == kDriving) next = input::kBlack, prev = input::kWhite;
+    else if (kImage == kBond) next = input::kDown, prev = input::kUp;  // the d-pad's up and down are the weapon on foot
     if (kImage == kDriving && !menu && OnGun() && input::UsingKeyboard()) {
         for (int c : {input::kA, input::kX, input::kLT, input::kRT}) p.analog[c - input::kA] = 0;
         if (held & 1) Press(p, input::kRT);

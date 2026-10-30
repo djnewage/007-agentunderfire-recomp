@@ -43,7 +43,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 | Use gadget | G | Right button, E | |
 | Alt. fire | F, Middle button | | |
 | Weapon | Wheel, Q, 1 next, 3 before | Wheel, Q, Z, 1 2 | |
-| Gadget | 2 next, arrows up and down | 3 4 | |
+| Gadget | 2 next, arrows left and right | 3 4 | |
 | Handbrake | | Space | |
 | Camera / look back | Tab, V center view | C camera, V look back | |
 | Pause | Esc, P | Esc, P | Esc, P |

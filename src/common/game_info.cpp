@@ -59,7 +59,7 @@ constexpr uint16_t kMouseLeft = 0x01, kMouseRight = 0x02, kMouseMiddle = 0x04, k
                    kEscape = 0x1B, kSpace = 0x20, kArrowLeft = 0x25, kArrowUp = 0x26, kArrowRight = 0x27, kArrowDown = 0x28,
                    kLeftShift = 0xA0, kLeftCtrl = 0xA2, kBackspace = 0x08;
 // on foot, as the game's Controller Setup page lists it: R fire, L manual aim, Y jump, White cycle weapon, Black alt.
-// fire, B use gadget, X action, reload and open, A crouch, the d-pad weapon and gadget, Back center view; the mouse looks
+// fire, B use gadget, X action, reload and open, A crouch, the d-pad gadget and weapon, Back center view; the mouse looks
 std::array<uint16_t, 2> ShooterKeys(int c) {
     using namespace input;
     switch (c) {
@@ -75,10 +75,10 @@ std::array<uint16_t, 2> ShooterKeys(int c) {
         case kB: return {'G', kBackspace};   // use gadget; back in the menus
         case kWhite: return {'Q', 0};        // cycle weapon
         case kBlack: return {'F', kMouseMiddle};  // alt. fire
-        case kUp: return {kArrowUp, 0};      // the d-pad: the gadget up and down, the weapon left and right (the wheel too);
-        case kDown: return {kArrowDown, '2'};  // as NightFire, 1 the next weapon, 2 the next gadget, 3 the weapon before
-        case kLeft: return {kArrowLeft, '3'};
-        case kRight: return {kArrowRight, '1'};
+        case kUp: return {kArrowUp, '3'};    // the d-pad: up and down the weapon, left and right the gadget (tried in play: right
+        case kDown: return {kArrowDown, '1'};  // Q-Laser, Q-Claw; down the gun); 1 the next weapon, 3 the one before, 2 the next
+        case kLeft: return {kArrowLeft, 0};    // gadget, the wheel the weapon (src/common/menu_mouse.cpp)
+        case kRight: return {kArrowRight, '2'};
         case kBack: return {kTab, 'V'};      // center view
         case kStart: return {kEscape, 'P'};
         default: return {0, 0};

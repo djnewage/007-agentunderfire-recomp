@@ -23,6 +23,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - The gun's spin, 1 for guns and 2 for gadgets
+- Harry: aim better; moving a mounted gun spun the camera 360 degrees; clicking in the main menus feels odd; the wheel zoom not reached yet. His save (.local/win/hdd.zip, all three mission kinds).
+- The spin, two causes: rates were set only when the mouse reported movement, so the last one kept turning (the harness's test always "reports", so it never showed); and +0x1BC, +0x1C0 are ramps a held stick builds, read as an angle.
+  Now every frame on a gun rates and targets are set, 0 with no movement, ramps cleared. Measured: 2020 counts 1.78 radians (0.00088 a count), the heading the same in the next dump. Up and down stopped at 0.147 (the mission's limit, by the look).
+- d-pad tried in play at last: right Q-Laser then Q-Claw (gadgets), down the gun. The earlier mapping read off the code was backwards. 1 next weapon (down), 3 before (up), 2 next gadget (right), the wheel weapons (down, up).
+- Menu clicks stepped once a click headless, right button back once, the wheel moves: no double presses found. There is no cursor: a click acts on what is highlighted. Harry to say if that is the oddness.
+- His save loads by itself in the harness; the next mission by the menu relaunches into DRIVING.XBE (see the log's level). SMOKE OK.
+
 ### 2026-10-30 - Auto-aim off, NightFire's keys
 - Harry: key pictures OK. Auto-aim off (option auto_aim, default off, every input): on foot the target search 0xB8BB0 sees player +0x716 clear for the call (the log says the option was on);
   on guns 0x76310 sees no target [0x1C6C18] for the call (logged on a target at 23 s in mis02a). Whether aim feels free: Harry's. Homing weapons and 0x9DDB0's use of the amounts untouched.
