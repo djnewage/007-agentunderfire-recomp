@@ -9,7 +9,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 3 minutes, SMOKE OK
-- GitHub: no remote yet (local only); the SDK branch is pushed
+- GitHub: hk21x/007-agentunderfire-recomp; SDK branch agentunderfire pushed
 - Not done: French and German xbes, the other driving levels, DRIVING.XBE in the smoke test, Windows, PC features
 
 ## Disc
