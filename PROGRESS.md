@@ -5,12 +5,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 ## Status
 - Milestone: 1 - plays headless. default.xbe's movies, START, bond_eng.xbe's title, menus, briefing and first mission;
   DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; Harry (2026-10-30, D3D12): plays with the driving fix, no obvious visual bugs on a first look.
-- XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
+- XDK: 4039 in the fork's main: default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK branch agentunderfire pushed
-- Not done: French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 0733ba3
+- PC features: skip intro, widescreen, field of view, mouse, keys, sharp 2D, headless only so far
+- Not done: in-game PC Settings page, keyboard prompts, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -21,6 +22,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - SDK merged into the fork's main (0733ba3)
+- Gate, each game's own commit in a disposable copy (.local/gate) with the candidate SDK: PGR2 SMOKE OK; NightFire SMOKE OK; PGR1 SMOKE OK and
+  repro.sh's frame a live race; EoN SMOKE OK on its pinned SDK merged with the candidate (-X theirs for launcher, handover and boot, which
+  conflict between its line and main already); this game SMOKE OK including the driving part. Fast-forward; main had not moved.
+- Smoke test now goes on into DRIVING.XBE (Windows build settings, HOLD_REPORTS). Not checked that it fails without the fix by running it;
+  the same hold reproduced the freeze by hand. .gitmodules follows main again.
 
 ### 2026-10-30 - PC features, headless (pc features in src/; not yet on Windows)
 - Skip intro: 0x20BD0 returns at once but for HILITE; bond_eng.xbe reached 0.26 s after start.

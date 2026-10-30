@@ -49,7 +49,7 @@ session. LESSONS.md is what the PGR2, EoN, PGR1, Forza and NightFire ports learn
   evidence, next step), its Status block updated, and a commit.
 - Game fixes go in `src/game`, `src/bond`, `src/driving` (X86_FUNC overrides, [[hook]]/[[function]]/[[switch]] in the
   hand configs), not in generated code. SDK changes go in `sdk/` as their own commits on branch `agentunderfire` of the
-  fork, merged into its `main` only after every game's smoke test passes (PGR2, PGR1 plus its frame check, EoN,
+  fork, merged into its `main` (0733ba3 so far) only after every game's smoke test passes (PGR2, PGR1 plus its frame check, EoN,
   NightFire, this one once it has one); fetch + merge (never rebase), publish the SDK first, then this repo's pointer.
 - A change to xbe_symbols itself must leave every other game's scan unchanged.
 - Game code registers from `GameInfo::init`, never a static initializer (one never ran in a Windows exe).
