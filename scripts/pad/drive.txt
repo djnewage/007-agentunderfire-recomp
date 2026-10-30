@@ -1,0 +1,7 @@
+# DRIVING.XBE: past the loading and briefing, then the accelerator
+600 A 20
+900 START 20
+1200 A 20
+1500 RT 900
+2400 A 20
+2500 RT 2400

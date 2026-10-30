@@ -115,3 +115,12 @@ or as the same class of bug in a new place.
 - `scripts/wincheck.sh` and `scripts/shadercheck.sh` before sending a build; UNICODE is defined, NOMINMAX first.
 - PowerShell sets environment variables with `$env:X="..."`, not `set`.
 - A renderer that fails to start falls back to D3D11, or the player never reaches F1.
+
+## From this port
+- A new XDK build can be named in about an hour: align each library section with every earlier game's in link order and
+  take names where the references agree and ret sizes match (.local/tools/align.py here). Then list the library functions
+  game code calls that have no name and do those by hand: only those matter first.
+- Host DirectSound objects are not the library's: any DSOUND function left unnamed crashes on them when called.
+- The launch data file is deleted by the image that boots: copy it back before each gdb run, or the run shows a
+  different problem (it cost a wrong trail here).
+- A hardware watchpoint can stay silent; dumping the damaged memory and measuring how far it reaches found the row.
