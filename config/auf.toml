@@ -2,3 +2,91 @@
 # there; hand entries go below ([[hook]], [[function]], [[switch]], [functions], [xbe] data_ranges / trace). A symbol
 # found by hand is signed into the SDK, then every xbe rescanned (each rescan must reproduce its scan file).
 includes = ["game.toml"]
+
+# XDK 4039: named from PGR1's (3948), NightFire's (4831) and PGR2's (5659) bodies, aligned in link order, or by hand from
+# the instructions (methods pushed, device fields, ret size); .local/a_*.txt hold the evidence
+
+# XDK 4039: named from PGR1's (3948), NightFire's (4831) and PGR2's (5659) bodies, aligned in link order, or by hand from
+# the instructions (methods pushed, device fields, ret size); .local/a_*.txt hold the evidence
+[symbols]
+CDevice_KickOff                                      = 0x453C0
+D3DDevice_BlockUntilVerticalBlank                    = 0x42EE0
+D3DDevice_Clear                                      = 0x474D0
+D3DDevice_GetBackBuffer                              = 0x43590
+D3DDevice_GetDepthStencilSurface                     = 0x435D0
+D3DDevice_LoadVertexShader                           = 0x46570
+D3DDevice_MakeSpace                                  = 0x45810
+D3DDevice_Release                                    = 0x42EA0
+D3DDevice_Reset                                      = 0x42FB0
+D3DDevice_SelectVertexShader                         = 0x465D0
+D3DDevice_SetFlickerFilter                           = 0x42F10
+D3DDevice_SetGammaRamp                               = 0x42D00
+D3DDevice_SetRenderStateNotInline                    = 0x41BB0
+D3DDevice_SetRenderState_BackFillMode                = 0x42190
+D3DDevice_SetRenderState_DoNotCullUncompressed       = 0x42C00
+D3DDevice_SetRenderState_Dxt1NoiseEnable             = 0x41FE0
+D3DDevice_SetRenderState_EdgeAntiAlias               = 0x41D50
+D3DDevice_SetRenderState_FillMode                    = 0x42140
+D3DDevice_SetRenderState_FrontFace                   = 0x41E90
+D3DDevice_SetRenderState_LogicOp                     = 0x420E0
+D3DDevice_SetRenderState_MultiSampleAntiAlias        = 0x42C20
+D3DDevice_SetRenderState_MultiSampleMask             = 0x42C80
+D3DDevice_SetRenderState_MultiSampleMode             = 0x41AF0
+D3DDevice_SetRenderState_MultiSampleRenderTargetMode = 0x41B20
+D3DDevice_SetRenderState_NormalizeNormals            = 0x41ED0
+D3DDevice_SetRenderState_OcclusionCullEnable         = 0x42AE0
+D3DDevice_SetRenderState_PSTextureModes              = 0x41B50
+D3DDevice_SetRenderState_RopZCmpAlwaysRead           = 0x42BC0
+D3DDevice_SetRenderState_RopZRead                    = 0x42BE0
+D3DDevice_SetRenderState_ShadowFunc                  = 0x41D90
+D3DDevice_SetRenderState_Simple                      = 0x41B80
+D3DDevice_SetRenderState_StencilCullEnable           = 0x42B50
+D3DDevice_SetRenderState_TextureFactor               = 0x41F10
+D3DDevice_SetRenderState_TwoSidedLighting            = 0x421F0
+D3DDevice_SetRenderState_VertexBlend                 = 0x42260
+D3DDevice_SetRenderState_YuvEnable                   = 0x42AB0
+D3DDevice_SetRenderState_ZEnable                     = 0x42910
+D3DDevice_SetRenderTarget                            = 0x43060
+D3DDevice_SetScissors                                = 0x43A70
+D3DDevice_SetScreenSpaceOffset                       = 0x43C10
+D3DDevice_SetSoftDisplayFilter                       = 0x42F30
+D3DDevice_SetStreamSource                            = 0x464E0
+D3DDevice_SetTexture                                 = 0x43760
+D3DDevice_SetTextureStageStateNotInline              = 0x424C0
+D3DDevice_SetTextureState_BorderColor                = 0x42440
+D3DDevice_SetTextureState_BumpEnv                    = 0x423D0
+D3DDevice_SetTextureState_ColorKeyColor              = 0x42480
+D3DDevice_SetTextureState_TexCoordIndex              = 0x422B0
+D3DDevice_SetTile                                    = 0x439B0
+D3DDevice_SetTransform                               = 0x42D90
+D3DDevice_SetVertexShader                            = 0x46880
+D3DDevice_SetViewport                                = 0x43600
+D3DDevice_Swap                                       = 0x4CBC0
+D3D_BlockOnResource                                  = 0x45880
+D3D_BlockOnTime                                      = 0x45560
+D3D_InitDefaultState                                 = 0x44420
+D3D_KickOffAndWaitForIdle                            = 0x45860
+D3D_SetFence                                         = 0x454B0
+Direct3D_CreateDevice                                = 0x41A50
+DirectSoundCreate                                    = 0x5450C
+DirectSoundCreateBuffer                              = 0x54552
+IDirectSoundBuffer_GetCurrentPosition                = 0x53917
+IDirectSoundBuffer_GetStatus                         = 0x538FB
+IDirectSoundBuffer_Play                              = 0x5389F
+IDirectSoundBuffer_SetBufferData                     = 0x540D6
+IDirectSoundBuffer_SetCurrentPosition                = 0x53937
+IDirectSoundBuffer_SetFilter                         = 0x5384B
+IDirectSoundBuffer_SetFrequency                      = 0x53D90
+IDirectSoundBuffer_SetLoopRegion                     = 0x538DB
+IDirectSoundBuffer_SetMixBinVolumes                  = 0x53883
+IDirectSoundBuffer_SetMixBins                        = 0x53867
+IDirectSoundBuffer_SetVolume                         = 0x5382F
+IDirectSoundBuffer_Stop                              = 0x538C3
+IDirectSound_CreateSoundBuffer                       = 0x5434A
+IDirectSound_DownloadEffectsImage                    = 0x53808
+Lock2DSurface                                        = 0x47230
+
+[data]
+# as bond_eng.xbe: the deferred texture state follows the dirty flags, the index data before them
+D3D_DirtyFlags = 0x50C70
+D3D_IndexData  = 0x50C6C
