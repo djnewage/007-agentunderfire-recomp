@@ -14,6 +14,7 @@
 
 namespace auf {
 bool skip_intro = false;
+bool uncapped = true;
 uint32_t fov_percent = 100;
 
 float FovScale() {
@@ -168,6 +169,8 @@ const app::GameInfo app::kGame = {
                {"bond_eng.xbe", "AgentUnderFireBond"},
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
+                {"uncapped", &auf::uncapped, nullptr, "60 FPS on foot",
+                 "Paced by the frame rate cap instead of the console's 30. Takes effect at the next start"},
                 {"fov_percent", nullptr, &auf::fov_percent, "Field of view (%)",
                  "50 to 150; 100 is the game's. On foot and driving; the scope zooms in proportion"}},
     .load = LoadKeys,                     // DRIVING.XBE's keys apart (DrivingKeys)

@@ -24,6 +24,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Widescreen** - True proportions on any frame wider than 4:3, with the 3D view widened and the menus and HUD kept in a 4:3 centre. The console's own 4:3 picture is kept on a 4:3 screen.
 - **Field of view** - 50 to 150% of the game's, on foot and driving.
 - **Skip intro movies** - Starts without the logos.
+- **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
 - **Mouse and keyboard** - The mouse looks directly on foot, moves a mounted gun as the right stick, and works the menus.
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.
 

@@ -23,13 +23,27 @@ float GetF(uint32_t va) {
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
 
 void ScaleFov(uint32_t va) { SetF(va, std::min(GetF(va) * auf::FovScale(), 2.9f)); }  // short of 180 degrees
+
+
+// the culling frustum (0x15CD00, from the ratio through 0x13A4B0) reaches past the frame's edges: on it, what stands just off
+// the screen and lights what is on it popped as the view turned (a TV's overscan hid that). Harry confirmed 2.2 times the
+// tangent in EoN's driving levels, the same complaint
+constexpr float kCullMargin = 2.2f;
+float g_margin = 1.0f;
 }  // namespace
 
 X86_EXTERN_FUNC(__imp__sub_001387E0);
 X86_FUNC(sub_001387E0) {
     float k = auf::FrameWidth();
-    SetF(0x3467B8, k > 1.0f + 1e-3f ? k * 1.1f : 1.0f);
+    SetF(0x3467B8, (k > 1.0f + 1e-3f ? k * 1.1f : 1.0f) * g_margin);
     __imp__sub_001387E0(ctx, base);
+}
+
+X86_EXTERN_FUNC(__imp__sub_0015CD00);
+X86_FUNC(sub_0015CD00) {
+    g_margin = kCullMargin;
+    __imp__sub_0015CD00(ctx, base);
+    g_margin = 1.0f;
 }
 
 X86_EXTERN_FUNC(__imp__sub_0013A350);

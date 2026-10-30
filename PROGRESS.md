@@ -9,8 +9,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 0733ba3
-- PC features: skip intro, widescreen, field of view, mouse, keys, sharp 2D, headless only so far
+- GitHub: hk21x/007-agentunderfire-recomp; SDK on branch agentunderfire, one commit past the fork's main 0733ba3
+- PC features: skip intro, field of view, mouse on foot confirmed by Harry; radar, 60 FPS, culling margin await Windows
 - Not done: in-game PC Settings page, keyboard prompts, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
@@ -22,6 +22,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - Harry's ultrawide run: the radar, 60 FPS, a culling margin (sdk branch agentunderfire)
+- Harry, 3440x1440: intro skip, field of view and mouse on foot fine. Three problems.
+- Driving map gone: the radar draws in its own viewport (477,48,135x135) and the squeeze moved the picture out of it. A draw squeezed
+  whole now takes its viewport and scissor along (gpu::SqueezedX, D3D12, D3D11, reference). Reproduced headless once the reference renderer
+  squeezed 576 line targets: cut in half before, whole at FRAME_ASPECT_X100=239 after. Changes SDK behaviour: needs the gate again.
+- 30 FPS on foot: 0x139015 and 0x138940 ask for interval 2. Now the default interval, paced by fps_cap (src/bond/framerate.cpp, option uncapped,
+  AUF_30FPS). Timing runs off a clock (0x25CA0): 600 frames, 10.18 s of game time, 60 a second headless.
+- Pop-in on foot: a margin of 2.2 on the culling frustum's sides (0x15CD00), EoN's remedy. About 16% more draws in the first mission's opening,
+  the picture the same; not compared like for like (frame shape differed). Whether it cures Harry's pop-in is not known: not reproduced.
+- Pop-in driving: NOT fixed. Draw counts are the same at 4:3 and 4x (284, 344), so what is drawn does not follow the view's width and something
+  else chooses it; no EoN-style frustum found by code pattern or by scanning memory for 33 degree planes, one candidate 0x82A6AE20 not tested.
+  4x frames show no gaps standing still. Harry's two captures (mis02b) have blank final frames and no log. Next: a clip or capture at a pop.
 
 ### 2026-10-30 - SDK merged into the fork's main (0733ba3)
 - Gate, each game's own commit in a disposable copy (.local/gate) with the candidate SDK: PGR2 SMOKE OK; NightFire SMOKE OK; PGR1 SMOKE OK and

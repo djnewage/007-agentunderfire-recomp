@@ -106,3 +106,8 @@ D3D_IndexData                  = 0x1A01E4  # SetIndices 0x195000+ stores the buf
 D3D_RenderState                = 0x1A03F0  # SetRenderStateNotInline 0x192EFD and 0x192F1F store it
 D3D_SimpleRenderStateEncode    = 0x1F89C8  # SetRenderStateNotInline 0x192EEA reads the method
 D3D_Streams                    = 0x1A32B0  # SetStreamSource 0x197190+
+
+[[hook]]
+at = 0x139015
+call = "DefaultInterval"
+after = true
