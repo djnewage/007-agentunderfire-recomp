@@ -23,5 +23,9 @@ own code and data, with its addresses).
   matrix more, the last taking the rest; 2, 4, 6 a weight per matrix. Blended in view space.
 - **[game]** bond_eng.xbe's characters and first person hands are FVF 0x11C, mode 5, in small indexed strips per bone set.
 
+- **[console]** 4039's D3DDevice_GetVisibilityTestResult (DRIVING.XBE 0x114BE0) sets no fence; a title polling it needs the host to
+  kick the renderer itself.
+- **[game]** DRIVING.XBE polls a visibility test in a loop while loading a level (0x87830).
+
 ## Push buffers
 - **[game]** None in any of the three xbes.

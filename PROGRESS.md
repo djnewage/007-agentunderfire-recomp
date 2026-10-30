@@ -4,7 +4,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - Milestone: 1 - plays headless. default.xbe's movies, START, bond_eng.xbe's title, menus, briefing and first mission;
-  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; the fix for torn models awaits a Windows run.
+  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; models confirmed fixed by Harry; driving levels froze, fix awaits a Windows run.
 - XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
@@ -21,6 +21,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - Driving levels froze on Windows: visibility reports (sdk)
+- Harry: textures fixed (D3D12). Starting the second mission froze: DRIVING.XBE drew about 11 frames, then none, F3's frame
+  never came. Thread 14's stack (log, guest_mem_8864656): 0x87851, the loop 0x87830 calling 0xFFC10 until true, that is
+  GetVisibilityTestResult 0x114BE0, in the level's load.
+- 4039's GetVisibilityTestResult only reads the report. Later XDKs' also set a fence, and the runtime's hosted D3D_SetFence is
+  what kicks the renderer; nothing here did, so the report never came. The harness's null backend writes reports at once,
+  which hid it.
+- SDK: an image naming D3DDevice_GetVisibilityTestResult (DRIVING.XBE only; the others do not link it) walks the pushes and
+  kicks the renderer before the library's read. Other games do not name it, so their behaviour is unchanged.
+- Proof, in a temporary harness build (RT_THREAD=1 RAW=1, null backend holding reports until Flush): before, frames stop at
+  about 24 s with 1054 draws; after, mis02a plays through 60 s. SMOKE OK, wincheck ok. Windows still to confirm.
 
 ### 2026-10-30 - Vertex blending on the render thread (sdk)
 - Harry's capture 154810 (D3D12): the flaps gone, most of the hand and the flag missing. The render thread's state copy

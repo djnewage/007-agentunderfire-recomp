@@ -130,3 +130,5 @@ or as the same class of bug in a new place.
   vertex format asks for with what the generated shader reads.
 - Test renderer changes in the harness built as the Windows exe too (`RT_THREAD=1 RAW=1`, its own `-o` folder): the render
   thread sends the backend only the state it lists, so a new field or transform in use can arrive as zeros.
+- The harness's null backend answers visibility reports at once, so a poll that depends on the renderer being kicked only hangs
+  on Windows. Holding reports until Flush in a temporary build reproduces such a hang headless.
