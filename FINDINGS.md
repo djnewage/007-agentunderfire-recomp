@@ -27,5 +27,8 @@ own code and data, with its addresses).
   kick the renderer itself.
 - **[game]** DRIVING.XBE polls a visibility test in a loop while loading a level (0x87830).
 
+- **[game]** DRIVING.XBE's world is chosen by the list builder 0x7DC10: spheres against the frustum at 0x190640 (0x7E140; planes in columns, built by
+  0x7E3C0 from the camera's half angle), then 0xAE550 (planes at 0x1C6CA0).
+
 ## Push buffers
 - **[game]** None in any of the three xbes.

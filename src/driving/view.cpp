@@ -35,3 +35,17 @@ X86_FUNC(sub_00102990) {
     }
     __imp__sub_00102990(ctx, base);
 }
+
+// What the world draws is chosen apart from the view above: the list builder 0x7DC10 tests each thing's sphere against the frustum
+// at 0x190640, whose planes 0x7B7F0 builds through 0x7E3C0 (thiscall: position, camera, half angle in degrees, far) from the camera's
+// half angle alone, 33 degrees whatever the view's width (draw counts did not change at all from 4:3 to four times that). Given the
+// wider angle here; it also reaches past the frame's edges by EoN's margin (2.2 times the tangent, Harry confirmed it there):
+// on the edge, what stands just off the screen and lights what is on it popped as the car turned.
+X86_EXTERN_FUNC(__imp__sub_0007E3C0);
+X86_FUNC(sub_0007E3C0) {
+    constexpr float kCullMargin = 2.2f, kMost = 80.0f;
+    float half = GetF(ctx.esp + 0xC) * auf::FovScale();
+    float wide = std::atan(std::max(auf::FrameWidth(), 1.0f) * kCullMargin * std::tan(half * kPi / 180)) * 180 / kPi;
+    SetF(ctx.esp + 0xC, std::min(wide, kMost));
+    __imp__sub_0007E3C0(ctx, base);
+}

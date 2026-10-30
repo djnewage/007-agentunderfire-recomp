@@ -23,6 +23,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - Driving pop-in: the world's frustum is fixed at the console's angle
+- Harry: 60 FPS fine; the pop-in shows just driving along the road.
+- Traced from world draws (gdb stacks: 0x7DF90, 0xA6AF0, the list at +0xC08): the list builder 0x7DC10 tests spheres with 0x7E140 against the
+  frustum at 0x190640, built by 0x7E3C0 from the camera's half angle (33 degrees at 0x1906A4) and nothing else: the view's widening never reached
+  it, hence the same draw count at every width. 0x7E3C0 now gets the angle widened by the frame and EoN's 2.2 margin, at most 80 degrees.
+- Evidence: mis07a frame 1500, 344 draws (277 world) before, 357 (290) after, the picture the same; SMOKE OK. A pop itself was never caught headless:
+  whether this cures it is Harry's to see. The earlier memory scan missed it: the planes are in columns, the watchpoint candidate 0x82A6AE20 was mesh data.
+- The second test 0xAE550 (planes at 0x1C6CA0) was not looked at; the count of those planes is 0x1C7CA0. First suspect if it still pops.
+
 ### 2026-10-30 - Harry's ultrawide run: the radar, 60 FPS, a culling margin (sdk branch agentunderfire)
 - Harry, 3440x1440: intro skip, field of view and mouse on foot fine. Three problems.
 - Driving map gone: the radar draws in its own viewport (477,48,135x135) and the squeeze moved the picture out of it. A draw squeezed
