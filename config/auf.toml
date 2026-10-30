@@ -85,6 +85,8 @@ IDirectSoundBuffer_Stop                              = 0x538C3
 IDirectSound_CreateSoundBuffer                       = 0x5434A
 IDirectSound_DownloadEffectsImage                    = 0x53808
 Lock2DSurface                                        = 0x47230
+IDirectSound_SetI3DL2Listener                        = 0x540B6
+D3DDevice_SetPalette                                 = 0x438E0
 
 [data]
 # as bond_eng.xbe: the deferred texture state follows the dirty flags, the index data before them

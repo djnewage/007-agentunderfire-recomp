@@ -1,0 +1,6 @@
+# default.xbe: START through the movies
+300 START
+600 START
+900 START
+1200 START
+1500 START
