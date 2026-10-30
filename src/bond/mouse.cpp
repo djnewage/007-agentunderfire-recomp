@@ -1,0 +1,73 @@
+// The mouse looks on foot as in a PC shooter: its movement turns the client's angles directly, not through the stick.
+//
+// The input layer 0x24570 (cmd, player) keeps degrees per player at 0x2A8124 (pitch) and 0x2A8128 (yaw), stride 0x30, and
+// turns them by the stick times the rates 0x2A8144 (yaw) and 0x2A8148 (pitch): 0.5/zoom through a scope, 0.33 and 0.66 in
+// manual aim, 0 when the player has no control (a cutscene, a frozen player), so the mouse follows them too. Yaw grows to
+// the left, pitch downwards. The server clamps pitch (0xC46E0). The console's invert option is the byte 0x3B22D5.
+// Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to plays that many counts a call for calls from..to.
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+#include "common/auf.h"
+#include "core/input.h"
+#include "core/log.h"
+#include "kernel/kernel.h"
+#include "xdk/hle.h"
+
+namespace {
+constexpr uint32_t kPitch = 0x2A8124, kYaw = 0x2A8128, kYawRate = 0x2A8144, kPitchRate = 0x2A8148, kInvert = 0x3B22D5;
+constexpr float kDegreesPerCount = 0.0458f;  // at 100% sensitivity: 36 degrees an inch at 800 counts an inch
+
+float GetF(uint32_t va) {
+    float f;
+    std::memcpy(&f, &kernel::G<uint32_t>(va), 4);
+    return f;
+}
+void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
+
+// the mouse's counts since the last call, times the sensitivity
+bool Counts(float& x, float& y) {
+    static const struct Test {
+        float dx = 0, dy = 0;
+        uint32_t from = 0, to = 0;
+    } test = [] {
+        Test t;
+        if (const char* e = std::getenv("AUF_MOUSE_TEST")) std::sscanf(e, "%f,%f,%u,%u", &t.dx, &t.dy, &t.from, &t.to);
+        return t;
+    }();
+    static uint32_t call = 0;
+    call++;
+    if (test.to) {
+        bool on = call >= test.from && call <= test.to;
+        x = on ? test.dx : 0, y = on ? test.dy : 0;
+        return true;
+    }
+    static auto last = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
+    float dt = std::clamp(std::chrono::duration<float>(now - last).count(), 0.001f, 0.1f);
+    last = now;
+    if (!input::UsingKeyboard() || !input::TakeMouse(x, y)) return false;  // a controller in use: its own stick
+    x *= 2400 * dt, y *= 2400 * dt;  // TakeMouse's rate (2400 counts a second at 100% is 1) back to counts
+    return true;
+}
+}  // namespace
+
+X86_EXTERN_FUNC(__imp__sub_00024570);
+X86_FUNC(sub_00024570) {
+    float x, y;
+    if (kernel::R32(ctx.esp + 8) == 0 && Counts(x, y)) {
+        float rx = GetF(kYawRate), ry = GetF(kPitchRate);
+        bool invert = kernel::G<uint8_t>(kInvert) != 0;
+        SetF(kYaw, GetF(kYaw) - x * kDegreesPerCount * rx);
+        SetF(kPitch, GetF(kPitch) + (invert ? -y : y) * kDegreesPerCount * ry);
+        static bool said = false;
+        if (!said && (x || y) && rx != 0) {
+            said = true;
+            LOGR("auf: the mouse turns the view directly");
+        }
+    }
+    __imp__sub_00024570(ctx, base);
+}

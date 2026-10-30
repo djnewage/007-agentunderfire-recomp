@@ -22,6 +22,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - PC features, headless (pc features in src/; not yet on Windows)
+- Skip intro: 0x20BD0 returns at once but for HILITE; bond_eng.xbe reached 0.26 s after start.
+- Widescreen: bond_eng.xbe, [0x3467B8] written in 0x1387E0 (draw, culling, tags together, true proportions); DRIVING.XBE,
+  0x102990 as NightFire's. 2D kept in 4:3 (hud_aspect). The reference renderer squeezes 480 line targets alone, so the driving
+  HUD's 640x576 stays full width in the harness; the GPU rule has no such limit: Windows to confirm (log: "ultrawide:").
+- Field of view: the four projection helpers' angle. The first person weapon's own path is skipped (0x14B654), but at AUF_FOV=130 the
+  gadget hand still looked smaller: another path draws it. Harry to judge.
+- Mouse: bond_eng.xbe 0x24570, degrees by the game's rates (scope, manual aim, no control). AUF_MOUSE_TEST=30,0,500,560 turned the view
+  right. DRIVING.XBE's guns take it as the right stick (mouse_direct off): no direct aim there, not tried headless.
+- Menus: MenuUp in bond_eng.xbe [0x3B2428], [0x3B2418], state name "frontend"; DRIVING.XBE byte 0x1801D8 (pause: the only byte up across one
+  by memory diff) or 0x1E1818 (not in play yet). 0x1801D8 blinks a few times as a pause closes. Guns: the control file's name at 0x17FED1.
+- Keys from the game's Controller Setup page; DRIVING.XBE's follow NightFire's, as the same engine's, unconfirmed here.
+- Left out: an in-game PC Settings page and keyboard button pictures in the prompts. Auto-aim stays the game's while the mouse aims.
+
 ### 2026-10-30 - Windows confirmed
 - Harry: the freeze and the models are fixed, the game works, no obvious visual bugs on a first look. Not yet a full
   playthrough. Next: the SDK gate and merge, then PC features.
