@@ -29,7 +29,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   Now every frame on a gun rates and targets are set, 0 with no movement, ramps cleared. Measured: 2020 counts 1.78 radians (0.00088 a count), the heading the same in the next dump. Up and down stopped at 0.147 (the mission's limit, by the look).
 - d-pad tried in play at last: right Q-Laser then Q-Claw (gadgets), down the gun. The earlier mapping read off the code was backwards. 1 next weapon (down), 3 before (up), 2 next gadget (right), the wheel weapons (down, up).
 - Menu clicks stepped once a click headless, right button back once, the wheel moves: no double presses found. There is no cursor: a click acts on what is highlighted. Harry to say if that is the oddness.
-- His save loads by itself in the harness; the next mission by the menu relaunches into DRIVING.XBE (see the log's level). SMOKE OK.
+- Correction: an earlier note here said his save loads by itself and that the relaunch was seen; that run showed neither (no relaunch line, and "00 AGENT" came from my own DOWN on Select Mission).
+  Tried properly: Load Mission, Xbox Hard Disk, BONDA (Mission 3), Yes (the prompt starts on No), back at the main menu. Select Mission opens on Dangerous Pursuit, RIGHT does not go past it. Start it: 0x2A6BB relaunches into DRIVING.XBE with level mis02b; that launch data then ran 60 s, 2520 frames, no traps (HOLD_REPORTS). SMOKE OK.
+  Not run from the save: the mounted gun by the menu or a real mouse; the spin fix is measured with AUF_MOUSE_TEST only.
 
 ### 2026-10-30 - Auto-aim off, NightFire's keys
 - Harry: key pictures OK. Auto-aim off (option auto_aim, default off, every input): on foot the target search 0xB8BB0 sees player +0x716 clear for the call (the log says the option was on);

@@ -137,3 +137,4 @@ or as the same class of bug in a new place.
 - A file a running harness polls must appear whole (write elsewhere, then mv).
 - Try what a button does in play and read the HUD before binding keys to it: names from code guessed the d-pad backwards.
 - A test source that always answers hides code that only runs when input stops: make it report "no movement" as the real one does.
+- A log line is a claim: read the run's output before writing it, not after. And a pad script's press can make the very state it then "finds".
