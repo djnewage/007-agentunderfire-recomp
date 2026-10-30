@@ -20,8 +20,8 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 ## Building
 
 1. Clone with submodules: `git clone --recurse-submodules https://github.com/hk21x/007-agentunderfire-recomp`.
-2. Extract your disc into `assets` (`default.xbe`, `bond_eng.xbe`, `DRIVING.XBE`, `assets\\`, `driving.dat\\`).
-3. Install Visual Studio 2022 with C++ desktop development and run `build.bat`. The exes are in `out\\build\\release`.
+2. Extract your disc into `assets` (`default.xbe`, `bond_eng.xbe`, `DRIVING.XBE`, `assets\`, `driving.dat\`).
+3. Install Visual Studio 2022 with C++ desktop development and run `build.bat`. The exes are in `out\build\release`.
    Run `AgentUnderFire.exe`; it starts the other two itself.
 
 The game is three programs, and the build recompiles all three, which takes a while.
