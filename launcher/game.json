@@ -1,0 +1,22 @@
+{
+    "title": "007: Agent Under Fire",
+    "short": "AgentUnderFire",
+    "exe": "AgentUnderFire",
+    "exes": [
+        "AgentUnderFire",
+        "AgentUnderFireBond",
+        "AgentUnderFireDriving"
+    ],
+    "xbe": "default.xbe",
+    "xbes": [
+        "default.xbe",
+        "bond_eng.xbe",
+        "DRIVING.XBE"
+    ],
+    "releases": {
+        "3dbed4eb51701a53676e0ace4cdea1752dc04697": "PAL (Europe)"
+    },
+    "repo": "https://github.com/hk21x/agentunderfire-recomp.git",
+    "branch": "main",
+    "toolchain": "https://raw.githubusercontent.com/hk21x/agentunderfire-recomp/main/launcher/toolchain.json"
+}

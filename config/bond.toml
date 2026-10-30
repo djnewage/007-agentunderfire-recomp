@@ -1,0 +1,4 @@
+# Hand-kept recompiler config for bond_eng (the file the build reads). bond_game.toml is xbe_symbols output: nothing is edited
+# there; hand entries go below ([[hook]], [[function]], [[switch]], [functions], [xbe] data_ranges / trace). A symbol
+# found by hand is signed into the SDK, then every xbe rescanned (each rescan must reproduce its scan file).
+includes = ["bond_game.toml"]
