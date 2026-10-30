@@ -22,6 +22,7 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 Set in the F1 window (or `settings.toml` beside the exe); the runtime's own display, graphics and controller options are there too.
 
 - **Widescreen** - True proportions on any frame wider than 4:3, with the 3D view widened and the menus and HUD kept in a 4:3 centre. The console's own 4:3 picture is kept on a 4:3 screen.
+- **Auto-aim** - The game's aim assist is off by default; the F1 window turns it back on.
 - **Field of view** - 50 to 150% of the game's, on foot and driving.
 - **Skip intro movies** - Starts without the logos.
 - **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
@@ -39,10 +40,10 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 | Jump | Space | | |
 | Crouch | C, Left Ctrl | | |
 | Action, reload, open | E, R | | R reload |
-| Use gadget | Q | Right button, E | |
+| Use gadget | G | Right button, E | |
 | Alt. fire | F, Middle button | | |
-| Weapon | Wheel, X, 1 2 | Wheel, Q, Z, 1 2 | |
-| Gadget | 3 4, arrows up and down | 3 4 | |
+| Weapon | Wheel, Q, 1 next, 3 before | Wheel, Q, Z, 1 2 | |
+| Gadget | 2 next, arrows up and down | 3 4 | |
 | Handbrake | | Space | |
 | Camera / look back | Tab, V center view | C camera, V look back | |
 | Pause | Esc, P | Esc, P | Esc, P |

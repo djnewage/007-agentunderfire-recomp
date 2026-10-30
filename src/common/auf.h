@@ -10,6 +10,7 @@ enum Image { kDefault, kBond, kDriving };
 extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp)
+extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/mouse.cpp, src/driving/mouse.cpp)
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
 float FovScale();             // fov_percent as a factor, 0.5 to 1.5
 float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4:3 screen

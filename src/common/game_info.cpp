@@ -15,6 +15,7 @@
 namespace auf {
 bool skip_intro = false;
 bool uncapped = true;
+bool auto_aim = false;
 uint32_t fov_percent = 100;
 
 float FovScale() {
@@ -48,6 +49,7 @@ const bool kDrv = auf::kImage == auf::kDriving;
 // after the settings load: the harness's environment overrides them; each setting in effect is logged
 void Init() {
     if (const char* e = std::getenv("AUF_SKIP_INTRO"); e && *e) auf::skip_intro = *e == '1';
+    if (const char* e = std::getenv("AUF_AUTO_AIM"); e && *e) auf::auto_aim = *e == '1';
     if (const char* e = std::getenv("AUF_FOV"); e && *e) auf::fov_percent = uint32_t(std::atoi(e));
     if (auf::skip_intro) LOGR("auf: the logo movies are skipped (skip_intro)");
 }
@@ -70,13 +72,13 @@ std::array<uint16_t, 2> ShooterKeys(int c) {
         case kA: return {'C', kLeftCtrl};    // crouch (Enter selects in the menus: menu_mouse.cpp)
         case kX: return {'E', 'R'};          // action, reload, open
         case kY: return {kSpace, 0};         // jump
-        case kB: return {'Q', kBackspace};   // use gadget; back in the menus
-        case kWhite: return {'X', 0};        // cycle weapon
+        case kB: return {'G', kBackspace};   // use gadget; back in the menus
+        case kWhite: return {'Q', 0};        // cycle weapon
         case kBlack: return {'F', kMouseMiddle};  // alt. fire
-        case kUp: return {kArrowUp, '3'};    // the d-pad: the gadget up and down, the weapon left and right (the wheel too)
-        case kDown: return {kArrowDown, '4'};
-        case kLeft: return {kArrowLeft, '1'};
-        case kRight: return {kArrowRight, '2'};
+        case kUp: return {kArrowUp, 0};      // the d-pad: the gadget up and down, the weapon left and right (the wheel too);
+        case kDown: return {kArrowDown, '2'};  // as NightFire, 1 the next weapon, 2 the next gadget, 3 the weapon before
+        case kLeft: return {kArrowLeft, '3'};
+        case kRight: return {kArrowRight, '1'};
         case kBack: return {kTab, 'V'};      // center view
         case kStart: return {kEscape, 'P'};
         default: return {0, 0};
@@ -169,6 +171,7 @@ const app::GameInfo app::kGame = {
                {"bond_eng.xbe", "AgentUnderFireBond"},
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
+                {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
                 {"uncapped", &auf::uncapped, nullptr, "60 FPS on foot",
                  "Paced by the frame rate cap instead of the console's 30. Takes effect at the next start"},
                 {"fov_percent", nullptr, &auf::fov_percent, "Field of view (%)",

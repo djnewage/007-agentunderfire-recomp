@@ -66,3 +66,20 @@ X86_FUNC(sub_00077A20) {
     }
     __imp__sub_00077A20(ctx, base);
 }
+
+// Auto-aim: 0x76310 (from 0x77A20) pulls the camera's aim to the target at [0x1C6C18], by the difficulty. Off, it sees no target for
+// the call.
+X86_EXTERN_FUNC(__imp__sub_00076310);
+X86_FUNC(sub_00076310) {
+    constexpr uint32_t kTarget = 0x1C6C18;
+    if (auf::auto_aim) return __imp__sub_00076310(ctx, base);
+    const uint32_t was = kernel::R32(kTarget);
+    static bool said = false;
+    if (!said && was) {
+        said = true;
+        LOGR("auf: auto-aim off on a target");
+    }
+    kernel::W32(kTarget, 0);
+    __imp__sub_00076310(ctx, base);
+    kernel::W32(kTarget, was);
+}

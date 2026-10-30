@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-30 - Auto-aim off, NightFire's keys
+- Harry: key pictures OK. Auto-aim off (option auto_aim, default off, every input): on foot the target search 0xB8BB0 sees player +0x716 clear for the call (the log says the option was on);
+  on guns 0x76310 sees no target [0x1C6C18] for the call (logged on a target at 23 s in mis02a). Whether aim feels free: Harry's. Homing weapons and 0x9DDB0's use of the amounts untouched.
+- On foot as NightFire: Q cycle weapon, G use gadget, 1 next weapon, 2 next gadget, 3 weapon before. Which way d-pad down cycles gadgets is from the code, not tried. A layout saved in settings.toml's [keys] keeps what it says.
+
 ### 2026-10-30 - Scope wheel, mounted gun aim, key pictures; SDK merged (fork main 36bb42e)
 - Harry confirmed the radar and on-foot pop-in. Gate on 36bb42e, each game's commit in a copy (.local/gate2): PGR2, NightFire, PGR1 plus repro's live race,
   EoN (its SDK merged, -X theirs on what already conflicts), this game: SMOKE OK. Fast-forward; .gitmodules follows main.

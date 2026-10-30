@@ -99,3 +99,21 @@ void WheelZoom(X86Context& ctx, uint8_t*) {
     if (!(most > 1.0f)) return;
     SetF(ctx.esi + 0x51C, std::clamp(GetF(ctx.esi + 0x51C) * std::pow(kNotchStep, float(notches)), 1.0f, most));
 }
+
+// Auto-aim: the target search 0xB8BB0 (fastcall: the player) only looks for a target when the player's +0x716 is set (the game's
+// option, written at 0xBA8AC, 0xDEC4D, 0xF4426). Off, it sees that clear for the call, and the option stays as set.
+X86_EXTERN_FUNC(__imp__sub_000B8BB0);
+X86_FUNC(sub_000B8BB0) {
+    const uint32_t player = ctx.ecx;
+    if (auf::auto_aim || !player) return __imp__sub_000B8BB0(ctx, base);
+    uint8_t& flag = kernel::G<uint8_t>(player + 0x716);
+    const uint8_t was = flag;
+    static bool said = false;
+    if (!said && was) {
+        said = true;
+        LOGR("auf: auto-aim off (the game's option was on)");
+    }
+    flag = 0;
+    __imp__sub_000B8BB0(ctx, base);
+    flag = was;
+}
