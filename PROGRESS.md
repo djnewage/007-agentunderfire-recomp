@@ -4,13 +4,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - Milestone: 1 - plays headless. default.xbe's movies, START, bond_eng.xbe's title, menus, briefing and first mission;
-  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. Not yet built or played on Windows.
+  DRIVING.XBE's five levels and back. No trap in 200 s of the first mission. On Windows the first mission plays to its end; see-through models being fixed.
 - XDK: 4039 on SDK branch agentunderfire (not in the fork's main): default.xbe 98, bond_eng.xbe 113, DRIVING.XBE 112 of
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 3 minutes, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK branch agentunderfire pushed
-- Not done: Windows, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- Not done: French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -21,6 +21,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-30 - First Windows run; see-through models: vertex buffer locks did not wait (sdk: 4039 signs the lock's wait)
+- Harry, Windows, D3D12, RX 7900 XT: the game loads and the first mission plays to its end with no crash or hitch, but
+  surfaces can be seen through. His F3 capture (.local/win/144318, 2560x1440): the hand is torn into pieces, also in the
+  depth buffer, so triangles are missing rather than transparent; the ground is black.
+- Likely cause, as NightFire's FINDINGS: D3D_BlockOnNonSurfaceResource was not in 4039's table (seeded from 3948, which lacks
+  it), so a vertex buffer lock (0x196AF0, calling 0x198080) never waited for the renderer. Windows draws on a render thread
+  and reads buffers the game has already refilled; the harness has no such thread, which fits its frames being whole.
+- Now signed: default.xbe 0x45900, bond_eng.xbe 0x198080, DRIVING.XBE 0x11B030. Compared the table with 4831's and 5659's:
+  nothing else missing that this game links, D3DDevice_GetRasterStatus not looked for.
+- SMOKE OK, mis02a 40 s without a trap, wincheck ok. None of that tests the fix: only a Windows run can.
+- Next: Harry's rebuild; the black ground may be a separate problem.
 
 ### 2026-10-30 - Every level loads headless; the driving handover goes both ways; GitHub repository
 - hk21x/007-agentunderfire-recomp holds main (merged GitHub's initial commit, the MIT licence). .gitmodules follows the SDK

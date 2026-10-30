@@ -95,6 +95,7 @@ IDirectSound_CreateSoundBuffer                       = 0x1C2F8A
 IDirectSound_DownloadEffectsImage                    = 0x1C2448
 Lock2DSurface                                        = 0x19A1C0
 IDirectSound_SetI3DL2Listener                        = 0x1C2CF6
+D3D_BlockOnNonSurfaceResource                        = 0x198080
 
 [data]
 D3D_Device                     = 0x1A0640  # Direct3D_CreateDevice 0x195780+ stores it; SetRenderState_Simple 0x192EB0 reads the push pointer there

@@ -91,6 +91,7 @@ Lock2DSurface                                        = 0x11C7B0
 IDirectSound_SetI3DL2Listener                        = 0x126D16
 D3DDevice_SetPalette                                 = 0x1159A0
 D3DDevice_PersistDisplay                             = 0x115D60
+D3D_BlockOnNonSurfaceResource                        = 0x11B030
 
 [data]
 # as bond_eng.xbe: the deferred texture state follows the dirty flags, the index data before them

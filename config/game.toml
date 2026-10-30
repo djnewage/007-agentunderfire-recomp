@@ -57,6 +57,7 @@ crt_pow                                              = 0x03AF34
 crt_sin                                              = 0
 crt_sqrt                                             = 0
 crt_tan                                              = 0
+D3D_BlockOnNonSurfaceResource                        = 0x045900
 D3D_BlockOnResource                                  = 0x045880
 D3D_BlockOnTime                                      = 0x045560
 D3D_DeferredTextureState                             = 0
