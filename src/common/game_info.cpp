@@ -187,6 +187,6 @@ const app::GameInfo app::kGame = {
     .sharpen_2d = true,                   // text and HUD pictures enlarged sharp (Settings::sharp_2d turns it off)
     .pal_console = true,                  // a PAL disc (region 4)
     .mouse_look = true,                   // the mouse looks and aims
-    .mouse_direct = auf::kImage == auf::kBond,  // src/bond/mouse.cpp; a mounted gun takes it as the right stick
+    .mouse_direct = true,                 // src/bond/mouse.cpp, src/driving/mouse.cpp
     .default_keys = Keys,                 // a shooter's keys on foot, a driving layout in DRIVING.XBE
 };

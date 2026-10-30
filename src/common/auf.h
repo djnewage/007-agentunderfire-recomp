@@ -15,5 +15,7 @@ float FovScale();             // fov_percent as a factor, 0.5 to 1.5
 float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4:3 screen
 bool MenuUp();                // a menu has the controller (each image's own test): the mouse plays A, B and the d-pad
 bool OnGun();                 // DRIVING.XBE: a mounted gun's controls are in force, not the car's
+bool Zoomed();                // bond_eng.xbe: through a scope
+void ScopeZoom(int notches);  // bond_eng.xbe: the wheel's notches, up nearer
 void MenuMouse(int port, input::Pad& p);
 }  // namespace auf

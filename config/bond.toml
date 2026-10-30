@@ -111,3 +111,7 @@ D3D_Streams                    = 0x1A32B0  # SetStreamSource 0x197190+
 at = 0x139015
 call = "DefaultInterval"
 after = true
+
+[[hook]]
+at = 0xBD768
+call = "WheelZoom"

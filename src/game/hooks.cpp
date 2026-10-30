@@ -9,6 +9,8 @@ namespace auf {
 extern const int kImage = kDefault;
 bool MenuUp() { return false; }
 bool OnGun() { return false; }
+bool Zoomed() { return false; }
+void ScopeZoom(int) {}
 }  // namespace auf
 
 // skip_intro: 0x20BD0 (cdecl: the movie's name) plays one and returns at its end or a button. The boot sequence 0x21130

@@ -11,7 +11,10 @@ extern const int kImage = kDriving;
 bool OnGun() {
     return !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(0x17FED0 + 13)), "povcfg", 6);
 }
-// a pause in play (0x1801D8: the only byte set across one, found comparing memory before, during and after), or the level
-// not in play yet (0x1E1818, set from its start to the end of the intro)
-bool MenuUp() { return kernel::G<uint8_t>(0x1801D8) != 0 || kernel::R32(0x1E1818) != 0; }
+// the level's state 3: paused, or a movie or the mission's end (0x77A20 and 0x503C0 stop the camera on it; NightFire's later
+// version of this engine has the same at its 0x234E24), or the level not in play yet (0x1E1818, set from its start to the end of
+// the intro)
+bool MenuUp() { return kernel::R32(0x1BEB1C) == 3 || kernel::R32(0x1E1818) != 0; }
+bool Zoomed() { return false; }
+void ScopeZoom(int) {}
 }  // namespace auf

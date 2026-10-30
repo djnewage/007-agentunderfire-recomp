@@ -6,7 +6,9 @@
 // the left, pitch downwards. The server clamps pitch (0xC46E0). The console's invert option is the byte 0x3B22D5.
 // Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to plays that many counts a call for calls from..to.
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -70,4 +72,28 @@ X86_FUNC(sub_00024570) {
         }
     }
     __imp__sub_00024570(ctx, base);
+}
+
+// The wheel through a scope: a weapon's zoom is its +0x51C, read each frame at 0xBD768 (esi the weapon, only when +0x52C says it
+// zooms) into the player's view; its most is +0x524, and leaving the scope is the game's own. The wheel's notches, counted on the
+// input thread, multiply it here, on the game's. Zoomed: the player state's +0x2E4, 1 when not.
+namespace {
+std::atomic<int> g_zoom_notches{0};
+constexpr float kNotchStep = 1.25f;
+}  // namespace
+
+namespace auf {
+bool Zoomed() {
+    uint32_t ps = kernel::R32(0x2A88B8);
+    return ps && GetF(ps + 0x2E4) > 1.01f;
+}
+void ScopeZoom(int notches) { g_zoom_notches += notches; }
+}  // namespace auf
+
+void WheelZoom(X86Context& ctx, uint8_t*) {
+    int notches = g_zoom_notches.exchange(0);
+    if (!notches) return;
+    float most = GetF(ctx.esi + 0x524);
+    if (!(most > 1.0f)) return;
+    SetF(ctx.esi + 0x51C, std::clamp(GetF(ctx.esi + 0x51C) * std::pow(kNotchStep, float(notches)), 1.0f, most));
 }

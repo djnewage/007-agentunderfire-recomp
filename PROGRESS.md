@@ -10,7 +10,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK on branch agentunderfire, one commit past the fork's main 0733ba3
-- PC features: skip intro, field of view, mouse on foot confirmed by Harry; 60 FPS and the driving culling confirmed; radar and on-foot margin await word
+- PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
 - Not done: in-game PC Settings page, keyboard prompts, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc

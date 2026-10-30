@@ -56,6 +56,10 @@ void MenuMouse(int port, input::Pad& p) {
     static bool was = false;
     if (menu != was) LOGR("auf: %s", menu ? "a menu is up: the mouse plays A, B and the d-pad" : "out of the menus");
     was = menu;
+    if (kImage == kBond && !menu && Zoomed() && notches) {  // through a scope the wheel zooms
+        ScopeZoom(notches);
+        notches = 0;
+    }
     int next = input::kRight, prev = input::kLeft;
     if (menu) next = input::kDown, prev = input::kUp;
     else if (kImage == kDriving) next = input::kBlack, prev = input::kWhite;
