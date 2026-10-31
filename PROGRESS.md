@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - The Windows build stopped at the language exes
+- Harry's build stopped ("ninja: build stopped"), the error line not yet seen. A() used throw to refuse an unmapped address, an error in every bond_fre and bond_ger source with -fno-exceptions, reproduced here that way. Whether Windows' build has exceptions off is not confirmed, so this may or may not be his error. A() is now consteval, with an undefined non-constexpr function for unmapped: no exceptions needed. All src/ syntax-checked with mingw headers, -fno-exceptions: no errors. The real target (windows-msvc) cannot be checked with these headers.
+
 ### 2026-10-31 - French and German
 - bond_fre.xbe and bond_ger.xbe are bond_eng.xbe's source with strings changed, so code and data shift a little throughout. tools/map_bond.py aligns the instructions (masked runs unique in both, a limit on distance, gaps filled) and reads data addresses off the aligned operands. It writes config/bond_<l>.toml, src/bond/addr_<l>.h (A()'s table; unmapped does not compile) and src/bond_<l>/*.cpp (src/bond with functions renamed at once: as macros one language's new name was another's old). Run it after changing src/bond; smoke fails if the output is uncommitted.
 - Scans need --name, or xbe_symbols writes out = generated/game: it did once, and left stale partitions there.

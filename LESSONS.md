@@ -143,3 +143,4 @@ or as the same class of bug in a new place.
 - Open every page and level at least once in a headless sweep: Multiplayer's crash sat one menu away from the title.
 - Check a test's window is in the state it claims to test: look at a frame of it. A number from the mission's intro passed twice as a confirmed fix, and Harry's mouse found it.
 - When a measured fix and a player's report disagree, doubt the measurement first.
+- wincheck compiles with exceptions on, and names no src/ file by default: check every src/ file with -fno-exceptions before saying a new image builds for Windows.

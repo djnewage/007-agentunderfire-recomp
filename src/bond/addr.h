@@ -9,11 +9,15 @@
 #include "bond/addr_ger.h"
 #endif
 
-constexpr uint32_t A(uint32_t english) {
+#ifdef AUF_ADDR_TABLE
+uint32_t NotMappedByToolsMapBond();  // not constexpr: reaching it does not compile
+#endif
+
+consteval uint32_t A(uint32_t english) {
 #ifdef AUF_ADDR_TABLE
     switch (english) {
         AUF_ADDR_TABLE
-        default: throw "tools/map_bond.py has not mapped this address";
+        default: return NotMappedByToolsMapBond();
     }
 #else
     return english;
