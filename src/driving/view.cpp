@@ -52,7 +52,7 @@ X86_FUNC(sub_0007E3C0) {
 }
 
 // The loading picture: 0xBDEC0 copies it into the back buffer by CPU, so the 2D squeeze never sees it
-// and the frame's widening stretches it. Each row is shrunk into the frame's 4:3 middle, black either side, before the unlock
+// and the frame's widening stretches it. Each row is shrunk into the frame's 4:3 middle, before the unlock
 // (0xBDF75: [esp+0x1C] the rows, the locked rectangle's pitch [esp+0x20] and bits [esp+0x24]; a row is the pitch's width).
 void LoadingPictureCentred(X86Context& ctx, uint8_t*) {
     const float k = auf::FrameWidth();
@@ -64,6 +64,7 @@ void LoadingPictureCentred(X86Context& ctx, uint8_t*) {
     for (uint32_t y = 0; y < rows; y++) {
         auto* p = reinterpret_cast<uint32_t*>(&kernel::G<uint8_t>(bits + y * pitch));
         std::memcpy(row.data(), p, w * 4);
-        for (uint32_t x = 0; x < w; x++) p[x] = x >= left && x < left + n ? row[size_t(x - left) * w / n] : 0xFF000000u;
+        // the row's edge colours out to the sides, as the on-foot screens' reach them
+        for (uint32_t x = 0; x < w; x++) p[x] = x < left ? row[0] : x >= left + n ? row[w - 1] : row[size_t(x - left) * w / n];
     }
 }

@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Scope test from the rates; loading sides in the art's colours
+- Harry: the flip changed nothing, the sniper still the wrong way. So Zoomed() (the player state's +0x2E4) was false for it; that also means the scope wheel (never reported on) probably did not work there. Zoomed() now: both rates equal and below 1, as 0xB45C0 sets them through a scope. Still not run: no scope reached headless. If it now flips and is right, the wheel should work there too.
+- Weapon keys and page's values confirmed by him. Loading sides: the row's edge pixels, not black, as he asked to match on foot.
+
 ### 2026-10-31 - Harry: scope, gun's weapons, page's values, loading stretched
 - Guns: 1, 3, Q and the wheel play the d-pad's down and up, as on foot (wheel seen changing the weapon in a capture; keys not, no keyboard here).
 - Page's values show "< 100% >"; a mouse press on the left arrow lowers (seen 100, 95, 90), elsewhere raises. Arrow keys Press the d-pad in any menu: on DRIVING.XBE they were on the left stick. Why they failed on foot for him is not found; his report says they did.

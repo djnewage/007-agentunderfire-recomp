@@ -5,7 +5,6 @@
         case 0x2A8128: return 0x2A8448; \
         case 0x2A8144: return 0x2A8464; \
         case 0x2A8148: return 0x2A8468; \
-        case 0x2A88B8: return 0x2A8BD8; \
         case 0x2A9724: return 0x2A9A44; \
         case 0x2A9734: return 0x2A9A54; \
         case 0x2A9C24: return 0x2A9F44; \

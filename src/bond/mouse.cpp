@@ -66,7 +66,7 @@ X86_FUNC(sub_00024570) {
         bool invert = kernel::G<uint8_t>(kInvert) != 0;
         SetF(kYaw, GetF(kYaw) - x * kDegreesPerCount * rx);
         // Harry on Windows: through the sniper's scope (end of mission 1) up and down come out inverted. Not found in the code: the rate's
-        // sign is the same (0xB4659). Flipped there by his report
+        // sign is the same (0xB4659). Flipped there by his report (first tried with a test of Zoomed that this sniper did not meet)
         if (auf::Zoomed()) y = -y;
         SetF(kPitch, GetF(kPitch) + (invert ? -y : y) * kDegreesPerCount * ry);
         static bool said = false;
@@ -80,7 +80,7 @@ X86_FUNC(sub_00024570) {
 
 // The wheel through a scope: a weapon's zoom is its +0x51C, read each frame at 0xBD768 (esi the weapon, only when +0x52C says it
 // zooms) into the player's view; its most is +0x524, and leaving the scope is the game's own. The wheel's notches, counted on the
-// input thread, multiply it here, on the game's. Zoomed: the player state's +0x2E4, 1 when not.
+// input thread, multiply it here, on the game's.
 namespace {
 std::atomic<int> g_zoom_notches{0};
 constexpr float kNotchStep = 1.25f;
@@ -90,8 +90,9 @@ namespace auf {
 // the input layer's rate: 0 when the player has no control (0xB45C0, 0xAEDC0)
 bool PlayerFree() { return GetF(kYawRate) != 0; }
 bool Zoomed() {
-    uint32_t ps = kernel::R32(A(0x2A88B8));
-    return ps && GetF(ps + 0x2E4) > 1.01f;
+    // 0xB45C0 sets both rates to [0x1E1620] / the weapon's zoom (+0x51C, with +0x52C set) through a scope; manual aim's differ
+    const float yaw = GetF(kYawRate), pitch = GetF(kPitchRate);
+    return yaw > 0 && yaw < 0.999f && yaw == pitch;
 }
 void ScopeZoom(int notches) { g_zoom_notches += notches; }
 }  // namespace auf
