@@ -141,3 +141,5 @@ or as the same class of bug in a new place.
 - wincheck with no arguments checks only sdk/runtime: name the game's Windows code too (scripts/wincheck.sh src/common/menu_mouse.cpp).
 - A P8 atlas in false colours shows no truth about which cell is which: get its palettes first, and test a theory (a poke) before blaming a tool.
 - Open every page and level at least once in a headless sweep: Multiplayer's crash sat one menu away from the title.
+- Check a test's window is in the state it claims to test: look at a frame of it. A number from the mission's intro passed twice as a confirmed fix, and Harry's mouse found it.
+- When a measured fix and a player's report disagree, doubt the measurement first.

@@ -2,9 +2,10 @@
 //
 // The camera's update 0x77A20 (fastcall: the camera) eases its rates +0x250 (up and down) and +0x254 (left and right) to their
 // targets +0x260 and +0x264, set by the right stick, and turns by them each frame, scaled by the view's half angle (+0x60), so a
-// zoom slows it. Held full right the stick turned the camera 1.55 radians (+0x1BC) in 390 frames: 0.004 a frame. While the
-// keyboard and mouse play on a gun the counts go straight into rates and targets, so there is no easing and the turn follows the
-// mouse: the on-foot rate, 0.0008 radians a count. Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to, counts a call for calls from..to.
+// zoom slows it. In play a rate of 0.01 turned the camera 0.054 radians a frame at the half angle 33, so about 5.6 radians a frame
+// a unit (read off its axis, not the ramp +0x1BC; the mission's intro is another path, far slower). While the keyboard and mouse
+// play on a gun the counts go straight into rates and targets, so there is no easing and the turn follows the mouse: the on-foot
+// rate, 0.0008 radians a count (measured 0.00076 from 1 to 100 counts a frame, mis02a and mis09). Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to, counts a call for calls from..to.
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -20,7 +21,8 @@
 namespace {
 constexpr uint32_t kUpRate = 0x250, kSideRate = 0x254, kUpTarget = 0x260, kSideTarget = 0x264;
 constexpr uint32_t kRamps[] = {0x1BC, 0x1C0};  // what a held stick builds up (0x77A20)
-constexpr float kRatePerCount = 0.0008f / 0.004f;
+constexpr float kRatePerCount = 0.0008f / 5.6f, kMostCounts = 400;
+constexpr float kUpScale = 2;  // up and down turn at half the rate of left and right (300 counts: 0.117 radians)
 
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
 
@@ -55,13 +57,16 @@ bool Counts(float& x, float& y) {
 X86_EXTERN_FUNC(__imp__sub_00077A20);
 X86_FUNC(sub_00077A20) {
     const uint32_t cam = ctx.ecx;
-    if (!cam || !auf::OnGun() || auf::MenuUp() || !UsingMouse()) return __imp__sub_00077A20(ctx, base);
     float x = 0, y = 0;
-    Counts(x, y);  // none (no movement): the rates go to 0 all the same, or the last one keeps turning the view
+    Counts(x, y);  // taken off a gun too: what the mouse did in an intro or a menu must not turn the gun when it starts
+    if (!cam || !auf::OnGun() || auf::MenuUp() || !UsingMouse()) return __imp__sub_00077A20(ctx, base);
+    // what built up where this was not called arrives at once: a third of a radian a frame at most
+    x = std::clamp(x, -kMostCounts, kMostCounts), y = std::clamp(y, -kMostCounts, kMostCounts);
+    // none (no movement): the rates go to 0 all the same, or the last one keeps turning the view
     SetF(cam + kSideRate, x * kRatePerCount);
     SetF(cam + kSideTarget, x * kRatePerCount);
-    SetF(cam + kUpRate, y * kRatePerCount);
-    SetF(cam + kUpTarget, y * kRatePerCount);
+    SetF(cam + kUpRate, y * kRatePerCount * kUpScale);
+    SetF(cam + kUpTarget, y * kRatePerCount * kUpScale);
     for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);  // the longer a stick is held, the faster: not for a mouse
     __imp__sub_00077A20(ctx, base);
     for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);

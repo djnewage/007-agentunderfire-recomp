@@ -23,6 +23,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Mounted guns about 1400 times too sensitive: my measurement was of the intro
+- Harry: on the gun missions any slight movement spins the view thousands of times. Reproduced in the harness: 5 counts a frame turned over 2 radians a frame.
+- Why it got through: both earlier figures were wrong. The "0.004 a frame at full stick" was the ramp +0x1BC, not the view, and "2020 counts 1.78 radians" and "2400 counts 2.39 radians, then still" (logged as confirmed on the real path) were taken with the test window inside the mission's intro, another camera path about 1000 times slower. So the earlier spin report was probably this too, and the "fix" only made it stop when the mouse stops.
+- Measured in play off the camera's axis: a rate of 0.01 turns 0.054 radians a frame at half angle 33. kRatePerCount now 0.0008/5.6 (was 0.2). 0.00076 a count at 1, 5, 20, 100 counts a frame, mis02a and mis09 the same; the harness's mouse tokens (the real Counts path) 0.00077. Zoomed (half angle 20) 0.00034, slower with the zoom, as the game scales it. Up and down turned half as fast: doubled (kUpScale, not re-measured after).
+- Movement built up off a gun is taken each call, and a call is capped at 400 counts: three 1000-count calls moved 400 each. Whether 0x77A20 runs through an intro on Windows was not checked.
+- Open: Y on a gun gives 0.7 s at 6.7 times the rate (0.0051 a count), each press. Not found what state that is or whether it is what Harry calls the launcher. mis07a has no gun, so no third level.
+- Open: +y (mouse up) looks down, on the gun as on foot, both by test. Harry called the foot fine, so left matching; he should say if up is down.
+- Not on a real mouse: Harry's to feel. SMOKE OK.
+
 ### 2026-10-31 - Every mission loads; DRIVING.XBE's prompts show keys
 - Sweep with the smoke's poke on 0x2A9F98, indices 0 to 15 for 110 s each: no crash. All on-foot levels draw (12 to 15 look like 5, so probably past the list). 1, 2, 6, 8 relaunch to mis02a, mis02b, mis07a, mis09; those ran 60 to 90 s, no crash. That is loading and the first minute, not levels played through.
 - bond_eng.xbe 30 minutes on random input: alive at the end, 77 MB flat. (rc=124 is the timeout's.)
@@ -33,7 +42,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ### 2026-10-31 - Multiplayer no longer crashes; long runs; the pointer's other pages; Select Mission by mouse
 - Crash found by opening Multiplayer, by d-pad too, so not the pointer: 0x5BE11 ends a typed-out text's 256-byte copy at the count of letters shown, and this page's speed takes that to 1071, a zero past the top of the guest stack at 0xD006003F. Probably mapped memory on the console. Hook ClampTextEnd keeps it in the buffer; the page opens and shows its text. No match started here (one pad): multiplayer play itself untried.
-- Gun on the real path: save, Select Mission, left to Precious Cargo, relaunch with mis02a. AUF_MOUSE_TEST 2400 counts turned 2.39 radians, then -0.2605 +/- 0.0003 for 1000 frames.
+- Gun on the real path: save, Select Mission, left to Precious Cargo, relaunch with mis02a. AUF_MOUSE_TEST 2400 counts turned 2.39 radians, then -0.2605 +/- 0.0003 for 1000 frames. (Wrong: that window was in the intro; see the entry above.)
 - Long runs on random input: car mis02b 760 s and gun mis02a 283 s played to the mission's end and relaunched, no crash, 85 and 92 MB flat. Those pads do not fight well: both are survival to a mission end, not coverage of a level.
 - Pointer: option rows join both columns (they were one or the other), Multiplayer's choices share one box so are not pointed at. Clicks are read a poll after the press, as a jump and click in one poll used the old answer.
 - Select Mission: side pictures step, the middle starts, the difficulty's line steps it, elsewhere nothing. Seen in captures. Rectangles measured at 16:9 only, hand-kept for this page. Option values are still arrows (A does not modify them).
