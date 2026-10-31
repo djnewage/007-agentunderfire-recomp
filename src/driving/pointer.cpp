@@ -72,7 +72,7 @@ void Make(uint32_t object) {
     SetF(g_widget + 4, GetF(quit + 4) + kRowPitch);
     SetF(g_chevron + 4, GetF(chevron + 4) + kRowPitch);
     kernel::W32(g_widget + kStringId, kOurString);
-    const char* text = auf::PcRowName(int(auf::language));
+    const char* text = auf::PcRowName(auf::Language());
     g_string = mem::AllocHostContiguous(uint32_t(std::strlen(text) + 1), 16);
     std::memcpy(&kernel::G<uint8_t>(g_string), text, std::strlen(text) + 1);
     for (int i = 0; i < auf::kPcRows * 2; i++) {
@@ -148,7 +148,7 @@ void DrawPcPage(X86Context& ctx, uint8_t* base) {
     std::memcpy(&kernel::G<uint8_t>(g_page_chevron), &kernel::G<uint8_t>(chevron), 0xA0);
     SetF(g_page_chevron + 4, GetF(chevron + 4) - GetF(kernel::R32(object + kQuitWidget) + 4) + kPageTop + float(g_cursor) * kPagePitch);
     for (int i = 0; i < auf::kPcRows * 2; i++) {
-        const std::string text = i % 2 ? auf::PcValue(i / 2, int(auf::language)) : auf::PcLabel(i / 2, int(auf::language));
+        const std::string text = i % 2 ? auf::PcValue(i / 2, auf::Language()) : auf::PcLabel(i / 2, auf::Language());
         std::snprintf(reinterpret_cast<char*>(&kernel::G<uint8_t>(g_page_strings[i])), kStringBytes, "%s", text.c_str());
         Call1(ctx, base, sub_000B20D0, g_page_widgets[i]);
         kernel::W32(kColour, i / 2 == g_cursor ? kBright : kDim);

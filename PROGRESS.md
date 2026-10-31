@@ -9,7 +9,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
+- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 37fa3dc
 - PC features: PC Settings, pointer, achievements, French and German confirmed by Harry; skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
 - Not done: DRIVING.XBE in the smoke test, levels played to their end, PC features
 
@@ -22,6 +22,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-31 - SDK at the fork's main 37fa3dc: MSAA and FXAA apart, sharpening, its language setting
+- Harry asked for the pull, for the new features' screenshots. The page's rows now: field of view, mouse sensitivity, render scale, MSAA, FXAA, sharpening, texture filtering, more settings: eight, so it still fits the pause panels. Sharp text and the frame counter are in the settings window only.
+- Language: GameInfo::languages {1, 3, 4}, the settings window's own; the hook of XGetLanguage and my option are gone (an old language key in a settings file is ignored; anyone who set it picks again). auto_fills_screen on.
+- Screenshots of those for the README want the real renderer: the reference renderer does not do MSAA, FXAA or sharpening, so they are Harry's to take.
 
 ### 2026-10-31 - A and X were NightFire's way round; the icon and README picture
 - Harry: R crouches, Ctrl is action. This game's A is action and X crouch, the reverse of NightFire's, whose table the keys were copied from; the README's table was right and the code was not. Swapped. Tried in play here: White (Q) cycles the weapon; X, Y, B and Black show nothing where the harness stands, so those rest on the game's chart and his play.

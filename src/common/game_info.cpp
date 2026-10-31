@@ -17,7 +17,6 @@ bool skip_intro = false;
 bool uncapped = true;
 bool auto_aim = false;
 uint32_t fov_percent = 100;
-uint32_t language = 0;
 
 float FovScale() {
     uint32_t pct = std::clamp<uint32_t>(fov_percent, 50, 150);
@@ -54,7 +53,6 @@ void Init() {
         if (std::string e = achievements::Check(d.condition); !e.empty()) LOGE("auf: achievement %s: %s", d.id, e.c_str());
     if (const char* e = std::getenv("AUF_SKIP_INTRO"); e && *e) auf::skip_intro = *e == '1';
     if (const char* e = std::getenv("AUF_AUTO_AIM"); e && *e) auf::auto_aim = *e == '1';
-    if (const char* e = std::getenv("AUF_LANGUAGE"); e && *e) auf::language = uint32_t(std::atoi(e));
     if (const char* e = std::getenv("AUF_FOV"); e && *e) auf::fov_percent = uint32_t(std::atoi(e));
     if (auf::skip_intro) LOGR("auf: the logo movies are skipped (skip_intro)");
 }
@@ -181,7 +179,6 @@ const app::GameInfo app::kGame = {
                 {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
                 {"uncapped", &auf::uncapped, nullptr, "60 FPS on foot",
                  "Paced by the frame rate cap instead of the console's 30. Takes effect at the next start"},
-                {"language", nullptr, &auf::language, "Language (0 English, 1 French, 2 German)", "The disc's languages, at the next start."},
                 {"fov_percent", nullptr, &auf::fov_percent, "Field of view (%)",
                  "50 to 150; 100 is the game's. On foot and driving; the scope zooms in proportion"}},
     .load = LoadKeys,                     // DRIVING.XBE's keys apart (DrivingKeys)
@@ -199,7 +196,9 @@ const app::GameInfo app::kGame = {
     .pal_console = true,                  // a PAL disc (region 4)
     .mouse_look = true,                   // the mouse looks and aims
     .mouse_direct = true,                 // src/bond/mouse.cpp, src/driving/mouse.cpp
+    .languages = {1, 3, 4},               // English, German, French: default.xbe launches that language's game
     .achievements = auf::AchievementSet(), // conditions on bond_eng.xbe's memory
     .texture_bound = auf::ButtonPictures,  // the prompts' pictures as the keys (src/common/buttons.cpp)
+    .auto_fills_screen = true,            // the 3D views widen and the 2D stays 4:3: "from the screen's shape" can fill an ultrawide
     .default_keys = Keys,                 // a shooter's keys on foot, a driving layout in DRIVING.XBE
 };

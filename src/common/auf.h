@@ -16,7 +16,6 @@ extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp)
 extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/mouse.cpp, src/driving/mouse.cpp)
-extern uint32_t language;     // 0 English, 1 French, 2 German: default.xbe's choice of game, DRIVING.XBE's text
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
 float FovScale();             // fov_percent as a factor, 0.5 to 1.5
 float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4:3 screen
@@ -38,6 +37,7 @@ uint32_t PointerButtons();
 int MenuClick();
 // the PC Settings page's rows, on foot and in the driving pause (src/common/pc_rows.cpp); lang 0 English, 1 French, 2 German
 constexpr int kPcRows = 8;
+int Language();                  // 0 English, 1 French, 2 German: the setting (src/common/pc_rows.cpp)
 const char* PcRowName(int lang);
 const char* PcLabel(int row, int lang);
 std::string PcValue(int row, int lang);
