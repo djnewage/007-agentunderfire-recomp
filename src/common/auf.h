@@ -5,6 +5,8 @@
 
 #include "core/input.h"
 
+struct X86Context;
+
 namespace auf {
 enum Image { kDefault, kBond, kDriving };
 extern const int kImage;      // which exe this is (each image's hooks.cpp)
@@ -27,4 +29,6 @@ enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown }; 
 bool PointerAt(float& x, float& y);
 uint32_t PointerButtons();
 int MenuClick();
+void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file);  // src/bond/pc_settings.cpp
+
 }  // namespace auf

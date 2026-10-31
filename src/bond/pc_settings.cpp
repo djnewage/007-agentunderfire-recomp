@@ -1,0 +1,331 @@
+// PC Settings in bond_eng.xbe's own menus: a row under the main menu's Options and under the pause menu's Quit Mission, and
+// a page of rows those open.
+//
+// A menu file's page keeps its text at +0x24 (count) and +0x2C, its pictures at +0x3C and +0x44, its items at +0x54 and +0x5C,
+// the current item at +0x60; a text is 0x2CC bytes (mode +0x8C, x +0x90, y +0x94, the string at +0x24), a picture 0x1F4, an
+// item 0xDC (up +0x10 and +0x14, down +0x18 and +0x1C, an index and that item; what A does +0x38; its text +0xB0, picture
+// +0xC4, index +0xC0). The new row is the page's arrays copied, with room for one more, into memory of ours. The settings page
+// is a second set of arrays laid on the same page: the game moves, highlights and draws it as its own, and the presses it would
+// act on are taken at 0x40A00 (file, event). Back puts the page's own arrays back.
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "app/app.h"
+#include "common/auf.h"
+#include "core/log.h"
+#include "kernel/kernel.h"
+#include "kernel/memory.h"
+#include "xdk/hle.h"
+
+X86_EXTERN_FUNC(sub_00037AD0);  // an item loses the highlight
+X86_EXTERN_FUNC(sub_00037A30);  // an item gets it
+
+namespace {
+constexpr uint32_t kTextCount = 0x24, kTexts = 0x2C, kPicCount = 0x3C, kPics = 0x44, kItemCount = 0x54, kItems = 0x5C, kCurrent = 0x60;
+constexpr uint32_t kTextSize = 0x2CC, kPicSize = 0x1F4, kItemSize = 0xDC, kStateSize = 0x3F8;
+constexpr uint32_t kItemText = 0xB0, kItemPic = 0xC4, kItemIndex = 0xC0, kAction = 0x38;
+constexpr uint32_t kTextNext = 0x2C8, kPicNext = 0x1F0;
+constexpr uint32_t kEventLeft = 0, kEventRight = 1, kEventA = 4, kEventB = 5;  // 0x40A00's, seen by pressing each
+constexpr uint32_t kOptionsState = 9;
+
+// cdecl: the argument, the return address (the callee's ret takes it), the argument off
+void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uint32_t arg) {
+    X86_PUSH32(arg);
+    X86_PUSH32(0x40A00u);
+    f(ctx, base);
+    ctx.esp += 4;
+}
+
+uint32_t Page(uint32_t file) { return file ? kernel::R32(file + 0x44) : 0; }
+uint32_t Frontend() { return kernel::R32(0x2A9724 + kernel::R32(0x2A9CA8) * 4); }
+uint32_t PauseFile() { return kernel::R32(0x2A9734); }
+void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
+void SetText(uint32_t text, const char* s) {
+    char* to = reinterpret_cast<char*>(&kernel::G<uint8_t>(text + 0x24));
+    if (std::strncmp(to, s, 255)) std::snprintf(to, 256, "%s", s);
+}
+void Place(uint32_t text, float x, float y) {
+    kernel::W32(text + 0x8C, 0);
+    SetF(text + 0x90, x);
+    SetF(text + 0x94, y);
+}
+
+// pointers into [from, from + bytes) moved to the copy, in the words given
+void Remap(uint32_t at, uint32_t words, uint32_t from, uint32_t bytes, uint32_t to) {
+    for (uint32_t i = 0; i < words; i++) {
+        uint32_t v = kernel::R32(at + i * 4);
+        if (v >= from && v < from + bytes) kernel::W32(at + i * 4, v - from + to);
+    }
+}
+
+// a page's arrays copied with room for extra more
+struct Copy {
+    uint32_t items, texts, pics;
+};
+Copy Enlarge(uint32_t page, uint32_t extra_items, uint32_t extra_texts, uint32_t extra_pics) {
+    const uint32_t ni = kernel::R32(page + kItemCount), nt = kernel::R32(page + kTextCount), np = kernel::R32(page + kPicCount);
+    const uint32_t oi = kernel::R32(page + kItems), ot = kernel::R32(page + kTexts), op = kernel::R32(page + kPics);
+    Copy c;
+    c.items = mem::AllocHostContiguous((ni + extra_items) * kItemSize, 16);
+    c.texts = mem::AllocHostContiguous((nt + extra_texts) * kTextSize, 16);
+    c.pics = mem::AllocHostContiguous((np + extra_pics) * kPicSize, 16);
+    std::memcpy(&kernel::G<uint8_t>(c.items), &kernel::G<uint8_t>(oi), ni * kItemSize);
+    if (nt) std::memcpy(&kernel::G<uint8_t>(c.texts), &kernel::G<uint8_t>(ot), nt * kTextSize);
+    if (np) std::memcpy(&kernel::G<uint8_t>(c.pics), &kernel::G<uint8_t>(op), np * kPicSize);
+    auto all = [&](uint32_t from, uint32_t bytes, uint32_t to) {
+        if (!bytes) return;
+        Remap(page + 0x54, 8, from, bytes, to);
+        Remap(c.items, ni * kItemSize / 4, from, bytes, to);
+        Remap(c.texts, nt * kTextSize / 4, from, bytes, to);
+        Remap(c.pics, np * kPicSize / 4, from, bytes, to);
+    };
+    all(oi, ni * kItemSize, c.items);
+    all(ot, nt * kTextSize, c.texts);
+    all(op, np * kPicSize, c.pics);
+    kernel::W32(page + kItems, c.items);
+    kernel::W32(page + kTexts, c.texts);
+    kernel::W32(page + kPics, c.pics);
+    return c;
+}
+
+void Link(uint32_t item, uint32_t up_index, uint32_t up, uint32_t down_index, uint32_t down) {
+    kernel::W32(item + 0x10, up_index);
+    kernel::W32(item + 0x14, up);
+    kernel::W32(item + 0x18, down_index);
+    kernel::W32(item + 0x1C, down);
+}
+
+// a text to copy (the Options page's rows on the main menu, which has none) and a picture (its chevron)
+void Templates(uint32_t file, uint32_t page, uint32_t& text, uint32_t& pic) {
+    uint32_t list = kernel::R32(page + kItems);
+    text = kernel::R32(list + kItemText), pic = kernel::R32(list + kItemPic);
+    if (text) return;
+    const uint32_t options = kernel::R32(file + 0x14) + kOptionsState * kStateSize, row = kernel::R32(options + kItems) + kItemSize;
+    text = kernel::R32(row + kItemText), pic = kernel::R32(row + kItemPic);
+}
+
+// the row that opens the page: the page's last, with a copy of an item's text and (if it has them) its chevron
+std::map<uint32_t, uint32_t> g_rows;  // page -> its row
+void AddRow(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page, float x, float y) {
+    const uint32_t n = kernel::R32(page + kItemCount), nt = kernel::R32(page + kTextCount), np = kernel::R32(page + kPicCount);
+    auto known = g_rows.find(page);
+    if (known != g_rows.end() && kernel::R32(page + kItems) + n * kItemSize > known->second && kernel::R32(page + kItems) <= known->second) return;
+    uint32_t text = 0, pic = 0;
+    Templates(file, page, text, pic);
+    if (!text) return;
+    const bool chevron = kernel::R32(kernel::R32(page + kItems) + kItemPic) != 0 && kernel::G<float>(pic + 0xA0) < 40;
+    std::vector<uint8_t> text_copy(kTextSize), pic_copy(kPicSize);
+    std::memcpy(text_copy.data(), &kernel::G<uint8_t>(text), kTextSize);
+    if (pic) std::memcpy(pic_copy.data(), &kernel::G<uint8_t>(pic), kPicSize);
+    Copy c = Enlarge(page, 1, 1, chevron ? 1 : 0);
+    const uint32_t item = c.items + n * kItemSize, last = c.items + (n - 1) * kItemSize, first = c.items;
+    const uint32_t new_text = c.texts + nt * kTextSize;
+    std::memcpy(&kernel::G<uint8_t>(item), &kernel::G<uint8_t>(last), kItemSize);
+    std::memcpy(&kernel::G<uint8_t>(new_text), text_copy.data(), kTextSize);
+    kernel::W32(new_text + kTextNext, 0);
+    SetText(new_text, "PC Settings");
+    Place(new_text, x, y);
+    kernel::W32(item + kItemText, new_text);
+    kernel::W32(item + kItemPic, 0);
+    if (chevron) {
+        const uint32_t new_pic = c.pics + np * kPicSize;
+        std::memcpy(&kernel::G<uint8_t>(new_pic), pic_copy.data(), kPicSize);
+        kernel::W32(new_pic + kPicNext, 0);
+        kernel::W32(new_pic + 0x90, 0);
+        SetF(new_pic + 0x94, x - 6 - kernel::G<float>(new_pic + 0xA0));
+        SetF(new_pic + 0x98, y - 16);
+        kernel::W32(item + kItemPic, new_pic);
+        kernel::W32(page + kPicCount, np + 1);
+    }
+    kernel::W32(item + kItemIndex, n);
+    kernel::W32(item + kAction, 0);
+    kernel::W32(item + 0x3C, 0);
+    kernel::W32(item + 0x40, 0);
+    Link(item, n - 1, last, 0, first);
+    kernel::W32(last + 0x18, n);
+    kernel::W32(last + 0x1C, item);
+    kernel::W32(first + 0x10, n);
+    kernel::W32(first + 0x14, item);
+    kernel::W32(page + kTextCount, nt + 1);
+    kernel::W32(page + kItemCount, n + 1);
+    g_rows[page] = item;
+    Call1(ctx, base, sub_00037AD0, item);  // the row copied may have been the highlighted one
+    LOGR("auf: PC Settings is a row of the menu page %08X", page);
+}
+
+// the page's rows, each a label and a value
+struct Row {
+    const char* label;
+    int step;
+};
+constexpr int kRows = 8;
+const char* const kLabels[kRows] = {"Field of View", "Mouse Sensitivity", "Render Scale", "Anti-aliasing",
+                                    "Texture Filtering", "Sharp Text and HUD", "Frame Counter", "More Settings"};
+
+std::string Value(int row) {
+    const app::Settings& s = app::Get();
+    char b[32] = "";
+    switch (row) {
+        case 0: std::snprintf(b, sizeof b, "%u%%", auf::fov_percent); break;
+        case 1: std::snprintf(b, sizeof b, "%u%%", s.mouse_sensitivity); break;
+        case 2: std::snprintf(b, sizeof b, "%u%%", s.render_percent); break;
+        case 3: {
+            const char* names[] = {"Off", "FXAA", "MSAA 2x", "MSAA 4x", "MSAA 8x"};
+            return names[s.antialiasing % 5];
+        }
+        case 4:
+            if (!s.aniso) return "Game's";
+            std::snprintf(b, sizeof b, "%ux", s.aniso);
+            break;
+        case 5: return s.sharp_2d ? "On" : "Off";
+        case 6: return s.show_fps ? "On" : "Off";
+        default: break;
+    }
+    return b;
+}
+
+void Step(int row, int dir) {
+    app::Settings& s = app::Get();
+    switch (row) {
+        case 0: auf::fov_percent = uint32_t(std::clamp(int(auf::fov_percent) + dir * 5, 50, 150)); break;
+        case 1: s.mouse_sensitivity = uint32_t(std::clamp(int(s.mouse_sensitivity) + dir * 10, 10, 500)); break;
+        case 2: s.render_percent = uint32_t(std::clamp(int(s.render_percent) + dir * 25, 25, 200)); break;
+        case 3: s.antialiasing = (s.antialiasing + 5 + uint32_t(dir)) % 5; break;
+        case 4: {
+            const uint32_t order[] = {0, 2, 4, 8, 16};
+            int at = 0;
+            for (int i = 0; i < 5; i++)
+                if (order[i] == s.aniso) at = i;
+            s.aniso = order[(at + 5 + dir) % 5];
+            break;
+        }
+        case 5: s.sharp_2d = !s.sharp_2d; break;
+        case 6: s.show_fps = !s.show_fps; break;
+        case 7: app::ToggleOverlay(); return;
+        default: return;
+    }
+    app::Save();
+}
+
+struct Open {
+    uint32_t page = 0;
+    uint32_t saved[7] = {};  // the page's text, picture and item arrays and current item
+    uint32_t items = 0, values = 0;
+};
+Open g_open;
+const uint32_t kSavedAt[7] = {kTextCount, kTexts, kPicCount, kPics, kItemCount, kItems, kCurrent};
+
+void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
+    uint32_t text = 0, pic = 0;
+    Templates(file, page, text, pic);
+    if (!text) return;
+    static std::map<uint32_t, Copy> built;  // by page
+    Copy& c = built[page];
+    if (!c.items) {
+        c.items = mem::AllocHostContiguous(kRows * kItemSize, 16);
+        c.texts = mem::AllocHostContiguous(kRows * 2 * kTextSize, 16);
+        c.pics = mem::AllocHostContiguous(kRows * kPicSize, 16);
+    }
+    const uint32_t model = kernel::R32(page + kItems);
+    const bool paused = file == PauseFile();
+    const float x = paused ? 110 : 100, value_x = paused ? 330 : 370, top = paused ? 178 : 150, pitch = paused ? 16 : 28;
+    for (int i = 0; i < kRows; i++) {
+        const uint32_t item = c.items + uint32_t(i) * kItemSize, label = c.texts + uint32_t(i) * 2 * kTextSize, value = label + kTextSize,
+                       chevron = c.pics + uint32_t(i) * kPicSize;
+        const float y = top + float(i) * pitch;
+        std::memcpy(&kernel::G<uint8_t>(item), &kernel::G<uint8_t>(model), kItemSize);
+        std::memcpy(&kernel::G<uint8_t>(label), &kernel::G<uint8_t>(text), kTextSize);
+        std::memcpy(&kernel::G<uint8_t>(value), &kernel::G<uint8_t>(text), kTextSize);
+        Place(label, x, y);
+        Place(value, value_x, y);
+        SetText(label, kLabels[i]);
+        SetText(value, Value(i).c_str());
+        kernel::W32(label + kTextNext, value);
+        kernel::W32(value + kTextNext, 0);
+        kernel::W32(item + kItemText, label);
+        kernel::W32(item + kItemPic, 0);
+        if (pic) {
+            std::memcpy(&kernel::G<uint8_t>(chevron), &kernel::G<uint8_t>(pic), kPicSize);
+            kernel::W32(chevron + kPicNext, 0);
+            kernel::W32(chevron + 0x90, 0);
+            SetF(chevron + 0x94, x - 16);
+            SetF(chevron + 0x98, y - 16);
+            kernel::W32(item + kItemPic, chevron);
+        }
+        kernel::W32(item + kItemIndex, uint32_t(i));
+        kernel::W32(item + kAction, 0);
+        const uint32_t up = uint32_t((i + kRows - 1) % kRows), down = uint32_t((i + 1) % kRows);
+        Link(item, up, c.items + up * kItemSize, down, c.items + down * kItemSize);
+    }
+    g_open.page = page;
+    for (int i = 0; i < 7; i++) g_open.saved[i] = kernel::R32(page + kSavedAt[i]);
+    g_open.items = c.items;
+    kernel::W32(page + kTextCount, kRows * 2);
+    kernel::W32(page + kTexts, c.texts);
+    kernel::W32(page + kPicCount, pic ? kRows : 0);
+    kernel::W32(page + kPics, c.pics);
+    kernel::W32(page + kItemCount, kRows);
+    kernel::W32(page + kItems, c.items);
+    kernel::W32(page + kCurrent, c.items);
+    for (int i = 0; i < kRows; i++) Call1(ctx, base, sub_00037AD0, c.items + uint32_t(i) * kItemSize);
+    Call1(ctx, base, sub_00037A30, c.items);
+    LOGR("auf: PC Settings opened");
+}
+
+void ClosePage() {
+    if (!g_open.page) return;
+    for (int i = 0; i < 7; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
+    g_open.page = 0;
+    LOGR("auf: PC Settings closed");
+}
+}  // namespace
+
+namespace auf {
+// each frame a menu has the input (src/bond/pointer.cpp's hook of 0x56930)
+void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
+    const uint32_t page = Page(file);
+    if (!page) return;
+    if (g_open.page) {
+        if (g_open.page != page) {  // the game left the page: it holds the arrays of ours still
+            for (int i = 0; i < 7; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
+            g_open.page = 0;
+            return;
+        }
+        for (int i = 0; i < kRows; i++) SetText(kernel::R32(g_open.items + uint32_t(i) * kItemSize + kItemText) + kTextSize, Value(i).c_str());
+        return;
+    }
+    const uint32_t states = kernel::R32(file + 0x14);
+    if (file == Frontend() && page == states + 3 * kStateSize && kernel::R32(page + kItemCount) >= 5) AddRow(ctx, base, file, page, 200, 402);
+    if (file == PauseFile() && page == states + 1 * kStateSize && kernel::R32(page + kItemCount) >= 3) AddRow(ctx, base, file, page, 110, 264);
+}
+}  // namespace auf
+
+// The presses: on the row, A opens the page; on the page, left and right and A change a row and Back leaves
+X86_EXTERN_FUNC(__imp__sub_00040A00);
+X86_FUNC(sub_00040A00) {
+    const uint32_t file = kernel::R32(ctx.esp + 4), event = kernel::R32(ctx.esp + 8), page = Page(file);
+    static const bool said = std::getenv("AUF_EVENT_LOG") != nullptr;
+    if (said) LOGR("auf: menu event %u", event);
+    if (page && g_open.page == page) {
+        const int row = int(kernel::R32(kernel::R32(page + kCurrent) + kItemIndex));
+        if (event == kEventLeft || event == kEventRight || event == kEventA || event == kEventB) {
+            if (event == kEventB) ClosePage();
+            else if (event == kEventA) Step(row, 1);
+            else Step(row, event == kEventLeft ? -1 : 1);
+            ctx.esp += 4;
+            return;
+        }
+    } else if (page && event == kEventA) {
+        auto row = g_rows.find(page);
+        if (row != g_rows.end() && kernel::R32(page + kCurrent) == row->second) {
+            OpenPage(ctx, base, file, page);
+            ctx.esp += 4;
+            return;
+        }
+    }
+    __imp__sub_00040A00(ctx, base);
+}
