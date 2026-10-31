@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - The Windows link: the language folders were in every exe
+- Harry's build.log: lld-link duplicate symbols in AgentUnderFire.exe. CMakeLists.txt's XBE_HOST_SOURCES takes src/*/*.cpp less a list of per-exe folders, and bond_fre and bond_ger were not listed, so each exe linked all three builds' hooks. So the throw was not his error (it may or may not have been one too). The harness does not read that list, so smoke cannot see this; checked with build/linux/build.ninja's objects per target.
+
 ### 2026-10-31 - The Windows build stopped at the language exes
 - Harry's build stopped ("ninja: build stopped"), the error line not yet seen. A() used throw to refuse an unmapped address, an error in every bond_fre and bond_ger source with -fno-exceptions, reproduced here that way. Whether Windows' build has exceptions off is not confirmed, so this may or may not be his error. A() is now consteval, with an undefined non-constexpr function for unmapped: no exceptions needed. All src/ syntax-checked with mingw headers, -fno-exceptions: no errors. The real target (windows-msvc) cannot be checked with these headers.
 

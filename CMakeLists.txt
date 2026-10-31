@@ -24,7 +24,7 @@ endif()
 include(${SDK}/cmake/XbeRecomp.cmake)
 
 file(GLOB XBE_HOST_SOURCES CONFIGURE_DEPENDS src/*/*.cpp)
-list(FILTER XBE_HOST_SOURCES EXCLUDE REGEX "/src/(game|bond|driving)/")
+list(FILTER XBE_HOST_SOURCES EXCLUDE REGEX "/src/(game|bond|bond_fre|bond_ger|driving)/")
 
 # partitions as xbe_symbols wrote them into each scan file (none yet: build.bat writes them, the change reconfigures)
 function(xbe_partitions scan out)
