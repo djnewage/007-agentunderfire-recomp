@@ -23,7 +23,7 @@ bool ButtonPictures(uint32_t header, uint32_t palette);  // GameInfo::texture_bo
 void RefreshButtons();        // each poll
 void MenuMouse(int port, input::Pad& p);
 // the menus' pointer, on foot (src/bond/pointer.cpp): where it is in the menus' 640x480, the buttons, and what a click does
-enum { kClickNone, kClickWait, kClickGo };
+enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown };  // Go plays A, the last three the d-pad
 bool PointerAt(float& x, float& y);
 uint32_t PointerButtons();
 int MenuClick();

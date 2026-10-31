@@ -1,7 +1,7 @@
 // The menus' pointer: the item under the mouse is the current one, and a click selects it. 0x56930 (the argument the
 // menu file) reads the controller for a menu each frame, so this runs there, on the game's thread. A file's +0x44 is
 // the page; a page's +0x54 its items' count, +0x5C the items (0xDC each), +0x60 the current one. Pages of one item or
-// none (a briefing, the controller's picture, Select Mission) have nothing to point at: a click anywhere plays A.
+// none (a briefing, the controller's picture) have nothing to point at: a click anywhere plays A.
 // Rectangles are the pictures' and the text's own: mode 1 is a fraction of 640x480, 0 pixels (0x56570).
 #include <atomic>
 #include <cstdint>
@@ -33,6 +33,7 @@ struct Box {
         if (!any) x0 = a, y0 = b, x1 = c, y1 = d, any = true;
         x0 = a < x0 ? a : x0, y0 = b < y0 ? b : y0, x1 = c > x1 ? c : x1, y1 = d > y1 ? d : y1;
     }
+    bool Same(const Box& o) const { return x0 == o.x0 && y0 == o.y0 && x1 == o.x1 && y1 == o.y1; }
     bool Has(float x, float y) const { return any && x >= x0 && x < x1 && y >= y0 && y < y1; }
 };
 
@@ -46,15 +47,18 @@ Box ItemBox(uint32_t item) {
     }
     if (b.any && b.x1 - b.x0 >= kNarrowest) return b;  // the pause menu's are only its chevron: go by the text
     b = Box{};
-    // the largest text is the row's own (a save's row has its thumbnail's caption too); its y is near the letters' foot
+    // the row's own text is its largest (a save's row has its thumbnail's smaller caption too), both columns of an
+    // option's; its y is near the letters' foot
     links = 0;
-    uint32_t text = 0;
+    float largest = 0;
     for (uint32_t t = kernel::R32(item + kItemText); t && links < 16; t = kernel::R32(t + kTextNext), links++)
-        if (!text || F(t + 0x9C) > F(text + 0x9C)) text = t;
-    if (text) {
-        bool frac = kernel::R32(text + 0x8C) == 1;
-        float x = F(text + 0x90) * (frac ? 640 : 1), y = F(text + 0x94) * (frac ? 480 : 1), size = F(text + 0x9C);
-        b.Add(x - 4, y - size - 4, x + kTextWidth, y + size * 0.3f);
+        if (F(t + 0x9C) > largest) largest = F(t + 0x9C);
+    links = 0;
+    for (uint32_t t = kernel::R32(item + kItemText); t && links < 16; t = kernel::R32(t + kTextNext), links++) {
+        if (F(t + 0x9C) != largest) continue;
+        bool frac = kernel::R32(t + 0x8C) == 1;
+        float x = F(t + 0x90) * (frac ? 640 : 1), y = F(t + 0x94) * (frac ? 480 : 1);
+        b.Add(x - 4, y - largest - 4, x + kTextWidth, y + largest * 0.3f);
     }
     return b;
 }
@@ -80,7 +84,13 @@ X86_FUNC(sub_00056930) {
     uint32_t count = page ? kernel::R32(page + kPageItems) : 0;
     float x, y;
     int click = kClickGo;
-    if (count >= 2 && count <= 64 && PointerAt(x, y)) {
+    // items all in one place (the Multiplayer page's choices, one showing at a time) are nothing to point at either
+    bool pointable = count >= 2 && count <= 64;
+    if (pointable) {
+        const uint32_t list = kernel::R32(page + kPageList);
+        pointable = !ItemBox(list).Same(ItemBox(list + kItemSize));
+    }
+    if (pointable && PointerAt(x, y)) {
         uint32_t list = kernel::R32(page + kPageList), current = kernel::R32(page + kPageCurrent), hit = 0;
         for (uint32_t i = 0; i < count && !hit; i++)
             if (ItemBox(list + i * kItemSize).Has(x, y)) hit = list + i * kItemSize;
@@ -115,6 +125,14 @@ X86_FUNC(sub_00056930) {
         }
         last_press = press;
         click = !hit ? kClickNone : hit == current ? kClickGo : kClickWait;
+    }
+    // Select Mission (the front end's state 7) is one item drawn as a carousel over the difficulty: the pictures at the
+    // sides step it, the middle one starts it, the difficulty's line steps that
+    const uint32_t states = file ? kernel::R32(file + 0x14) : 0;
+    if (count == 1 && page == states + 7 * 0x3F8 && file == kernel::R32(0x2A9724 + kernel::R32(0x2A9CA8) * 4) && PointerAt(x, y)) {
+        click = kClickNone;
+        if (y >= 120 && y < 275) click = x >= 96 && x < 214 ? kClickLeft : x >= 224 && x < 416 ? kClickGo : x >= 426 && x < 544 ? kClickRight : kClickNone;
+        else if (y >= 280 && y < 305) click = kClickDown;
     }
     g_click.store(click, std::memory_order_relaxed);
     __imp__sub_00056930(ctx, base);

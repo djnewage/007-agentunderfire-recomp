@@ -18,3 +18,10 @@ bool MenuUp() {
 }
 bool OnGun() { return false; }
 }  // namespace auf
+
+// A text's typing-out at 0x5BE11 ends its 256-byte copy at the count of letters shown, which a fast text's speed takes
+// past the buffer (1071 on the Multiplayer page). On the console that zero lands in other memory; here past the stack's
+// top, a crash. By then the whole text shows, so the copy's own last byte does the same.
+void ClampTextEnd(X86Context& ctx, uint8_t*) {
+    if (ctx.eax > 0xFF) ctx.eax = 0xFF;
+}

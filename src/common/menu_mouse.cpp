@@ -164,12 +164,23 @@ void MenuMouse(int port, input::Pad& p) {
             else p.analog[c - input::kA] = 0;
         }
         // A: once the pointer's item is the current one; a press off every item does nothing until it is let go
-        static bool was_held = false, armed = false;
+        // what it plays is read a poll after the press: the game's thread must have seen the pointer where it now is
+        static bool was_held = false, arming = false;
+        static int armed = kClickNone;
         int click = MenuClick();
-        if ((held & 1) && !was_held) armed = click != kClickNone;
+        if (arming) {
+            armed = click;
+            LOGR("auf: menu click plays %d", armed);
+        }
+        const bool playing = (held & 1) && !arming && was_held;
+        arming = (held & 1) && !was_held;
         was_held = held & 1;
-        if ((held & 1) && armed && click == kClickGo) p.analog[0] = 255;
-        if (held & 2) p.analog[1] = 255;  // B
+        if (playing) {
+            if (armed == kClickLeft) Press(p, input::kLeft);
+            else if (armed == kClickRight) Press(p, input::kRight);
+            else if (armed == kClickDown) Press(p, input::kDown);
+            else if (armed != kClickNone && click == kClickGo) p.analog[0] = 255;
+        }
     }
     // the wheel: a d-pad press a notch
     if (menu != was_menu) pending = 0;

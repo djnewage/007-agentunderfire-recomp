@@ -115,3 +115,7 @@ after = true
 [[hook]]
 at = 0xBD768
 call = "WheelZoom"
+
+[[hook]]
+at = 0x5BE11
+call = "ClampTextEnd"

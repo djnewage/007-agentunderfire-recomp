@@ -23,6 +23,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Multiplayer no longer crashes; long runs; the pointer's other pages; Select Mission by mouse
+- Crash found by opening Multiplayer, by d-pad too, so not the pointer: 0x5BE11 ends a typed-out text's 256-byte copy at the count of letters shown, and this page's speed takes that to 1071, a zero past the top of the guest stack at 0xD006003F. Probably mapped memory on the console. Hook ClampTextEnd keeps it in the buffer; the page opens and shows its text. No match started here (one pad): multiplayer play itself untried.
+- Gun on the real path: save, Select Mission, left to Precious Cargo, relaunch with mis02a. AUF_MOUSE_TEST 2400 counts turned 2.39 radians, then -0.2605 +/- 0.0003 for 1000 frames.
+- Long runs on random input: car mis02b 760 s and gun mis02a 283 s played to the mission's end and relaunched, no crash, 85 and 92 MB flat. Those pads do not fight well: both are survival to a mission end, not coverage of a level.
+- Pointer: option rows join both columns (they were one or the other), Multiplayer's choices share one box so are not pointed at. Clicks are read a poll after the press, as a jump and click in one poll used the old answer.
+- Select Mission: side pictures step, the middle starts, the difficulty's line steps it, elsewhere nothing. Seen in captures. Rectangles measured at 16:9 only, hand-kept for this page. Option values are still arrows (A does not modify them).
+- SMOKE OK, wincheck of src/common/menu_mouse.cpp ok.
+
+### 2026-10-30 - The launch segfault (0x321D0) did not come back
+- 360 launches of default.xbe by exit code, 24 at a time, each alive at 3 s: none died. (240 more earlier were judged by their logs, which cannot show a silent death, so they do not count.) With the earlier 42, about 400 without a repeat; it remains one sighting right after a build.
+- Nothing changed: a fix without a repro could not be shown to work. Still open; disc_rate first if it returns. 0x321D0 walks the ring from [ebx+0xC] outside the lock, so a stale chunk is plausible, not shown.
+
 ### 2026-10-30 - A visible pointer in the on-foot menus
 - Harry chose it after "clicking feels odd". While a menu is up in bond_eng.xbe the Windows arrow shows (a window procedure in src/common/menu_mouse.cpp; no SDK change, so no shared gate). src/bond/pointer.cpp hooks 0x56930, the menu's per-frame input, whose argument is the menu file.
 - The item under the pointer becomes current by the game's own sequence (0x37AD0, 0x37A30, page +0x60, sound 0x202E0, as 0x39120). A click waits until its item is current; a click off every item does nothing; pages of 0 or 1 items keep click anywhere.
