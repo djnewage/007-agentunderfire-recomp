@@ -139,7 +139,7 @@ void MenuMouse(int port, input::Pad& p) {
         notches = 0;
     }
     // on foot Enter is the console's A everywhere, and where Bond is not the player's to move (a cutscene, a hint's "Press A") the left
-    // button too: the keyboard has A as crouch
+    // button too
     if (kImage == kBond && !menu && input::UsingKeyboard() && (KeyHeld(0x0D) || (!PlayerFree() && (held & 1)))) Press(p, input::kA);
     int next = input::kRight, prev = input::kLeft;
     if (menu) next = input::kDown, prev = input::kUp;

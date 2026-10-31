@@ -74,8 +74,8 @@ std::array<uint16_t, 2> ShooterKeys(int c) {
         case kRSRight: return {'D', 0};      // and the mouse does the turning
         case kRT: return {kMouseLeft, 0};    // fire
         case kLT: return {kMouseRight, 0};   // manual aim
-        case kA: return {'C', kLeftCtrl};    // crouch (Enter selects in the menus: menu_mouse.cpp)
-        case kX: return {'E', 'R'};          // action, reload, open
+        case kA: return {'E', 'R'};          // action, reload, open (Enter selects in the menus: menu_mouse.cpp); not as NightFire's A
+        case kX: return {'C', kLeftCtrl};    // crouch
         case kY: return {kSpace, 0};         // jump
         case kB: return {'G', kBackspace};   // use gadget; back in the menus
         case kWhite: return {'Q', 0};        // cycle weapon

@@ -1,5 +1,7 @@
 # 007: Agent Under Fire - XBE Recomp
 
+![007: Agent Under Fire - native PC port](docs/img/agentunderfire-pc-port.webp)
+
 An unofficial native PC port of the original Xbox version of 007: Agent Under Fire, in progress. The game's own x86 code
 is statically recompiled with the [Xbox XBE Recomp](https://github.com/TGP482/XboxXBE-Recomp) tool. It is not an emulator.
 

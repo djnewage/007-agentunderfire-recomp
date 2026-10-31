@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - A and X were NightFire's way round; the icon and README picture
+- Harry: R crouches, Ctrl is action. This game's A is action and X crouch, the reverse of NightFire's, whose table the keys were copied from; the README's table was right and the code was not. Swapped. Tried in play here: White (Q) cycles the weapon; X, Y, B and Black show nothing where the harness stands, so those rest on the game's chart and his play.
+- launcher/icon.ico and docs/img/agentunderfire-pc-port.webp from his pictures, the icon's corners made clear.
+
 ### 2026-10-31 - Harry confirms the mouse's direction, the scope, the wheel, loading colours and languages
 - On Windows at 572f01d, Invert mouse off: up and down right, on foot, in the scope and on guns; the wheel stays a zoom in the scope; the three items he was asked (direction, wheel, and the loading colours and language through a driving mission) "all three fixed".
 - Nothing else reported open from his lists. Not exercised by anyone: a multiplayer match; the launcher's packaging; the driving page's pointer and Yes/No boxes after widening were asked about, not separately reported.
