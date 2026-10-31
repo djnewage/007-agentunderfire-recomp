@@ -35,7 +35,8 @@ struct Rect {
     float x0, y0, x1, y1;
     bool Has(float x, float y) const { return x >= x0 && x < x1 && y >= y0 && y < y1; }
 };
-const Rect kRows[4] = {{113, 176, 269, 198}, {113, 202, 265, 224}, {113, 228, 240, 250}, {113, 254, 260, 276}};
+// wide enough for the French and German rows
+const Rect kRows[4] = {{113, 176, 340, 198}, {113, 202, 340, 224}, {113, 228, 340, 250}, {113, 254, 340, 276}};
 const Rect kTabs[4] = {{100, 112, 184, 134}, {244, 112, 355, 134}, {413, 112, 500, 134}, {540, 112, 610, 134}};
 
 float GetF(uint32_t va) { return kernel::G<float>(va); }

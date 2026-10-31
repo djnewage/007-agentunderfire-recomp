@@ -11,7 +11,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
 - PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
-- Not done: French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- Not done: DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -22,6 +22,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-31 - French and German
+- bond_fre.xbe and bond_ger.xbe are bond_eng.xbe's source with strings changed, so code and data shift a little throughout. tools/map_bond.py aligns the instructions (masked runs unique in both, a limit on distance, gaps filled) and reads data addresses off the aligned operands. It writes config/bond_<l>.toml, src/bond/addr_<l>.h (A()'s table; unmapped does not compile) and src/bond_<l>/*.cpp (src/bond with functions renamed at once: as macros one language's new name was another's old). Run it after changing src/bond; smoke fails if the output is uncommitted.
+- Scans need --name, or xbe_symbols writes out = generated/game: it did once, and left stale partitions there.
+- The language: option `language` (settings window, AUF_LANGUAGE), read by a hook of default.xbe's XGetLanguage 0x24052. Seen: AUF_LANGUAGE=1 opens SOUND_FRE.VIV, relaunches BOND_FRE.XBE with IDL_FR.LOC. DRIVING.XBE takes the .LOC from the launch data: French pause seen, Paramètres PC row in it, from hand-made launch data, not by a French run's own relaunch.
+- Seen in French and German: menus, first mission, PC Settings page with translated labels (the translations are mine, unchecked by a speaker), keys in prompts' log. Smoke runs both to a mission with the mouse hook in force. Not played further: a sweep of their levels, gun rates, widescreen by eye. AUF_WIDE=2 was on for the page's run only.
+- Windows exes: launcher/game.json lists the two new ones; the launcher's packaging itself not run here.
 
 ### 2026-10-31 - PC Settings, the driving pointer, achievements
 - Harry asked for: the driving pause pointer and menu pointer, French and German, achievements, PC Settings from the main menu and pause menus.

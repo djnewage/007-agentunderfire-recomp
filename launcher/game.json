@@ -13,6 +13,8 @@
     "xbes": [
         "default.xbe",
         "bond_eng.xbe",
+        "bond_fre.xbe",
+        "bond_ger.xbe",
         "DRIVING.XBE"
     ],
     "releases": {
