@@ -4,6 +4,7 @@
 // called from 0x846B0 (the game's views: twice the camera's half angle, aspect 4:3) and 0x7C530 (an auxiliary view, aspect 1,
 // left alone). A wider frame widens the horizontal angle in tangent and the aspect with it: the vertical angle is the game's,
 // and the cull data the view keeps follows from the same arguments. The field of view scales the angle first.
+#include <vector>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -48,4 +49,21 @@ X86_FUNC(sub_0007E3C0) {
     float wide = std::atan(std::max(auf::FrameWidth(), 1.0f) * kCullMargin * std::tan(half * kPi / 180)) * 180 / kPi;
     SetF(ctx.esp + 0xC, std::min(wide, kMost));
     __imp__sub_0007E3C0(ctx, base);
+}
+
+// The loading picture: 0xBDEC0 copies it into the back buffer by CPU, so the 2D squeeze never sees it
+// and the frame's widening stretches it. Each row is shrunk into the frame's 4:3 middle, black either side, before the unlock
+// (0xBDF75: [esp+0x1C] the rows, the locked rectangle's pitch [esp+0x20] and bits [esp+0x24]; a row is the pitch's width).
+void LoadingPictureCentred(X86Context& ctx, uint8_t*) {
+    const float k = auf::FrameWidth();
+    if (k <= 1.001f) return;
+    const uint32_t rows = kernel::R32(ctx.esp + 0x1C), pitch = kernel::R32(ctx.esp + 0x20), bits = kernel::R32(ctx.esp + 0x24);
+    const uint32_t w = pitch / 4, n = uint32_t(float(w) / k), left = (w - n) / 2;
+    if (!bits || !w || !n) return;
+    std::vector<uint32_t> row(w);
+    for (uint32_t y = 0; y < rows; y++) {
+        auto* p = reinterpret_cast<uint32_t*>(&kernel::G<uint8_t>(bits + y * pitch));
+        std::memcpy(row.data(), p, w * 4);
+        for (uint32_t x = 0; x < w; x++) p[x] = x >= left && x < left + n ? row[size_t(x - left) * w / n] : 0xFF000000u;
+    }
 }

@@ -65,6 +65,9 @@ X86_FUNC(sub_00024570) {
         float rx = GetF(kYawRate), ry = GetF(kPitchRate);
         bool invert = kernel::G<uint8_t>(kInvert) != 0;
         SetF(kYaw, GetF(kYaw) - x * kDegreesPerCount * rx);
+        // Harry on Windows: through the sniper's scope (end of mission 1) up and down come out inverted. Not found in the code: the rate's
+        // sign is the same (0xB4659). Flipped there by his report
+        if (auf::Zoomed()) y = -y;
         SetF(kPitch, GetF(kPitch) + (invert ? -y : y) * kDegreesPerCount * ry);
         static bool said = false;
         if (!said && (x || y) && rx != 0) {

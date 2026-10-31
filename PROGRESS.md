@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Harry: scope, gun's weapons, page's values, loading stretched
+- Guns: 1, 3, Q and the wheel play the d-pad's down and up, as on foot (wheel seen changing the weapon in a capture; keys not, no keyboard here).
+- Page's values show "< 100% >"; a mouse press on the left arrow lowers (seen 100, 95, 90), elsewhere raises. Arrow keys Press the d-pad in any menu: on DRIVING.XBE they were on the left stick. Why they failed on foot for him is not found; his report says they did.
+- Scope: Harry reports up and down inverted through the sniper at the end of mission 1. Not found in code: the rate's sign is unchanged at 0xB4659; a zoomed gun also goes the same way as unzoomed. y flipped when Zoomed() on his report alone, unverified: the harness has not reached that sniper. The foot's y (up positive, pitch growing down) also looks backwards on paper, yet he calls it right; not resolved, his mouse_invert_y not checked.
+- Loading: 0xBDEC0 CPU-copies the picture into the back buffer, so no squeeze. Hook at 0xBDF75 shrinks each row to the 4:3 middle, black sides. Width is the pitch's. Seen with AUF_WIDE; a spinner's place against it to be checked on Windows.
+
 ### 2026-10-31 - Harry's tests; PC Settings as a page in the driving pause
 - Harry on Windows: achievements on a finished mission on foot and driving work, a finished save awards nothing, PC Settings on foot works, the pointer lines up (ultrawide too), Select Mission clicks, driving prompts, French and German menus and labels all confirmed. Not yet: language through a driving mission and back. The earlier risk about driving's scoring is answered: it works.
 - He wanted a page in the driving pause, not the window. src/common/pc_rows.cpp now holds the rows for both exes. The tab goes to 4 from 0xBB1B1 and back at 0xBBC5F so the panel draws nothing (the tabs and the footer index widgets by the tab: 4 at the start crashed), and rows are drawn by a hook at 0xBC730. B is 0x10, START 6. Seen in captures: opening, moving, Render Scale changed, Back to the row. Pointer on the page written; hover and click on it not exercised.

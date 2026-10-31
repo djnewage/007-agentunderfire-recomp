@@ -114,3 +114,7 @@ call = "PageHidesPanel"
 [[hook]]
 at = 0xBBC5F
 call = "PagePanelDone"
+
+[[hook]]
+at = 0xBDF75
+call = "LoadingPictureCentred"
