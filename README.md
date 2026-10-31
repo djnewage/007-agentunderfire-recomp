@@ -68,9 +68,9 @@ Keys can be changed in the F1 window.
 In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 3440x1440, taken one after another and lined up, so anything moving differs between them.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A split between all settings off and render scale 200%, MSAA 4x and sharpening" width="800">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe between all settings off and render scale 200%, MSAA 4x and sharpening" width="800">
   <br>
-  <i>All off, left, against render scale 200%, MSAA 4x and sharpening, right.</i>
+  <i>All off vs. render scale 200%, MSAA 4x and sharpening.</i>
 </p>
 
 <p align="center">
