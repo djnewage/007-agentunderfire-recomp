@@ -2,7 +2,7 @@
 
 ![007: Agent Under Fire - native PC port](docs/img/agentunderfire-pc-port.webp)
 
-An unofficial native PC port of the original Xbox version of 007: Agent Under Fire, in progress. The game's own x86 code
+An unofficial native PC port of the original Xbox version of 007: Agent Under Fire. The game's own x86 code
 is statically recompiled with the [Xbox XBE Recomp](https://github.com/TGP482/XboxXBE-Recomp) tool. It is not an emulator.
 
 > [!NOTE]
@@ -11,13 +11,13 @@ is statically recompiled with the [Xbox XBE Recomp](https://github.com/TGP482/Xb
 
 ## Status
 
-In progress and not yet released. The game runs through its movies, menus, every mission and the driving levels in a
-headless test build; it has not yet been played on Windows.
+Playable on Windows: on-foot missions, driving missions and mounted guns, in English, French and German. Not every later mission has been played through yet, and a multiplayer match has not been tried.
 
 ## Supported version
 
 The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4eb51701a53676e0ace4cdea1752dc04697`,
-`bond_eng.xbe` `66aace3859a5ca9a992f2d1845c2b5f5265fd9d6`, `DRIVING.XBE` `6b58e61ee8ce9aa2a1a357affe188af874cf05f4`.
+`bond_eng.xbe` `66aace3859a5ca9a992f2d1845c2b5f5265fd9d6`, `bond_fre.xbe` `87b2d3c8b7b40916fe29b03490c84c4f690a4c12`,
+`bond_ger.xbe` `88d06191f3ba940394f258f138f0aa37f1ced1dd`, `DRIVING.XBE` `6b58e61ee8ce9aa2a1a357affe188af874cf05f4`.
 
 ## Features
 
@@ -29,10 +29,17 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Skip intro movies** - Starts without the logos.
 - **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
 - **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys. On-foot menus show a pointer: the item under it highlights and a click selects it.
-- **PC Settings** - A row in the main menu and pause menus. It opens a page of rows in the game's own style.
+- **PC Settings** - A row in the main menu and the pause menus, on foot and driving, opening a page in the game's own style. Everything else is in the F1 window.
+- **Menu pointer** - In the menus and pause screens the item under the mouse highlights and a click selects it.
 - **Languages** - English, French and German, chosen in the settings window (F1), at the next start.
 - **Achievements** - Each mission, medals, and every gold and platinum.
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.
+
+<p align="center">
+  <img src="docs/img/agentunderfire-pc-settings.webp" alt="The PC Settings page in the main menu, with field of view, mouse sensitivity, render scale, MSAA, FXAA, sharpening and texture filtering" width="700">
+  <br>
+  <i>PC Settings, in the game's own menus.</i>
+</p>
 
 ### Keyboard and mouse
 
@@ -56,11 +63,39 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 
 Keys can be changed in the F1 window.
 
+## Graphics settings
+
+In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 3440x1440, taken one after another and lined up, so anything moving differs between them.
+
+<p align="center">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A split between all settings off and render scale 200%, MSAA 4x and sharpening" width="800">
+  <br>
+  <i>All off, left, against render scale 200%, MSAA 4x and sharpening, right.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of a handrail with all off and with two combinations of settings" width="800">
+  <br>
+  <i>Edges, enlarged three times.</i>
+</p>
+
+- **MSAA** smooths the edges of the 3D scene and keeps textures sharp. The more samples, the slower.
+- **FXAA** smooths the finished frame, HUD included, and softens it a little.
+- **Render scale** draws the picture larger than the screen: the smoothest fine detail, and the slowest.
+
+<p align="center">
+  <img src="docs/img/agentunderfire-settings-sharpness.webp" alt="The distant city with all off, sharpening 50% and sharpening 100%" width="800">
+  <br>
+  <i>Sharpening, enlarged twice.</i>
+</p>
+
+- **Sharpening** makes the picture crisper. Around 50% is a good start.
+
 ## Building
 
 1. Clone with submodules: `git clone --recurse-submodules https://github.com/hk21x/007-agentunderfire-recomp`.
-2. Extract your disc into `assets` (`default.xbe`, `bond_eng.xbe`, `DRIVING.XBE`, `assets\`, `driving.dat\`).
+2. Extract your disc into `assets` (`default.xbe`, `bond_eng.xbe`, `bond_fre.xbe`, `bond_ger.xbe`, `DRIVING.XBE`, `assets\`, `driving.dat\`).
 3. Install Visual Studio 2022 with C++ desktop development and run `build.bat`. The exes are in `out\build\release`.
-   Run `AgentUnderFire.exe`; it starts the other two itself.
+   Run `AgentUnderFire.exe`; it starts the others itself.
 
-The game is three programs, and the build recompiles all three, which takes a while.
+The game is five programs (the launcher and movies, the game in each of three languages, and the driving levels), and the build recompiles them all, which takes a while.

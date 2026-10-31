@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - README: status, comparisons from Harry's shots
+- Shots at 3440x1440 differ by a measured 24 to 32 across and 68 to 76 down, so crops are offset by that. His file names give the settings; the sharpening percentage in "4x-sharpening-200" is not known, so the captions do not state it.
+- His agent-menu.jpg shows the on-foot pause's fourth row reading Continue Mission, not PC Settings: a bug to fix with the tabs. agent-menu-2 (the page) is used meanwhile.
+
 ### 2026-10-31 - SDK at the fork's main 37fa3dc: MSAA and FXAA apart, sharpening, its language setting
 - Harry asked for the pull, for the new features' screenshots. The page's rows now: field of view, mouse sensitivity, render scale, MSAA, FXAA, sharpening, texture filtering, more settings: eight, so it still fits the pause panels. Sharp text and the frame counter are in the settings window only.
 - Language: GameInfo::languages {1, 3, 4}, the settings window's own; the hook of XGetLanguage and my option are gone (an old language key in a settings file is ignored; anyone who set it picks again). auto_fills_screen on.
