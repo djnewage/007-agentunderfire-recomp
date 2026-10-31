@@ -29,7 +29,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Skip intro movies** - Starts without the logos.
 - **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
 - **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys. On-foot menus show a pointer: the item under it highlights and a click selects it.
-- **PC Settings** - A row in the main menu and the pause menus, on foot and driving, opening a page in the game's own style. Everything else is in the F1 window.
+- **PC Settings** - In the game's own menus: a row on the main menu and a tab on the pause screen, on foot and driving, with pages for graphics, display, controls and game. Key bindings and the rest are in the F1 window.
 - **Menu pointer** - In the menus and pause screens the item under the mouse highlights and a click selects it.
 - **Languages** - English, French and German, chosen in the settings window (F1), at the next start.
 - **Achievements** - Each mission, medals, and every gold and platinum.

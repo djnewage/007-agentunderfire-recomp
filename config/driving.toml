@@ -100,10 +100,6 @@ D3D_DirtyFlags = 0x1228A8
 D3D_IndexData  = 0x1228A4
 
 [[hook]]
-at = 0xBB284
-call = "DrawPcRow"
-
-[[hook]]
 at = 0xBC730
 call = "DrawPcPage"
 
@@ -112,9 +108,9 @@ at = 0xBB1B1
 call = "PageHidesPanel"
 
 [[hook]]
-at = 0xBBC5F
-call = "PagePanelDone"
-
-[[hook]]
 at = 0xBDF75
 call = "LoadingPictureCentred"
+
+[[hook]]
+at = 0xBBC5F
+call = "PagePanelDone"

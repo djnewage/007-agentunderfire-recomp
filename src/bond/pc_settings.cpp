@@ -1,5 +1,5 @@
-// PC Settings in bond_eng.xbe's own menus: a row under the main menu's Options and under the pause menu's Quit Mission, and
-// a page of rows those open.
+// PC Settings in bond_eng.xbe's own menus: a row under the main menu's Options, a tab beside the pause's Briefing, and the page of
+// rows those open.
 //
 // A menu file's page keeps its text at +0x24 (count) and +0x2C, its pictures at +0x3C and +0x44, its items at +0x54 and +0x5C,
 // the current item at +0x60; a text is 0x2CC bytes (mode +0x8C, x +0x90, y +0x94, the string at +0x24), a picture 0x1F4, an
@@ -32,6 +32,10 @@ constexpr uint32_t kItemText = 0xB0, kItemPic = 0xC4, kItemIndex = 0xC0, kAction
 constexpr uint32_t kTextNext = 0x2C8, kPicNext = 0x1F0;
 constexpr uint32_t kEventLeft = 0, kEventRight = 1, kEventA = 4, kEventB = 5;  // 0x40A00's, seen by pressing each
 constexpr uint32_t kOptionsState = 9;
+// the pause's tab strip: a page's plain texts at +0 (count) and +8, 0x278 each (x, its centre, +0x90, y +0x94, w +0x98, red +0xA4, 1 on the
+// tab showing, the string +0x24), the tabs at y 113; its strip's bands at +0xC and +0x14, 0x1C4 each (y +0x1C, 111)
+constexpr uint32_t kPlainCount = 0, kPlains = 8, kPlainSize = 0x278, kBandCount = 0xC, kBands = 0x14, kBandSize = 0x1C4;
+constexpr float kTabY = 113, kPcTabX = 577;
 
 // cdecl: the argument, the return address (the callee's ret takes it), the argument off
 void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uint32_t arg) {
@@ -102,6 +106,8 @@ void Link(uint32_t item, uint32_t up_index, uint32_t up, uint32_t down_index, ui
 
 // a text to copy (the Options page's rows on the main menu, which has none) and a picture (its chevron)
 void Templates(uint32_t file, uint32_t page, uint32_t& text, uint32_t& pic) {
+    // the pause's Briefing has no items: its Mission page's (state 1)
+    if (!kernel::R32(page + kItemCount)) page = kernel::R32(file + 0x14) + kStateSize;
     uint32_t list = kernel::R32(page + kItems);
     text = kernel::R32(list + kItemText), pic = kernel::R32(list + kItemPic);
     if (text) return;
@@ -167,14 +173,52 @@ void AddRow(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page, float 
     LOGR("auf: PC Settings is a row of the menu page %08X", page);
 }
 
+constexpr int kBandsKept = 16;
 struct Open {
     uint32_t page = 0;
-    uint32_t saved[7] = {};  // the page's text, picture and item arrays and current item
+    uint32_t saved[9] = {};  // the page's text, picture and item arrays and current item
     uint32_t items = 0, values = 0;
     int rows = 0;
+    uint32_t bands = 0;
+    float band[kBandsKept] = {};
 };
 Open g_open;
-const uint32_t kSavedAt[7] = {kTextCount, kTexts, kPicCount, kPics, kItemCount, kItems, kCurrent};
+const uint32_t kSavedAt[9] = {kTextCount, kTexts, kPicCount, kPics, kItemCount, kItems, kCurrent, kPlainCount, kPlains};
+
+// the plain texts of a page that are its tabs; the one showing
+std::vector<uint32_t> TabsOf(uint32_t page) {
+    std::vector<uint32_t> tabs;
+    const uint32_t list = kernel::R32(page + kPlains);
+    for (uint32_t i = 0, n = kernel::R32(page + kPlainCount); i < n && n < 64; i++)
+        if (kernel::G<float>(list + i * kPlainSize + 0x94) == kTabY) tabs.push_back(list + i * kPlainSize);
+    return tabs;
+}
+std::map<uint32_t, uint32_t> g_pc_tabs;  // page -> the plain text that is PC Settings' tab
+
+// the tab: one more plain text in the page's list, copied into memory of ours
+void AddTab(uint32_t page) {
+    const auto known = g_pc_tabs.find(page);
+    if (known != g_pc_tabs.end() && kernel::R32(page + kPlains) <= known->second &&
+        known->second < kernel::R32(page + kPlains) + kernel::R32(page + kPlainCount) * kPlainSize) {
+        SetText(known->second, auf::PcRowName(kLang));
+        return;
+    }
+    const std::vector<uint32_t> tabs = TabsOf(page);
+    if (tabs.size() < 3) return;
+    const uint32_t n = kernel::R32(page + kPlainCount), list = kernel::R32(page + kPlains);
+    const uint32_t copy = mem::AllocHostContiguous((n + 1) * kPlainSize, 16);
+    std::memcpy(&kernel::G<uint8_t>(copy), &kernel::G<uint8_t>(list), n * kPlainSize);
+    const uint32_t tab = copy + n * kPlainSize;
+    std::memcpy(&kernel::G<uint8_t>(tab), &kernel::G<uint8_t>(tabs.back()), kPlainSize);
+    SetText(tab, auf::PcRowName(kLang));
+    SetF(tab + 0x90, kPcTabX);
+    SetF(tab + 0x98, 110);
+    for (const uint32_t t : tabs)
+        if (kernel::G<float>(t + 0xA4) <= 0.6f) SetF(tab + 0xA4, kernel::G<float>(t + 0xA4));
+    kernel::W32(page + kPlains, copy);
+    kernel::W32(page + kPlainCount, n + 1);
+    g_pc_tabs[page] = tab;
+}
 
 // the tab's rows: as many items, texts and chevrons as it has, linked in a ring
 void ShowRows(uint32_t page, uint32_t items, bool chevrons) {
@@ -200,9 +244,9 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
         c.texts = mem::AllocHostContiguous(kRows * 2 * kTextSize, 16);
         c.pics = mem::AllocHostContiguous(kRows * kPicSize, 16);
     }
-    const uint32_t model = kernel::R32(page + kItems);
+    const uint32_t model = kernel::R32((kernel::R32(page + kItemCount) ? page : kernel::R32(file + 0x14) + kStateSize) + kItems);
     const bool paused = file == PauseFile();
-    const float x = paused ? 110 : 100, value_x = paused ? 330 : 370, top = paused ? 178 : 150, pitch = paused ? 16 : 28;
+    const float x = paused ? 110 : 100, value_x = paused ? 330 : 370, top = paused ? 158 : 150, pitch = paused ? 20 : 28;
     for (int i = 0; i < kRows; i++) {
         const uint32_t item = c.items + uint32_t(i) * kItemSize, label = c.texts + uint32_t(i) * 2 * kTextSize, value = label + kTextSize,
                        chevron = c.pics + uint32_t(i) * kPicSize;
@@ -230,11 +274,43 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
         kernel::W32(item + kAction, 0);
     }
     g_open.page = page;
-    for (int i = 0; i < 7; i++) g_open.saved[i] = kernel::R32(page + kSavedAt[i]);
+    for (int i = 0; i < 9; i++) g_open.saved[i] = kernel::R32(page + kSavedAt[i]);
     g_open.items = c.items;
     kernel::W32(page + kTexts, c.texts);
     kernel::W32(page + kPics, c.pics);
     ShowRows(page, c.items, pic != 0);
+    if (paused) {
+        // only the tabs and the footer of the page under it; PC Settings' tab bright, its band under the tab
+        static uint32_t kept = 0;
+        if (!kept) kept = mem::AllocHostContiguous(64 * kPlainSize, 16);
+        const uint32_t list = g_open.saved[8], count = g_open.saved[7];
+        uint32_t n = 0;
+        // the page's own two reds
+        float bright = 1, dim = 0;
+        for (uint32_t i = 0; i < count; i++)
+            if (kernel::G<float>(list + i * kPlainSize + 0x94) == kTabY && kernel::G<float>(list + i * kPlainSize + 0x90) != kPcTabX) {
+                const float r = kernel::G<float>(list + i * kPlainSize + 0xA4);
+                if (r > 0.6f) bright = r;
+                else dim = r;
+            }
+        for (uint32_t i = 0; i < count && n < 64; i++) {
+            const uint32_t t = list + i * kPlainSize;
+            const float ty = kernel::G<float>(t + 0x94);
+            if (ty != kTabY && ty < 300) continue;
+            const uint32_t k = kept + n++ * kPlainSize;
+            std::memcpy(&kernel::G<uint8_t>(k), &kernel::G<uint8_t>(t), kPlainSize);
+            if (ty == kTabY) SetF(k + 0xA4, kernel::G<float>(k + 0x90) == kPcTabX ? bright : dim);
+        }
+        kernel::W32(page + kPlains, kept);
+        kernel::W32(page + kPlainCount, n);
+        // the strip's lit box is under Briefing's label: all its bands away while this tab shows
+        const uint32_t bands = kernel::R32(page + kBands);
+        g_open.bands = bands;
+        for (int i = 0; i < kBandsKept; i++) {
+            g_open.band[i] = kernel::G<float>(bands + uint32_t(i) * kBandSize + 0x1C);
+            if (g_open.band[i] == 111) SetF(bands + uint32_t(i) * kBandSize + 0x1C, -200);
+        }
+    }
     kernel::W32(page + kItems, c.items);
     kernel::W32(page + kCurrent, c.items);
     for (int i = 0; i < kRows; i++) Call1(ctx, base, sub_00037AD0, c.items + uint32_t(i) * kItemSize);
@@ -242,13 +318,22 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
     LOGR("auf: PC Settings opened");
 }
 
+void RestoreBands() {
+    if (!g_open.bands) return;
+    for (int i = 0; i < kBandsKept; i++) SetF(g_open.bands + uint32_t(i) * kBandSize + 0x1C, g_open.band[i]);
+    g_open.bands = 0;
+}
+
 void ClosePage() {
     if (!g_open.page) return;
-    for (int i = 0; i < 7; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
+    RestoreBands();
+    for (int i = 0; i < 9; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
     g_open.page = 0;
     LOGR("auf: PC Settings closed");
 }
 }  // namespace
+
+X86_EXTERN_FUNC(__imp__sub_00040A00);
 
 namespace auf {
 // each frame a menu has the input (src/bond/pointer.cpp's hook of 0x56930)
@@ -257,7 +342,8 @@ void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
     if (!page) return;
     if (g_open.page) {
         if (g_open.page != page) {  // the game left the page: it holds the arrays of ours still
-            for (int i = 0; i < 7; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
+            for (int i = 0; i < 9; i++) kernel::W32(g_open.page + kSavedAt[i], g_open.saved[i]);
+            RestoreBands();
             g_open.page = 0;
             return;
         }
@@ -275,12 +361,46 @@ void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
         SetText(kernel::R32(row->second + kItemText), auf::PcRowName(kLang));
     const uint32_t states = kernel::R32(file + 0x14);
     if (file == Frontend() && page == states + 3 * kStateSize && kernel::R32(page + kItemCount) >= 5) AddRow(ctx, base, file, page, 200, 402);
-    if (file == PauseFile() && page == states + 1 * kStateSize && kernel::R32(page + kItemCount) >= 3) AddRow(ctx, base, file, page, 110, 264);
+    if (file == PauseFile()) {
+        AddTab(page);
+        // the pointer on the tabs: steps through them with the game's left and right, a step a frame
+        static int wanted = -1;  // 3 PC Settings
+        static bool last_press = false;
+        float x, y;
+        const bool press = (auf::PointerButtons() & 1) != 0, edge = press && !last_press;
+        last_press = press;
+        const std::vector<uint32_t> tabs = TabsOf(page);
+        if (edge && tabs.size() >= 3 && auf::PointerAt(x, y) && y >= 104 && y < 132) {
+            for (int i = 0; i < 3; i++) {
+                const float c = kernel::G<float>(tabs[size_t(i)] + 0x90);
+                if (x >= c - 60 && x < c + 60) wanted = i;
+            }
+            if (x >= kPcTabX - 60) wanted = 3;
+        }
+        if (wanted >= 0) {
+            int showing = -1;
+            for (size_t i = 0; i < tabs.size() && i < 3; i++)
+                if (kernel::G<float>(tabs[i] + 0xA4) > 0.6f) showing = int(i);
+            if (showing < 0) wanted = -1;
+            else if (wanted == 3 && showing == 2) {
+                OpenPage(ctx, base, file, page);
+                wanted = -1;
+            } else if (wanted == showing) {
+                wanted = -1;
+            } else {
+                X86_PUSH32(wanted > showing ? kEventRight : kEventLeft);
+                X86_PUSH32(file);
+                X86_PUSH32(0x56930u);
+                __imp__sub_00040A00(ctx, base);
+                ctx.esp += 8;
+            }
+        }
+    }
 }
 }  // namespace auf
 
-// The presses: on the row, A opens the page; on the page, left and right and A change a row and Back leaves
-X86_EXTERN_FUNC(__imp__sub_00040A00);
+// The presses: on the row, A opens the page; right from the pause's last tab does too; on the page, left and right and A change a
+// row and Back leaves
 X86_FUNC(sub_00040A00) {
     const uint32_t file = kernel::R32(ctx.esp + 4), event = kernel::R32(ctx.esp + 8), page = Page(file);
     static const bool said = std::getenv("AUF_EVENT_LOG") != nullptr;
@@ -291,6 +411,13 @@ X86_FUNC(sub_00040A00) {
             if (event == kEventB) ClosePage();
             else if (event == kEventA) auf::PcStep(row, auf::PcClickDir(file == PauseFile() ? 330 : 370));
             else auf::PcStep(row, event == kEventLeft ? -1 : 1);
+            ctx.esp += 4;
+            return;
+        }
+    } else if (page && file == PauseFile() && event == kEventRight) {
+        const std::vector<uint32_t> tabs = TabsOf(page);
+        if (tabs.size() >= 3 && kernel::G<float>(tabs[2] + 0xA4) > 0.6f) {
+            OpenPage(ctx, base, file, page);
             ctx.esp += 4;
             return;
         }

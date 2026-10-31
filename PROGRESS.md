@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - PC Settings is a tab along the pause's top
+- Harry: a tab on the strip, not a row on the Mission page. The main menu keeps its row (it has no tabs).
+- On foot: a page's plain texts (+0, +8, 0x278 each; x centre +0x90, y +0x94, red +0xA4) hold the tabs at y 113; one is added beside Briefing on each page. Right from Briefing or a click opens the page over Briefing's arrays, with only the strip's and footer's texts kept and the strip's lit bands moved off. Clicks on any tab step there with the game's own left and right.
+- Driving: a label drawn after the draw, "PC" when the level has a Map tab, else the full name. +0x420 is 4 from 0xBB1B1 (empty panel), 3 from 0xBBC5F (strip, footer: their widgets exist for it; 4 crashes there), 0 after. Right from the last tab or a click opens. Seen: strip, rows, a value changed, Back. The Map case not seen: mis02a has no Map, so "PC" at 600 is unchecked.
+- The tab bar's inner tabs stay row 0, "Page".
+
 ### 2026-10-31 - PC Settings in tabs, on every menu
 - Harry: more settings in game, tabs, in the pause menus too. Row 0 of the page chooses the tab, Graphics, Display, Controls, Game (a tab bar would need new art and space, and the pause already has its own tabs). Rows from src/common/pc_rows.cpp, so main menu, foot pause and driving pause are the same. Each row changes what the settings window changes; display mode posts ApplyDisplay as it does. Those marked * apply at the next start. Key rebinding stays in the settings window (More Settings on Controls and Game).
 - The pause row reading Continue Mission: the game refills its texts as a page comes up; the row's text is set each frame.
