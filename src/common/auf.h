@@ -3,6 +3,7 @@
 // game; DRIVING.XBE: the driving levels)
 #include <cstdint>
 
+#include "core/achievements.h"
 #include "core/input.h"
 
 struct X86Context;
@@ -24,6 +25,7 @@ bool PlayerFree();            // bond_eng.xbe: Bond under the player's control, 
 bool ButtonPictures(uint32_t header, uint32_t palette);  // GameInfo::texture_bound (src/common/buttons.cpp)
 void RefreshButtons();        // each poll
 void MenuMouse(int port, input::Pad& p);
+std::vector<achievements::Def> AchievementSet();  // src/common/achievement_set.cpp
 // the menus' pointer, on foot (src/bond/pointer.cpp): where it is in the menus' 640x480, the buttons, and what a click does
 enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown };  // Go plays A, the last three the d-pad
 bool PointerAt(float& x, float& y);

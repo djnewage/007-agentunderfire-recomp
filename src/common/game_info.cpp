@@ -48,6 +48,9 @@ const bool kDrv = auf::kImage == auf::kDriving;
 
 // after the settings load: the harness's environment overrides them; each setting in effect is logged
 void Init() {
+    // every achievement's condition parses (a typo would leave it never met)
+    for (const achievements::Def& d : app::kGame.achievements)
+        if (std::string e = achievements::Check(d.condition); !e.empty()) LOGE("auf: achievement %s: %s", d.id, e.c_str());
     if (const char* e = std::getenv("AUF_SKIP_INTRO"); e && *e) auf::skip_intro = *e == '1';
     if (const char* e = std::getenv("AUF_AUTO_AIM"); e && *e) auf::auto_aim = *e == '1';
     if (const char* e = std::getenv("AUF_FOV"); e && *e) auf::fov_percent = uint32_t(std::atoi(e));
@@ -191,6 +194,7 @@ const app::GameInfo app::kGame = {
     .pal_console = true,                  // a PAL disc (region 4)
     .mouse_look = true,                   // the mouse looks and aims
     .mouse_direct = true,                 // src/bond/mouse.cpp, src/driving/mouse.cpp
+    .achievements = auf::AchievementSet(), // conditions on bond_eng.xbe's memory
     .texture_bound = auf::ButtonPictures,  // the prompts' pictures as the keys (src/common/buttons.cpp)
     .default_keys = Keys,                 // a shooter's keys on foot, a driving layout in DRIVING.XBE
 };
