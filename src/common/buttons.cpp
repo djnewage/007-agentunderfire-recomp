@@ -5,7 +5,8 @@
 // gets a replacement four times larger with those cells drawn as keys: the first binding of each control, A as Enter and B as
 // Backspace where those select and go back (a menu, or Bond not the player's to move), the d-pads as arrow keys. With a controller
 // the replacement goes and the disc's pictures are drawn. The guest's bytes are left alone. Shapes: src/common/strokes.h.
-// DRIVING.XBE's icons are other textures, not done. Headless: AUF_BUTTON_DUMP=1 writes each drawing to buttons_<data>_<w>.rgba.
+// DRIVING.XBE's menus draw theirs from a 256x256 P8 atlas: its guest bytes are rewritten, coded to its own palette, and put
+// back for a controller (src/common/buttons.cpp's P8 part). Headless: AUF_BUTTON_DUMP=1 writes each drawing to buttons_<data>_<w>.rgba.
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -54,6 +55,22 @@ struct Known {
 const Known kKnown[] = {{0x06, 256, 256, 256 * 256 * 4, 0xC3A73051EF13D69Full, &kAtlasCells, 256},
                         {0x0E, 32, 64, 32 * 64, 0xA17873E88E43A396ull, &kPressACells, 32}};
 
+// DRIVING.XBE's atlas in its icons' palette: the tall ovals the pause menu's line draws (squeezed to a 12x20 quad), A and B
+// small, the rings, and the d-pads: the round pictures beside them are that line's change page and scroll
+const std::vector<Cell> kP8Cells = {
+    {{99, 100, 131, 164}, input::kA, 0, 0},    {{99, 34, 131, 98}, input::kB, 0, 0},
+    {{132, 34, 164, 98}, input::kX, 0, 0},     {{132, 100, 164, 164}, input::kY, 0, 0},
+    {{167, 3, 182, 18}, input::kA, 0, 0},      {{167, 21, 182, 37}, input::kB, 0, 0},
+    {{100, 200, 119, 220}, input::kY, 0, 0},   {{125, 200, 145, 220}, input::kA, 0, 0},
+    {{152, 215, 170, 234}, input::kX, 0, 0},   {{94, 235, 112, 253}, input::kA, 0, 0},
+    {{113, 235, 131, 253}, input::kY, 0, 0},   {{133, 235, 151, 253}, input::kX, 0, 0},
+    {{153, 235, 171, 253}, input::kB, 0, 0},   {{202, 150, 218, 166}, -1, kVkLeft, kVkRight},
+    {{202, 176, 218, 192}, -1, kVkUp, kVkDown},
+    {{168, 117, 184, 132}, -1, kVkUp, kVkDown}, {{168, 135, 184, 150}, -1, kVkLeft, kVkRight},
+};
+constexpr uint64_t kP8Disc = 0x0D17DFB8FC1761F7ull;
+constexpr int kP8GreenX = 104, kP8GreenY = 132;  // on the A oval's rim: green only in the icons' palette
+
 struct Look {
     bool keys = false, select = false;
     std::array<uint16_t, 4> bound{};
@@ -76,7 +93,8 @@ uint64_t Fnv(const uint8_t* p, size_t n) {
 
 Look Current() {
     Look l;
-    l.keys = input::UsingKeyboard();
+    static const bool forced = std::getenv("AUF_KEYS_TEST") != nullptr;  // headless: the reference renderer keeps a texture's first look
+    l.keys = forced || input::UsingKeyboard();
     l.select = MenuUp() || !PlayerFree();
     const int controls[4] = {input::kA, input::kB, input::kX, input::kY};
     for (int i = 0; i < 4; i++) l.bound[size_t(i)] = input::ControlKeys(controls[i])[0];
@@ -176,12 +194,129 @@ void Apply(uint32_t data, Picture& pic, const Look& look) {
     gpu::SetReplacement(data, k.bytes, W, W, std::move(out));
     LOGR("auf: the button pictures (%08X) drawn as keys%s", data, look.select ? ", Enter and Backspace" : "");
 }
+
+// the P8 atlas: one at a time, the disc's bytes kept, its palette read when it is first bound. Redrawn only as it is bound:
+// the renderers read a texture again when texture_bound says it changed
+struct P8Atlas {
+    uint32_t data = 0;
+    std::vector<uint8_t> disc;
+    std::vector<std::array<uint8_t, 4>> palette;  // R G B A
+    uint64_t written = 0;
+    Look drawn;
+};
+P8Atlas g_p8;
+
+uint32_t Swizzled(int x, int y) {
+    uint32_t r = 0;
+    for (int b = 0; b < 8; b++) r |= uint32_t(x >> b & 1) << (2 * b) | uint32_t(y >> b & 1) << (2 * b + 1);
+    return r;
+}
+
+void ApplyP8(const Look& look) {
+    auto* bytes = static_cast<uint8_t*>(kernel::HostPtr(g_p8.data));
+    std::vector<uint8_t> out = g_p8.disc;
+    if (look.keys) {
+        Canvas c;
+        c.size = 256;
+        c.px.assign(size_t(256) * 256, {0, 0, 0, 0});
+        for (const Cell& cell : kP8Cells) {
+            const Area& a = cell.area;
+            const float w = a.x1 - a.x0, cx = (a.x0 + a.x1) / 2, cy = (a.y0 + a.y1) / 2;
+            auto shape = [&](std::vector<Pt> pts) { Fill(c, a, kWhite, [pts](float x, float y) { return PolygonDistance(x, y, pts); }); };
+            auto arrow = [&](uint16_t vk) {
+                const float k = w * 0.24f, far = w * 0.46f, near = w * 0.08f;
+                if (vk == kVkUp) shape({{cx, cy - far}, {cx + k, cy - near}, {cx - k, cy - near}});
+                if (vk == kVkDown) shape({{cx, cy + far}, {cx - k, cy + near}, {cx + k, cy + near}});
+                if (vk == kVkLeft) shape({{cx - far, cy}, {cx - near, cy - k}, {cx - near, cy + k}});
+                if (vk == kVkRight) shape({{cx + far, cy}, {cx + near, cy + k}, {cx + near, cy - k}});
+            };
+            const uint16_t key = cell.control < 0 ? 0 : KeyOf(cell.control, look);
+            if (cell.control < 0) {
+                arrow(cell.arrow0);
+                arrow(cell.arrow1);
+            } else if (key == kEnter) {  // too small for the word: its bent arrow
+                shape({{cx + w * 0.26f, cy - w * 0.36f}, {cx + w * 0.42f, cy - w * 0.36f}, {cx + w * 0.42f, cy + w * 0.16f}, {cx + w * 0.26f, cy + w * 0.16f}});
+                shape({{cx - w * 0.14f, cy}, {cx + w * 0.42f, cy}, {cx + w * 0.42f, cy + w * 0.16f}, {cx - w * 0.14f, cy + w * 0.16f}});
+                shape({{cx - w * 0.44f, cy + w * 0.08f}, {cx - w * 0.1f, cy - w * 0.22f}, {cx - w * 0.1f, cy + w * 0.38f}});
+            } else if (key == kBackspace) {
+                shape({{cx - w * 0.44f, cy}, {cx - w * 0.06f, cy - w * 0.3f}, {cx - w * 0.06f, cy + w * 0.3f}});
+                shape({{cx - w * 0.06f, cy - w * 0.1f}, {cx + w * 0.42f, cy - w * 0.1f}, {cx + w * 0.42f, cy + w * 0.1f}, {cx - w * 0.06f, cy + w * 0.1f}});
+            } else {
+                KeyCap(c, {a.x0, cy - w * 0.6f, a.x1, cy + w * 0.6f}, key);
+            }
+        }
+        int clear = 0;
+        for (size_t i = 0; i < g_p8.palette.size(); i++)
+            if (g_p8.palette[i][3] == 0) {
+                clear = int(i);
+                break;
+            }
+        for (const Cell& cell : kP8Cells)
+            for (int y = int(cell.area.y0); y < int(cell.area.y1); y++)
+                for (int x = int(cell.area.x0); x < int(cell.area.x1); x++) {
+                    const auto& p = c.px[size_t(y) * 256 + x];
+                    int best = clear;
+                    if (p[3] > 0.03f) {
+                        float px[4] = {p[0] / p[3] * 255, p[1] / p[3] * 255, p[2] / p[3] * 255, p[3] * 255}, lowest = 1e12f;
+                        for (size_t k = 0; k < g_p8.palette.size(); k++) {
+                            float dist = 0;
+                            for (int n = 0; n < 4; n++) dist += (px[n] - g_p8.palette[k][size_t(n)]) * (px[n] - g_p8.palette[k][size_t(n)]);
+                            if (dist < lowest) lowest = dist, best = int(k);
+                        }
+                    }
+                    out[Swizzled(x, y)] = uint8_t(best);
+                }
+    }
+    std::memcpy(bytes, out.data(), out.size());
+    g_p8.written = Fnv(bytes, out.size());
+    g_p8.drawn = look;
+    LOGR("auf: the driving menus' atlas (%08X) %s", g_p8.data, look.keys ? "drawn as keys" : "as the disc has it");
+}
+
+bool ButtonsP8(const gpu::TextureDesc& d, uint32_t palette) {
+    constexpr uint32_t kSize = 256 * 256;
+    if (!mem::IsCommitted(d.data) || !mem::IsCommitted(d.data + kSize - 1)) return false;
+    const auto* bytes = static_cast<const uint8_t*>(kernel::HostPtr(d.data));
+    std::lock_guard<std::mutex> hold(g_lock);
+    if (g_p8.data != d.data || Fnv(bytes, kSize) != g_p8.written) {
+        // the whole hash once per address and contents: fonts share this shape, bound many times a frame
+        uint64_t head = Fnv(bytes, 256);
+        auto no = g_not.find(d.data);
+        if (no != g_not.end() && no->second == head) return false;
+        if (Fnv(bytes, kSize) != kP8Disc) {
+            g_not[d.data] = head;
+            return false;
+        }
+        g_p8 = P8Atlas{};
+        g_p8.data = d.data;
+        g_p8.disc.assign(bytes, bytes + kSize);
+        g_p8.written = kP8Disc;
+    }
+    if (g_p8.palette.empty()) {
+        if (!palette) return false;
+        const uint32_t colours = 256u >> (kernel::R32(palette) >> 30), pal = mem::VirtualFromPhysical(kernel::R32(palette + 4));
+        if (!mem::IsCommitted(pal) || !mem::IsCommitted(pal + colours * 4 - 1)) return false;
+        const auto* bgra = static_cast<const uint8_t*>(kernel::HostPtr(pal));
+        // bound with several palettes: the icons' is the one that shows the A oval's rim green
+        const uint8_t rim = g_p8.disc[Swizzled(kP8GreenX, kP8GreenY)];
+        if (rim >= colours) return false;
+        const uint8_t* e = bgra + rim * 4;
+        if (!(e[1] > e[2] + 24 && e[1] > e[0] + 24)) return false;
+        for (uint32_t i = 0; i < colours; i++) g_p8.palette.push_back({bgra[i * 4 + 2], bgra[i * 4 + 1], bgra[i * 4], bgra[i * 4 + 3]});
+        LOGR("auf: the driving menus' atlas's palette: %u colours at %08X", colours, pal);
+    }
+    Look look = Current();
+    if (look == g_p8.drawn) return false;
+    ApplyP8(look);
+    return true;
+}
 }  // namespace
 
 // GameInfo::texture_bound
-bool ButtonPictures(uint32_t header, uint32_t) {
+bool ButtonPictures(uint32_t header, uint32_t palette) {
     gpu::TextureDesc d;
     if (!gpu::Describe(header, d)) return false;
+    if (kImage == kDriving) return d.format == 0x0B && d.width == 256 && d.height == 256 && ButtonsP8(d, palette);
     const Known* k = nullptr;
     for (const Known& c : kKnown)
         if (c.format == d.format && c.w == d.width && c.h == d.height) k = &c;

@@ -139,3 +139,5 @@ or as the same class of bug in a new place.
 - A test source that always answers hides code that only runs when input stops: make it report "no movement" as the real one does.
 - A log line is a claim: read the run's output before writing it, not after. And a pad script's press can make the very state it then "finds".
 - wincheck with no arguments checks only sdk/runtime: name the game's Windows code too (scripts/wincheck.sh src/common/menu_mouse.cpp).
+- A P8 atlas in false colours shows no truth about which cell is which: get its palettes first, and test a theory (a poke) before blaming a tool.
+- Open every page and level at least once in a headless sweep: Multiplayer's crash sat one menu away from the title.

@@ -37,3 +37,6 @@ own code and data, with its addresses).
 ## Push buffers
 - **[game]** None in any of the three xbes.
 - **[game]** bond_eng.xbe menus: 0x56930(file) reads input each frame. File +0x44 page, +0x54 lock. Page +0x54 item count, +0x5C items (0xDC each), +0x60 current. Item +0xB0 text chain (next +0x2C8: mode +0x8C, x +0x90, y +0x94, size +0x9C), +0xC4 picture chain (next +0x1F0: mode +0x90, x +0x94, y +0x98, w +0xA0, h +0xA4); mode 1 is a fraction of 640x480. Change item: 0x37AD0(old), 0x37A30(new), store +0x60, as 0x39120.
+- **[game]** 0x5BE11 (text draw): ends a typed-out text's 256-byte stack copy at the shown count, unchecked; Multiplayer's text passes 1071. Clamped by hook ClampTextEnd.
+- **[game]** DRIVING.XBE's prompt atlas: P8, FNV 0x0D17DFB8FC1761F7, five palettes, cells in src/common/buttons.cpp.
+- **[harness]** The reference renderer reads textures fresh each frame (BeginFrame clears g_images). The palette a P8 was first bound with need not be the one a draw uses.

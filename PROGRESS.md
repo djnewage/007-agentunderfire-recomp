@@ -11,7 +11,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
 - PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
-- Not done: in-game PC Settings page, DRIVING.XBE key pictures, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- Not done: in-game PC Settings page, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -22,6 +22,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-31 - Every mission loads; DRIVING.XBE's prompts show keys
+- Sweep with the smoke's poke on 0x2A9F98, indices 0 to 15 for 110 s each: no crash. All on-foot levels draw (12 to 15 look like 5, so probably past the list). 1, 2, 6, 8 relaunch to mis02a, mis02b, mis07a, mis09; those ran 60 to 90 s, no crash. That is loading and the first minute, not levels played through.
+- bond_eng.xbe 30 minutes on random input: alive at the end, 77 MB flat. (rc=124 is the timeout's.)
+- Driving prompts: a 256x256 P8 atlas, FNV 0x0D17DFB8FC1761F7, same in mis02b and mis09, at a different address per level (the 820C1580 in an earlier note was another level's font). Bound with five palettes: the icons' is the one with the A oval's rim green. The line's A is the tall oval (99,100 to 131,164), squeezed to 12x20; change page and scroll are the round cells at (202,150) and (202,176). Keys: a return arrow, back arrow, bare arrows; caps elsewhere. The palette has no dark grey, so bare glyphs read better.
+- Took several wrong turns: fonts first, the wrong palette, the wrong cells, and blaming the reference renderer's cache, which a live poke disproved (it clears each frame). The redraw must be in the bind, which returns true: only that marks the texture dirty for the real renderers.
+- Seen on screen with AUF_KEYS_TEST=1 (keys from the first bind) and with a controller (the disc's). A switch mid-pause, keys to pad, seen in the log and on screen on the pad side only; D3D12 itself untested. Cells other than the line's not seen in use.
+- SMOKE OK, wincheck of the two files ok.
 
 ### 2026-10-31 - Multiplayer no longer crashes; long runs; the pointer's other pages; Select Mission by mouse
 - Crash found by opening Multiplayer, by d-pad too, so not the pointer: 0x5BE11 ends a typed-out text's 256-byte copy at the count of letters shown, and this page's speed takes that to 1071, a zero past the top of the guest stack at 0xD006003F. Probably mapped memory on the console. Hook ClampTextEnd keeps it in the buffer; the page opens and shows its text. No match started here (one pad): multiplayer play itself untried.
