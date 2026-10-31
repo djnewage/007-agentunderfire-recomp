@@ -65,8 +65,9 @@ X86_FUNC(sub_00077A20) {
     // none (no movement): the rates go to 0 all the same, or the last one keeps turning the view
     SetF(cam + kSideRate, x * kRatePerCount);
     SetF(cam + kSideTarget, x * kRatePerCount);
-    SetF(cam + kUpRate, y * kRatePerCount * kUpScale);
-    SetF(cam + kUpTarget, y * kRatePerCount * kUpScale);
+    // y is up positive; a positive rate looks down
+    SetF(cam + kUpRate, -y * kRatePerCount * kUpScale);
+    SetF(cam + kUpTarget, -y * kRatePerCount * kUpScale);
     for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);  // the longer a stick is held, the faster: not for a mouse
     __imp__sub_00077A20(ctx, base);
     for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);

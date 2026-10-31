@@ -65,10 +65,7 @@ X86_FUNC(sub_00024570) {
         float rx = GetF(kYawRate), ry = GetF(kPitchRate);
         bool invert = kernel::G<uint8_t>(kInvert) != 0;
         SetF(kYaw, GetF(kYaw) - x * kDegreesPerCount * rx);
-        // Harry on Windows: through the sniper's scope (end of mission 1) up and down come out inverted. Not found in the code: the rate's
-        // sign is the same (0xB4659). Flipped there by his report (first tried with a test of Zoomed that this sniper did not meet)
-        if (auf::Zoomed()) y = -y;
-        SetF(kPitch, GetF(kPitch) + (invert ? -y : y) * kDegreesPerCount * ry);
+        SetF(kPitch, GetF(kPitch) - (invert ? -y : y) * kDegreesPerCount * ry);  // y is up positive, pitch grows downwards
         static bool said = false;
         if (!said && (x || y) && rx != 0) {
             said = true;
@@ -84,6 +81,7 @@ X86_FUNC(sub_00024570) {
 namespace {
 std::atomic<int> g_zoom_notches{0};
 constexpr float kNotchStep = 1.25f;
+constexpr float kLeastZoom = 1.05f;  // at 1 the game stops treating it as a scope (0xB4620): Zoomed() is false and the wheel would change weapon
 }  // namespace
 
 namespace auf {
@@ -102,7 +100,7 @@ void WheelZoom(X86Context& ctx, uint8_t*) {
     if (!notches) return;
     float most = GetF(ctx.esi + 0x524);
     if (!(most > 1.0f)) return;
-    SetF(ctx.esi + 0x51C, std::clamp(GetF(ctx.esi + 0x51C) * std::pow(kNotchStep, float(notches)), 1.0f, most));
+    SetF(ctx.esi + 0x51C, std::clamp(GetF(ctx.esi + 0x51C) * std::pow(kNotchStep, float(notches)), kLeastZoom, most));
 }
 
 // Auto-aim: the target search 0xB8BB0 (fastcall: the player) only looks for a target when the player's +0x716 is set (the game's

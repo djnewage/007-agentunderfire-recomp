@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - The mouse's up and down were backwards everywhere, hidden by Invert mouse
+- Harry: Invert mouse is ticked; forward looks up out of the scope, down in it. So with it off (the default) forward looked down, on foot and on guns, since the first mouse work: input::TakeMouse's y is up positive, and pitch grows downwards. Every "fine" from him was with it ticked. Noted as odd twice on paper and left, because he called it right; the setting should have been asked about the first time.
+- Fixed in both exes; the scope flip, which was the answer to a wrong picture, is gone. He must untick it. Gun checked by a run; foot by the same sign, not run. His first report, sniper inverted with no flip in the code, is not explained by this: without a flip the scope goes the way normal aiming does.
+- Wheel: at zoom 1 the game stops treating it as a scope, Zoomed() false, the wheel changed weapon while scoped. Zoom held at 1.05 at least.
+
 ### 2026-10-31 - Scope test from the rates; loading sides in the art's colours
 - Harry: the flip changed nothing, the sniper still the wrong way. So Zoomed() (the player state's +0x2E4) was false for it; that also means the scope wheel (never reported on) probably did not work there. Zoomed() now: both rates equal and below 1, as 0xB45C0 sets them through a scope. Still not run: no scope reached headless. If it now flips and is right, the wheel should work there too.
 - Weapon keys and page's values confirmed by him. Loading sides: the row's edge pixels, not black, as he asked to match on foot.
