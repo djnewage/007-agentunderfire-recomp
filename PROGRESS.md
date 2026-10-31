@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Harry: movement great on the gun levels and on foot
+- Confirms the gun rate and the up and down direction on a real mouse, both places. Pointer, Select Mission clicks, driving prompts and scope wheel not reported on yet.
+
 ### 2026-10-31 - Mounted guns about 1400 times too sensitive: my measurement was of the intro
 - Harry: on the gun missions any slight movement spins the view thousands of times. Reproduced in the harness: 5 counts a frame turned over 2 radians a frame.
 - Why it got through: both earlier figures were wrong. The "0.004 a frame at full stick" was the ramp +0x1BC, not the view, and "2020 counts 1.78 radians" and "2400 counts 2.39 radians, then still" (logged as confirmed on the real path) were taken with the test window inside the mission's intro, another camera path about 1000 times slower. So the earlier spin report was probably this too, and the "fix" only made it stop when the mouse stops.
