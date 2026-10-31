@@ -11,7 +11,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
 - PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
-- Not done: in-game PC Settings page, French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
+- Not done: French and German xbes, DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
 - PAL, title 0x4541000D (EA), certificate region 0x4, version 2; extracted with extract-xiso from Harry's image.
@@ -22,6 +22,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-31 - PC Settings, the driving pointer, achievements
+- Harry asked for: the driving pause pointer and menu pointer, French and German, achievements, PC Settings from the main menu and pause menus.
+- PC Settings (src/bond/pc_settings.cpp): a row under the main menu's Options and under Quit Mission. Page arrays copied into AllocHostContiguous with one more text and item; the page is a second set of arrays laid on the same page, so the game moves, highlights and draws it. 0x40A00's events by pressing each: 0 left, 1 right, 2 up, 3 down, 4 A, 5 B. Rows: field of view, mouse sensitivity, render scale, anti-aliasing, texture filtering, sharp text, frame counter, more settings (F1). Seen in captures on the main menu and the pause, opening, moving, changing one, back. Main menu's labels are baked in main_icons, so the row is text, not a bar. The heading stays MAIN MENU. Renderers' effect of a change not seen here.
+- Driving (src/driving/pointer.cpp): the pause object [0x1DFB08] +0x420 tab, +0x424 row, +0x428 prompt's choice, +0x42C its row (research run proved by pokes; earlier diffs missed it, as it is in high memory). Rows hover, tabs click both ways: seen in captures. A fourth row drawn by a hook at 0xBB284 with a widget copy and a string number of ours (0xBC8C0), keyboard and pointer reach it. It opens the settings window, not a page: this engine has no page to borrow. Yes/No by pointer written, not exercised; click on the row not exercised (the harness has no window).
+- Achievements (src/common/achievement_set.cpp), 16: each mission, first gold, first platinum, every gold, every platinum. Only tested by poking the medal values (a run's medal and the best): the real scoring was not run, as no mission has been finished headless. That is the risk: whether 0x3B2D08 is set on a driving mission's return is read from code only.
+- wincheck of the new files ok, SMOKE OK.
 
 ### 2026-10-31 - Harry: movement great on the gun levels and on foot
 - Confirms the gun rate and the up and down direction on a real mouse, both places. Pointer, Select Mission clicks, driving prompts and scope wheel not reported on yet.
