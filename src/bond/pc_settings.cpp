@@ -7,6 +7,7 @@
 // +0xC4, index +0xC0). The new row is the page's arrays copied, with room for one more, into memory of ours. The settings page
 // is a second set of arrays laid on the same page: the game moves, highlights and draws it as its own, and the presses it would
 // act on are taken at 0x40A00 (file, event). Back puts the page's own arrays back.
+#include "bond/addr.h"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -41,8 +42,8 @@ void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uin
 }
 
 uint32_t Page(uint32_t file) { return file ? kernel::R32(file + 0x44) : 0; }
-uint32_t Frontend() { return kernel::R32(0x2A9724 + kernel::R32(0x2A9CA8) * 4); }
-uint32_t PauseFile() { return kernel::R32(0x2A9734); }
+uint32_t Frontend() { return kernel::R32(A(0x2A9724) + kernel::R32(A(0x2A9CA8)) * 4); }
+uint32_t PauseFile() { return kernel::R32(A(0x2A9734)); }
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
 void SetText(uint32_t text, const char* s) {
     char* to = reinterpret_cast<char*>(&kernel::G<uint8_t>(text + 0x24));
@@ -108,6 +109,25 @@ void Templates(uint32_t file, uint32_t page, uint32_t& text, uint32_t& pic) {
     text = kernel::R32(row + kItemText), pic = kernel::R32(row + kItemPic);
 }
 
+constexpr int kRows = 8;
+// the font is the game's Latin-1
+#if defined(AUF_LANG_FRE)
+constexpr const char* kRowName = "Param\xE8tres PC";
+const char* const kLabels[kRows] = {"Champ de vision", "Sensibilit\xE9 souris", "\xC9" "chelle de rendu", "Anticr\xE9nelage",
+                                    "Filtrage des textures", "Texte et ATH nets", "Compteur d'images", "Plus d'options"};
+const char* const kOff = "Non", *const kOn = "Oui", *const kGames = "Du jeu";
+#elif defined(AUF_LANG_GER)
+constexpr const char* kRowName = "PC-Einstellungen";
+const char* const kLabels[kRows] = {"Sichtfeld", "Mausempfindlichkeit", "Renderskalierung", "Kantengl\xE4ttung",
+                                    "Texturfilterung", "Scharfer Text und HUD", "Bildz\xE4hler", "Weitere Optionen"};
+const char* const kOff = "Aus", *const kOn = "An", *const kGames = "Vom Spiel";
+#else
+constexpr const char* kRowName = "PC Settings";
+const char* const kLabels[kRows] = {"Field of View", "Mouse Sensitivity", "Render Scale", "Anti-aliasing",
+                                    "Texture Filtering", "Sharp Text and HUD", "Frame Counter", "More Settings"};
+const char* const kOff = "Off", *const kOn = "On", *const kGames = "Game's";
+#endif
+
 // the row that opens the page: the page's last, with a copy of an item's text and (if it has them) its chevron
 std::map<uint32_t, uint32_t> g_rows;  // page -> its row
 void AddRow(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page, float x, float y) {
@@ -127,7 +147,7 @@ void AddRow(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page, float 
     std::memcpy(&kernel::G<uint8_t>(item), &kernel::G<uint8_t>(last), kItemSize);
     std::memcpy(&kernel::G<uint8_t>(new_text), text_copy.data(), kTextSize);
     kernel::W32(new_text + kTextNext, 0);
-    SetText(new_text, "PC Settings");
+    SetText(new_text, kRowName);
     Place(new_text, x, y);
     kernel::W32(item + kItemText, new_text);
     kernel::W32(item + kItemPic, 0);
@@ -162,10 +182,6 @@ struct Row {
     const char* label;
     int step;
 };
-constexpr int kRows = 8;
-const char* const kLabels[kRows] = {"Field of View", "Mouse Sensitivity", "Render Scale", "Anti-aliasing",
-                                    "Texture Filtering", "Sharp Text and HUD", "Frame Counter", "More Settings"};
-
 std::string Value(int row) {
     const app::Settings& s = app::Get();
     char b[32] = "";
@@ -174,15 +190,15 @@ std::string Value(int row) {
         case 1: std::snprintf(b, sizeof b, "%u%%", s.mouse_sensitivity); break;
         case 2: std::snprintf(b, sizeof b, "%u%%", s.render_percent); break;
         case 3: {
-            const char* names[] = {"Off", "FXAA", "MSAA 2x", "MSAA 4x", "MSAA 8x"};
+            const char* names[] = {kOff, "FXAA", "MSAA 2x", "MSAA 4x", "MSAA 8x"};
             return names[s.antialiasing % 5];
         }
         case 4:
-            if (!s.aniso) return "Game's";
+            if (!s.aniso) return kGames;
             std::snprintf(b, sizeof b, "%ux", s.aniso);
             break;
-        case 5: return s.sharp_2d ? "On" : "Off";
-        case 6: return s.show_fps ? "On" : "Off";
+        case 5: return s.sharp_2d ? kOn : kOff;
+        case 6: return s.show_fps ? kOn : kOff;
         default: break;
     }
     return b;

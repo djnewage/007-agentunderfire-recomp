@@ -30,3 +30,33 @@ read -r f1 d1 < <(grep 'renderer: frame' "$L" | tail -1 | sed -E 's/.*frame ([0-
 per=$(( (d1 - d0) / (f1 - f0) ))
 [ "$per" -gt 100 ] || fail "DRIVING.XBE not drawing: $per draws a frame"
 echo "SMOKE OK: DRIVING.XBE's mis02a draws $per a frame with reports held, as the Windows exe builds"
+# French and German: bond_eng.xbe's sources at those builds' addresses (tools/map_bond.py). Each must reach its first mission, its own
+# files open, the mouse's hook in force, PC Settings' row made; and the sources must be as the tool writes them.
+python3 tools/map_bond.py fre ger > .local/smoke_lang.out 2>&1 || fail "tools/map_bond.py left an address unmapped (.local/smoke_lang.out)"
+git diff --quiet -- src/bond_fre src/bond_ger config/bond_fre.toml config/bond_ger.toml src/bond/addr_fre.h src/bond/addr_ger.h || fail "the language sources are not as tools/map_bond.py writes them: commit them"
+cmake --build build/linux --target recompile_AgentUnderFireBondFre recompile_AgentUnderFireBondGer >> .local/smoke_lang.out 2>&1 || fail "the language xbes do not recompile"
+for l in fre ger; do
+    RT_THREAD=1 RAW=1 bash sdk/harness/build.sh -r . -g generated/bond_$l -o .local/harness_$l -n bond_$l >> .local/smoke_lang.out 2>&1 || fail "bond_$l does not build"
+done
+for l in fre ger; do
+    d=.local/run_$l; rm -rf $d && mkdir -p $d/1 && cp -r .local/run/1/hdd $d/1/ || fail "no hard disk to carry over"
+    python3 - "$l" unused $d/1/hdd/launch.bin <<'PY' || fail "no launch data for $l"
+import sys
+l=sys.argv[1]; d=bytearray(open('.local/hand/launch_bond.bin','rb').read())
+o=d.index(b'BOND_ENG.XBE'); d[o:o+12]=('BOND_%s.XBE'%l.upper()).encode()
+loc={'fre':b'IDL_FR.LOC','ger':b'IDL_GER.LOC'}[l]; o=d.index(b'IDL_ENG.LOC'); d[o:o+len(loc)+1]=loc+b'\0'
+open(sys.argv[3],'wb').write(d)
+PY
+    AUF_MOUSE_TEST=20,0,100,200 bash sdk/harness/run.sh -x .local/harness_$l/bond_$l -g "${GAME:-assets}" -o $d -t 110 -s scripts/pad/explore.txt >> .local/smoke_lang.out 2>&1 &
+done
+wait
+for l in fre ger; do
+    L=.local/run_$l/1/logs/auf_001.log; U=$(echo $l | tr a-z A-Z)
+    grep -q crash: .local/run_$l/1/run.out && fail "bond_$l crashed"
+    grep -q "1P_$U.VIV" $L || fail "bond_$l did not open its own files"
+    grep -q 'PC Settings is a row' $L || fail "bond_$l: no PC Settings row"
+    grep -q 'the mouse turns the view directly' $L || fail "bond_$l: the mouse's hook was not reached"
+    D=$(grep -h 'renderer: frame' $L | tail -1 | grep -oE '[0-9]+ draws' | cut -d' ' -f1); [ "${D:-0}" -gt 500000 ] || fail "bond_$l: only ${D:-0} draws (no mission?)"
+    echo "SMOKE OK: bond_$l reaches its mission, $D draws"
+done
+

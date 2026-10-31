@@ -5,6 +5,7 @@
 // the frame's seconds at 0x3B2420 from the time counter, the server at its own sv_fps), so nothing else depends on it. With the
 // default interval the runtime paces frames by the frame rate cap alone (Settings::fps_cap, 60 unless changed).
 // AUF_30FPS=1 keeps the console's.
+#include "bond/addr.h"
 #include <cstdlib>
 
 #include "common/auf.h"
@@ -13,7 +14,7 @@
 #include "xdk/hle.h"
 
 namespace {
-constexpr uint32_t kParamsInterval = 0x346788;  // the present parameters' interval (0x346758 + 0x30)
+constexpr uint32_t kParamsInterval = A(0x346788);  // the present parameters' interval (0x346758 + 0x30)
 constexpr uint32_t kModeDefault = 5;
 
 bool Unlocked() {

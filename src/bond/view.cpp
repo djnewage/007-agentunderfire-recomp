@@ -7,6 +7,7 @@
 // culling agree. On a 4:3 frame it stays the console's 1.
 // The field of view scales the angle those helpers are given; the scope divides the "fov" setting (0xBD78x), so it
 // zooms in proportion. The first person weapon, drawn through 0x13A350 from 0x14B654, keeps its own.
+#include "bond/addr.h"
 #include <algorithm>
 #include <cstring>
 
@@ -35,7 +36,7 @@ float g_margin = 1.0f;
 X86_EXTERN_FUNC(__imp__sub_001387E0);
 X86_FUNC(sub_001387E0) {
     float k = auf::FrameWidth();
-    SetF(0x3467B8, (k > 1.0f + 1e-3f ? k * 1.1f : 1.0f) * g_margin);
+    SetF(A(0x3467B8), (k > 1.0f + 1e-3f ? k * 1.1f : 1.0f) * g_margin);
     __imp__sub_001387E0(ctx, base);
 }
 
@@ -48,7 +49,7 @@ X86_FUNC(sub_0015CD00) {
 
 X86_EXTERN_FUNC(__imp__sub_0013A350);
 X86_FUNC(sub_0013A350) {
-    if (kernel::R32(ctx.esp) != 0x14B654) ScaleFov(ctx.esp + 8);
+    if (kernel::R32(ctx.esp) != A(0x14B654)) ScaleFov(ctx.esp + 8);
     __imp__sub_0013A350(ctx, base);
 }
 X86_EXTERN_FUNC(__imp__sub_0013A3D0);

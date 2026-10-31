@@ -5,6 +5,8 @@
     "exes": [
         "AgentUnderFire",
         "AgentUnderFireBond",
+        "AgentUnderFireBondFre",
+        "AgentUnderFireBondGer",
         "AgentUnderFireDriving"
     ],
     "xbe": "default.xbe",

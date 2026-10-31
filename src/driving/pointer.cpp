@@ -60,9 +60,10 @@ void Make(uint32_t object) {
     SetF(g_widget + 4, GetF(quit + 4) + kRowPitch);
     SetF(g_chevron + 4, GetF(chevron + 4) + kRowPitch);
     kernel::W32(g_widget + kStringId, kOurString);
-    static const char kText[] = "PC Settings";
-    g_string = mem::AllocHostContiguous(sizeof kText, 16);
-    std::memcpy(&kernel::G<uint8_t>(g_string), kText, sizeof kText);
+    static const char* const kText[3] = {"PC Settings", "Param\xE8tres PC", "PC-Einstellungen"};
+    const char* text = kText[auf::language % 3];
+    g_string = mem::AllocHostContiguous(uint32_t(std::strlen(text) + 1), 16);
+    std::memcpy(&kernel::G<uint8_t>(g_string), text, std::strlen(text) + 1);
     LOGR("auf: PC Settings is a row of the driving pause");
 }
 }  // namespace

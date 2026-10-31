@@ -14,6 +14,7 @@ extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp)
 extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/mouse.cpp, src/driving/mouse.cpp)
+extern uint32_t language;     // 0 English, 1 French, 2 German: default.xbe's choice of game, DRIVING.XBE's text
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
 float FovScale();             // fov_percent as a factor, 0.5 to 1.5
 float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4:3 screen
@@ -25,6 +26,8 @@ bool PlayerFree();            // bond_eng.xbe: Bond under the player's control, 
 bool ButtonPictures(uint32_t header, uint32_t palette);  // GameInfo::texture_bound (src/common/buttons.cpp)
 void RefreshButtons();        // each poll
 void MenuMouse(int port, input::Pad& p);
+// bond_eng.xbe's and each language's: the mission played, a run's medal, the best medals (0 in the other exes)
+extern const uint32_t kAddrMission, kAddrRunMedal, kAddrBestMedals;
 std::vector<achievements::Def> AchievementSet();  // src/common/achievement_set.cpp
 // the menus' pointer, on foot (src/bond/pointer.cpp): where it is in the menus' 640x480, the buttons, and what a click does
 enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown };  // Go plays A, the last three the d-pad

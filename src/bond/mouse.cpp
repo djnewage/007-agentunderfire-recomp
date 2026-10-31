@@ -5,6 +5,7 @@
 // manual aim, 0 when the player has no control (a cutscene, a frozen player), so the mouse follows them too. Yaw grows to
 // the left, pitch downwards. The server clamps pitch (0xC46E0). The console's invert option is the byte 0x3B22D5.
 // Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to plays that many counts a call for calls from..to.
+#include "bond/addr.h"
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -20,7 +21,7 @@
 #include "xdk/hle.h"
 
 namespace {
-constexpr uint32_t kPitch = 0x2A8124, kYaw = 0x2A8128, kYawRate = 0x2A8144, kPitchRate = 0x2A8148, kInvert = 0x3B22D5;
+constexpr uint32_t kPitch = A(0x2A8124), kYaw = A(0x2A8128), kYawRate = A(0x2A8144), kPitchRate = A(0x2A8148), kInvert = A(0x3B22D5);
 constexpr float kDegreesPerCount = 0.0458f;  // at 100% sensitivity: 36 degrees an inch at 800 counts an inch
 
 float GetF(uint32_t va) {
@@ -86,7 +87,7 @@ namespace auf {
 // the input layer's rate: 0 when the player has no control (0xB45C0, 0xAEDC0)
 bool PlayerFree() { return GetF(kYawRate) != 0; }
 bool Zoomed() {
-    uint32_t ps = kernel::R32(0x2A88B8);
+    uint32_t ps = kernel::R32(A(0x2A88B8));
     return ps && GetF(ps + 0x2E4) > 1.01f;
 }
 void ScopeZoom(int notches) { g_zoom_notches += notches; }

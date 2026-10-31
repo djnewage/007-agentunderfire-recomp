@@ -17,6 +17,7 @@ bool skip_intro = false;
 bool uncapped = true;
 bool auto_aim = false;
 uint32_t fov_percent = 100;
+uint32_t language = 0;
 
 float FovScale() {
     uint32_t pct = std::clamp<uint32_t>(fov_percent, 50, 150);
@@ -53,6 +54,7 @@ void Init() {
         if (std::string e = achievements::Check(d.condition); !e.empty()) LOGE("auf: achievement %s: %s", d.id, e.c_str());
     if (const char* e = std::getenv("AUF_SKIP_INTRO"); e && *e) auf::skip_intro = *e == '1';
     if (const char* e = std::getenv("AUF_AUTO_AIM"); e && *e) auf::auto_aim = *e == '1';
+    if (const char* e = std::getenv("AUF_LANGUAGE"); e && *e) auf::language = uint32_t(std::atoi(e));
     if (const char* e = std::getenv("AUF_FOV"); e && *e) auf::fov_percent = uint32_t(std::atoi(e));
     if (auf::skip_intro) LOGR("auf: the logo movies are skipped (skip_intro)");
 }
@@ -172,11 +174,14 @@ const app::GameInfo app::kGame = {
     // default.xbe launches the language's xbe; the runtime matches names lower case
     .images = {{"default.xbe", "AgentUnderFire"},
                {"bond_eng.xbe", "AgentUnderFireBond"},
+               {"bond_fre.xbe", "AgentUnderFireBondFre"},
+               {"bond_ger.xbe", "AgentUnderFireBondGer"},
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
                 {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
                 {"uncapped", &auf::uncapped, nullptr, "60 FPS on foot",
                  "Paced by the frame rate cap instead of the console's 30. Takes effect at the next start"},
+                {"language", nullptr, &auf::language, "Language (0 English, 1 French, 2 German)", "The disc's languages, at the next start."},
                 {"fov_percent", nullptr, &auf::fov_percent, "Field of view (%)",
                  "50 to 150; 100 is the game's. On foot and driving; the scope zooms in proportion"}},
     .load = LoadKeys,                     // DRIVING.XBE's keys apart (DrivingKeys)

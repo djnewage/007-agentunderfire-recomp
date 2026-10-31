@@ -3,6 +3,7 @@
 // the page; a page's +0x54 its items' count, +0x5C the items (0xDC each), +0x60 the current one. Pages of one item or
 // none (a briefing, the controller's picture) have nothing to point at: a click anywhere plays A.
 // Rectangles are the pictures' and the text's own: mode 1 is a fraction of 640x480, 0 pixels (0x56570).
+#include "bond/addr.h"
 #include <atomic>
 #include <cstdint>
 
@@ -131,7 +132,7 @@ X86_FUNC(sub_00056930) {
     // Select Mission (the front end's state 7) is one item drawn as a carousel over the difficulty: the pictures at the
     // sides step it, the middle one starts it, the difficulty's line steps that
     const uint32_t states = file ? kernel::R32(file + 0x14) : 0;
-    if (count == 1 && page == states + 7 * 0x3F8 && file == kernel::R32(0x2A9724 + kernel::R32(0x2A9CA8) * 4) && PointerAt(x, y)) {
+    if (count == 1 && page == states + 7 * 0x3F8 && file == kernel::R32(A(0x2A9724) + kernel::R32(A(0x2A9CA8)) * 4) && PointerAt(x, y)) {
         click = kClickNone;
         if (y >= 120 && y < 275) click = x >= 96 && x < 214 ? kClickLeft : x >= 224 && x < 416 ? kClickGo : x >= 426 && x < 544 ? kClickRight : kClickNone;
         else if (y >= 280 && y < 305) click = kClickDown;

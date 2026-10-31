@@ -42,18 +42,23 @@ endfunction()
 xbe_partitions(game.toml GAME_PARTITIONS)
 xbe_partitions(bond_game.toml BOND_PARTITIONS)
 xbe_partitions(driving_game.toml DRIVING_PARTITIONS)
+xbe_partitions(bond_fre_game.toml BOND_FRE_PARTITIONS)
+xbe_partitions(bond_ger_game.toml BOND_GER_PARTITIONS)
 
 # target name = GAME_EXE in build.bat, xbe = GAME_XBE: default.xbe is the disc's launcher and movie player
 add_xbe_image(AgentUnderFire default.xbe auf.toml ${GAME_PARTITIONS} game)
-# each language's game is an xbe default.xbe launches (XLaunchNewImage): an exe of its own. English first
+# each language's game is an xbe default.xbe launches (XLaunchNewImage): an exe of its own. src/bond_fre and src/bond_ger are
+# src/bond again, at those builds' addresses (tools/map_bond.py)
 add_xbe_image(AgentUnderFireBond bond_eng.xbe bond.toml ${BOND_PARTITIONS} bond)
+add_xbe_image(AgentUnderFireBondFre bond_fre.xbe bond_fre.toml ${BOND_FRE_PARTITIONS} bond_fre)
+add_xbe_image(AgentUnderFireBondGer bond_ger.xbe bond_ger.toml ${BOND_GER_PARTITIONS} bond_ger)
 # the driving levels are another
 add_xbe_image(AgentUnderFireDriving DRIVING.XBE driving.toml ${DRIVING_PARTITIONS} driving)
 
 # launcher/icon.ico, when there is one: the game's icon too (resource 1, which the window class loads)
 if(WIN32 AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/launcher/icon.ico)
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/game_icon.rc "1 ICON \"${CMAKE_CURRENT_SOURCE_DIR}/launcher/icon.ico\"\n")
-    foreach(t AgentUnderFire AgentUnderFireBond AgentUnderFireDriving)
+    foreach(t AgentUnderFire AgentUnderFireBond AgentUnderFireBondFre AgentUnderFireBondGer AgentUnderFireDriving)
         target_sources(${t} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/game_icon.rc)
     endforeach()
 endif()
