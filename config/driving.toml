@@ -102,3 +102,15 @@ D3D_IndexData  = 0x1228A4
 [[hook]]
 at = 0xBB284
 call = "DrawPcRow"
+
+[[hook]]
+at = 0xBC730
+call = "DrawPcPage"
+
+[[hook]]
+at = 0xBB1B1
+call = "PageHidesPanel"
+
+[[hook]]
+at = 0xBBC5F
+call = "PagePanelDone"

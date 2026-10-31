@@ -1,13 +1,17 @@
-// DRIVING.XBE's pause menu: the pointer, and a fourth row, PC Settings, that opens the settings window.
+// DRIVING.XBE's pause menu: the pointer, a fourth row, PC Settings, and the page it opens.
 //
 // The pause object is [0x1DFB08]: +0x2E0 the pause is up, +0x420 the tab, +0x424 the row (0 Continue, 1 Restart, 2 Quit), +0x428
 // the prompt's choice (0 none, 1 Yes, 2 No), +0x42C the row the prompt replaces (1 Restart, 2 Quit). Plain fields: the draw 0xBAEE0
 // reads them each frame. 0xB5B00 (thiscall, the event) takes presses: 1 A, 7 left, 9 right, 0xB up, 0xD down. It has the tabs' own
 // set up, so tabs go through it. A row is a widget of x +0, y +4 and a string number +0x34, which 0xBC8C0 looks up. The pointer's
 // rectangles are the widgets' places in 640x480, their widths from captures of the English text.
+// The page is the pause on its first tab, with +0x420 set to 4 from 0xBB1B1, where the draw has drawn the tabs (which index by it) and
+// turns to the panel, which has nothing for 4, back to 0 at 0xBBC5F; then rows drawn after the draw (a hook at 0xBC730), as the game draws its own. 0xB5B00 gets 0x10 for B and 6 for START.
 #include <atomic>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
+#include <string>
 
 #include "app/app.h"
 #include "common/auf.h"
@@ -26,10 +30,17 @@ constexpr uint32_t kObject = 0x1DFB08, kUp = 0x2E0, kTab = 0x420, kRow = 0x424, 
 constexpr uint32_t kColour = 0x16B910, kBright = 0xFFC4E6FF, kDim = 0xFF65839F;
 constexpr uint32_t kQuitWidget = 0x158, kChevron3 = 0x1B8, kStringId = 0x34, kOurString = 0x7FF0, kRowPitch = 26;
 constexpr int kOurRow = 3;
-constexpr uint32_t kEventA = 1, kEventLeft = 7, kEventRight = 9, kEventUp = 0xB, kEventDown = 0xD;
+constexpr uint32_t kEventA = 1, kEventLeft = 7, kEventRight = 9, kEventUp = 0xB, kEventDown = 0xD, kEventB = 0x10, kEventStart = 6;
+constexpr uint32_t kPageTab = 4, kStringsFirst = kOurString + 1;
+constexpr float kPageTop = 168, kPagePitch = 16, kPageX = 110, kPageValueX = 340;
 std::atomic<int> g_click{auf::kClickGo};
 std::atomic<bool> g_up{false};
 uint32_t g_widget = 0, g_chevron = 0, g_string = 0;
+// the page: a widget and a string for each row's label and value, and the cursor
+uint32_t g_page_widgets[auf::kPcRows * 2] = {}, g_page_strings[auf::kPcRows * 2] = {}, g_page_chevron = 0;
+int g_cursor = 0;
+bool g_page = false;
+constexpr uint32_t kStringBytes = 64;
 
 struct Rect {
     float x0, y0, x1, y1;
@@ -61,10 +72,19 @@ void Make(uint32_t object) {
     SetF(g_widget + 4, GetF(quit + 4) + kRowPitch);
     SetF(g_chevron + 4, GetF(chevron + 4) + kRowPitch);
     kernel::W32(g_widget + kStringId, kOurString);
-    static const char* const kText[3] = {"PC Settings", "Param\xE8tres PC", "PC-Einstellungen"};
-    const char* text = kText[auf::language % 3];
+    const char* text = auf::PcRowName(int(auf::language));
     g_string = mem::AllocHostContiguous(uint32_t(std::strlen(text) + 1), 16);
     std::memcpy(&kernel::G<uint8_t>(g_string), text, std::strlen(text) + 1);
+    for (int i = 0; i < auf::kPcRows * 2; i++) {
+        const uint32_t w = g_page_widgets[i] = mem::AllocHostContiguous(kBytes, 16);
+        std::memcpy(&kernel::G<uint8_t>(w), &kernel::G<uint8_t>(quit), kBytes);
+        SetF(w, i % 2 ? kPageValueX : kPageX);
+        SetF(w + 4, kPageTop + float(i / 2) * kPagePitch);
+        kernel::W32(w + kStringId, kStringsFirst + uint32_t(i));
+        g_page_strings[i] = mem::AllocHostContiguous(kStringBytes, 16);
+    }
+    g_page_chevron = mem::AllocHostContiguous(kBytes, 16);
+    std::memcpy(&kernel::G<uint8_t>(g_page_chevron), &kernel::G<uint8_t>(chevron), kBytes);
     LOGR("auf: PC Settings is a row of the driving pause");
 }
 }  // namespace
@@ -89,6 +109,55 @@ void SelectRow(X86Context& ctx, uint8_t* base, uint32_t object, int row) {
 }
 }  // namespace
 
+namespace {
+void OpenPage(uint32_t) {
+    g_page = true;
+    g_cursor = 0;
+    LOGR("auf: PC Settings opened in the driving pause");
+}
+void ClosePage(uint32_t object) {
+    kernel::W32(object + kRow, kOurRow);
+    g_page = false;
+    LOGR("auf: PC Settings closed in the driving pause");
+}
+// the game's step's sound, for a row of ours
+void Sound(X86Context& ctx, uint8_t* base, uint32_t object) {
+    g_page = false;  // the step goes to the game
+    kernel::W32(object + kRow, 0);
+    Event(ctx, base, object, kEventDown);
+    kernel::W32(object + kRow, kOurRow);
+    g_page = true;
+}
+}  // namespace
+
+// in the draw, the tabs done: nothing of the panel's
+void PageHidesPanel(X86Context& ctx, uint8_t*) {
+    if (g_page) kernel::W32(ctx.esi + kTab, kPageTab);
+}
+
+// the panel's paths meet at 0xBBC5F; the footer and the tabs' pictures after it index by the tab too
+void PagePanelDone(X86Context& ctx, uint8_t*) {
+    if (g_page) kernel::W32(ctx.esi + kTab, 0);
+}
+
+// after the pause's draw: the page's rows
+void DrawPcPage(X86Context& ctx, uint8_t* base) {
+    const uint32_t object = ctx.esi;
+    if (!g_page || !g_widget) return;
+    const uint32_t chevron = kernel::R32(object + kChevron3);
+    std::memcpy(&kernel::G<uint8_t>(g_page_chevron), &kernel::G<uint8_t>(chevron), 0xA0);
+    SetF(g_page_chevron + 4, GetF(chevron + 4) - GetF(kernel::R32(object + kQuitWidget) + 4) + kPageTop + float(g_cursor) * kPagePitch);
+    for (int i = 0; i < auf::kPcRows * 2; i++) {
+        const std::string text = i % 2 ? auf::PcValue(i / 2, int(auf::language)) : auf::PcLabel(i / 2, int(auf::language));
+        std::snprintf(reinterpret_cast<char*>(&kernel::G<uint8_t>(g_page_strings[i])), kStringBytes, "%s", text.c_str());
+        Call1(ctx, base, sub_000B20D0, g_page_widgets[i]);
+        kernel::W32(kColour, i / 2 == g_cursor ? kBright : kDim);
+        Call1(ctx, base, sub_000B4560, g_page_widgets[i] + 0x30);
+    }
+    Call1(ctx, base, sub_000B10B0, g_page_chevron);
+    Call1(ctx, base, sub_000B2BE0, g_page_chevron);
+}
+
 // in the draw, after the three rows
 void DrawPcRow(X86Context& ctx, uint8_t* base) {
     const uint32_t object = ctx.esi;
@@ -111,8 +180,14 @@ bool PointerWanted() { return g_up.load(std::memory_order_relaxed); }
 // the string number of ours
 X86_EXTERN_FUNC(__imp__sub_000BC8C0);
 X86_FUNC(sub_000BC8C0) {
-    if (kernel::R32(ctx.esp + 4) == kOurString && g_string) {
+    const uint32_t id = kernel::R32(ctx.esp + 4);
+    if (id == kOurString && g_string) {
         ctx.eax = g_string;
+        ctx.esp += 4;
+        return;
+    }
+    if (id >= kStringsFirst && id < kStringsFirst + auf::kPcRows * 2 && g_widget) {
+        ctx.eax = g_page_strings[id - kStringsFirst];
         ctx.esp += 4;
         return;
     }
@@ -122,11 +197,24 @@ X86_FUNC(sub_000BC8C0) {
 // the presses: the fourth row below Quit
 X86_FUNC(sub_000B5B00) {
     const uint32_t object = ctx.ecx, event = kernel::R32(ctx.esp + 4);
+    if (g_page) {
+        ctx.esp += 8;
+        if (event == kEventB) ClosePage(object);
+        else if (event == kEventStart) {
+            ClosePage(object);
+            Event(ctx, base, object, kEventStart);
+        } else if (event == kEventUp || event == kEventDown) {
+            g_cursor = (g_cursor + auf::kPcRows + (event == kEventUp ? -1 : 1)) % auf::kPcRows;
+            Sound(ctx, base, object);
+        } else if (event == kEventLeft || event == kEventRight) auf::PcStep(g_cursor, event == kEventLeft ? -1 : 1);
+        else if (event == kEventA) auf::PcStep(g_cursor, 1);
+        return;
+    }
     const bool rows = !kernel::R32(object + kTab) && !kernel::R32(object + kPrompt);
     const int row = int(kernel::R32(object + kRow));
     if (rows && ((event == kEventDown && row == 2) || row == kOurRow)) {
         if (row == kOurRow && event == kEventA) {
-            app::ToggleOverlay();
+            OpenPage(object);
             ctx.esp += 8;
             return;
         }
@@ -149,7 +237,23 @@ X86_FUNC(sub_000BC6B0) {
     g_up.store(up, std::memory_order_relaxed);
     int click = kClickGo;
     float x, y;
-    if (up && PointerAt(x, y)) {
+    if (!up) g_page = false;
+    if (up && g_page && PointerAt(x, y)) {
+        static float page_x = -1, page_y = -1;
+        const bool moved = x != page_x || y != page_y;
+        page_x = x, page_y = y;
+        click = kClickNone;
+        const int row = int((y - kPageTop + 6) / kPagePitch);
+        if (x >= kPageX && x < 560 && y >= kPageTop - 6 && row >= 0 && row < auf::kPcRows) {
+            if (moved && row != g_cursor) {
+                const uint32_t ecx = ctx.ecx;
+                g_cursor = row;
+                Sound(ctx, base, object);
+                ctx.ecx = ecx;
+            }
+            click = kClickGo;
+        }
+    } else if (up && PointerAt(x, y)) {
         static float last_x = -1, last_y = -1;
         static bool last_press = false;
         const bool press = (PointerButtons() & 1) != 0, moved = x != last_x || y != last_y, edge = press && !last_press;
@@ -167,7 +271,8 @@ X86_FUNC(sub_000BC6B0) {
             }
         if (prompt) {
             const float top = kernel::R32(object + kPromptRow) == 1 ? 202 : 228;
-            const Rect yes{293, top, 328, top + 22}, no{353, top, 379, top + 22};
+            // the row's right part in two, not the words' width: the words are small targets
+            const Rect yes{262, top - 4, 340, top + 26}, no{340, top - 4, 440, top + 26};
             const int hit = yes.Has(x, y) ? 1 : no.Has(x, y) ? 2 : 0;
             if (hit && (moved || edge)) kernel::W32(object + kPrompt, uint32_t(hit));
             if (hit) click = kClickGo;

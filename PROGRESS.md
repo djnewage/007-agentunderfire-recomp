@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - Harry's tests; PC Settings as a page in the driving pause
+- Harry on Windows: achievements on a finished mission on foot and driving work, a finished save awards nothing, PC Settings on foot works, the pointer lines up (ultrawide too), Select Mission clicks, driving prompts, French and German menus and labels all confirmed. Not yet: language through a driving mission and back. The earlier risk about driving's scoring is answered: it works.
+- He wanted a page in the driving pause, not the window. src/common/pc_rows.cpp now holds the rows for both exes. The tab goes to 4 from 0xBB1B1 and back at 0xBBC5F so the panel draws nothing (the tabs and the footer index widgets by the tab: 4 at the start crashed), and rows are drawn by a hook at 0xBC730. B is 0x10, START 6. Seen in captures: opening, moving, Render Scale changed, Back to the row. Pointer on the page written; hover and click on it not exercised.
+- Yes and No: he saw no hover highlight. Here at 16:9 the choice flipped on every move, at 310 and 366 by log; the highlight's change seen in captures. Boxes were only about 30 wide; now half the row each, on the guess that an offset on ultrawide missed them. Harry to confirm.
+
 ### 2026-10-31 - The Windows link: the language folders were in every exe
 - Harry's build.log: lld-link duplicate symbols in AgentUnderFire.exe. CMakeLists.txt's XBE_HOST_SOURCES takes src/*/*.cpp less a list of per-exe folders, and bond_fre and bond_ger were not listed, so each exe linked all three builds' hooks. So the throw was not his error (it may or may not have been one too). The harness does not read that list, so smoke cannot see this; checked with build/linux/build.ninja's objects per target.
 

@@ -2,6 +2,8 @@
 // Agent Under Fire's own settings and what its executables share (default.xbe: the logos and movies; bond_eng.xbe: the
 // game; DRIVING.XBE: the driving levels)
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "core/achievements.h"
 #include "core/input.h"
@@ -34,6 +36,12 @@ enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown }; 
 bool PointerAt(float& x, float& y);
 uint32_t PointerButtons();
 int MenuClick();
+// the PC Settings page's rows, on foot and in the driving pause (src/common/pc_rows.cpp); lang 0 English, 1 French, 2 German
+constexpr int kPcRows = 8;
+const char* PcRowName(int lang);
+const char* PcLabel(int row, int lang);
+std::string PcValue(int row, int lang);
+void PcStep(int row, int dir);  // the last row opens the settings window
 bool PointerWanted();             // the arrow shows: each image's own test
 void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file);  // src/bond/pc_settings.cpp
 
