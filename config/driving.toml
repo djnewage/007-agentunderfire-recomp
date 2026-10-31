@@ -98,3 +98,7 @@ D3DDevice_GetVisibilityTestResult                    = 0x114BE0
 # as bond_eng.xbe: the deferred texture state follows the dirty flags, the index data before them
 D3D_DirtyFlags = 0x1228A8
 D3D_IndexData  = 0x1228A4
+
+[[hook]]
+at = 0xBB284
+call = "DrawPcRow"

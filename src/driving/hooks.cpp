@@ -17,6 +17,5 @@ bool OnGun() {
 bool MenuUp() { return kernel::R32(0x1BEB1C) == 3 || kernel::R32(0x1E1818) != 0; }
 bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
-int MenuClick() { return kClickGo; }
 void ScopeZoom(int) {}
 }  // namespace auf

@@ -2,8 +2,8 @@
 // and Enter selects too. While a menu is up (auf::MenuUp, each image's own test) the mouse's buttons stop playing what
 // they are bound to in play and play A and B instead; each notch of the wheel is a press of the d-pad. In play a notch
 // cycles the weapon: on foot the d-pad's down a notch down and up a notch up; in the car Black and White. On a mounted
-// gun (auf::OnGun) the left button fires and the right zooms. On foot the menus show the Windows cursor, and the left
-// button selects what it is over (src/bond/pointer.cpp); DRIVING.XBE's menu keeps no rectangles, so no cursor there.
+// gun (auf::OnGun) the left button fires and the right zooms. The menus show the Windows cursor, and the left button
+// selects what it is over (src/bond/pointer.cpp, src/driving/pointer.cpp).
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -129,7 +129,7 @@ void MenuMouse(int port, input::Pad& p) {
     int64_t now = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
     bool menu = MenuUp();
 #ifdef _WIN32
-    if (kImage == kBond) ShowArrow(menu && input::UsingKeyboard());
+    if (kImage != kDefault) ShowArrow(PointerWanted() && input::UsingKeyboard());
 #endif
     static bool was = false;
     if (menu != was) LOGR("auf: %s", menu ? "a menu is up: the mouse plays A, B and the d-pad" : "out of the menus");

@@ -74,6 +74,7 @@ void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uin
 
 namespace auf {
 int MenuClick() { return g_click.load(std::memory_order_relaxed); }
+bool PointerWanted() { return MenuUp(); }
 }  // namespace auf
 
 X86_EXTERN_FUNC(__imp__sub_00056930);

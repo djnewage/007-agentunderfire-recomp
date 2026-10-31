@@ -29,6 +29,7 @@ enum { kClickNone, kClickWait, kClickGo, kClickLeft, kClickRight, kClickDown }; 
 bool PointerAt(float& x, float& y);
 uint32_t PointerButtons();
 int MenuClick();
+bool PointerWanted();             // the arrow shows: each image's own test
 void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file);  // src/bond/pc_settings.cpp
 
 }  // namespace auf
