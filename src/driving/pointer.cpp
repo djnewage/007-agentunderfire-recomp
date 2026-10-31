@@ -147,7 +147,7 @@ void DrawPcPage(X86Context& ctx, uint8_t* base) {
     const uint32_t chevron = kernel::R32(object + kChevron3);
     std::memcpy(&kernel::G<uint8_t>(g_page_chevron), &kernel::G<uint8_t>(chevron), 0xA0);
     SetF(g_page_chevron + 4, GetF(chevron + 4) - GetF(kernel::R32(object + kQuitWidget) + 4) + kPageTop + float(g_cursor) * kPagePitch);
-    for (int i = 0; i < auf::kPcRows * 2; i++) {
+    for (int i = 0; i < auf::PcRows() * 2; i++) {
         const std::string text = i % 2 ? auf::PcValue(i / 2, auf::Language()) : auf::PcLabel(i / 2, auf::Language());
         std::snprintf(reinterpret_cast<char*>(&kernel::G<uint8_t>(g_page_strings[i])), kStringBytes, "%s", text.c_str());
         Call1(ctx, base, sub_000B20D0, g_page_widgets[i]);
@@ -204,7 +204,7 @@ X86_FUNC(sub_000B5B00) {
             ClosePage(object);
             Event(ctx, base, object, kEventStart);
         } else if (event == kEventUp || event == kEventDown) {
-            g_cursor = (g_cursor + auf::kPcRows + (event == kEventUp ? -1 : 1)) % auf::kPcRows;
+            g_cursor = (g_cursor + auf::PcRows() + (event == kEventUp ? -1 : 1)) % auf::PcRows();
             Sound(ctx, base, object);
         } else if (event == kEventLeft || event == kEventRight) auf::PcStep(g_cursor, event == kEventLeft ? -1 : 1);
         else if (event == kEventA) auf::PcStep(g_cursor, auf::PcClickDir(kPageValueX));
@@ -244,7 +244,7 @@ X86_FUNC(sub_000BC6B0) {
         page_x = x, page_y = y;
         click = kClickNone;
         const int row = int((y - kPageTop + 6) / kPagePitch);
-        if (x >= kPageX && x < 560 && y >= kPageTop - 6 && row >= 0 && row < auf::kPcRows) {
+        if (x >= kPageX && x < 560 && y >= kPageTop - 6 && row >= 0 && row < auf::PcRows()) {
             if (moved && row != g_cursor) {
                 const uint32_t ecx = ctx.ecx;
                 g_cursor = row;

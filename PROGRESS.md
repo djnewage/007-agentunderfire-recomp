@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-10-31 - PC Settings in tabs, on every menu
+- Harry: more settings in game, tabs, in the pause menus too. Row 0 of the page chooses the tab, Graphics, Display, Controls, Game (a tab bar would need new art and space, and the pause already has its own tabs). Rows from src/common/pc_rows.cpp, so main menu, foot pause and driving pause are the same. Each row changes what the settings window changes; display mode posts ApplyDisplay as it does. Those marked * apply at the next start. Key rebinding stays in the settings window (More Settings on Controls and Game).
+- The pause row reading Continue Mission: the game refills its texts as a page comes up; the row's text is set each frame.
+
 ### 2026-10-31 - README: status, comparisons from Harry's shots
 - Shots at 3440x1440 differ by a measured 24 to 32 across and 68 to 76 down, so crops are offset by that. His file names give the settings; the sharpening percentage in "4x-sharpening-200" is not known, so the captions do not state it.
 - His agent-menu.jpg shows the on-foot pause's fourth row reading Continue Mission, not PC Settings: a bug to fix with the tabs. agent-menu-2 (the page) is used meanwhile.

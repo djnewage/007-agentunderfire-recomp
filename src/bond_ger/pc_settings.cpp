@@ -149,7 +149,7 @@ void AddRow(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page, float 
         kernel::W32(new_pic + kPicNext, 0);
         kernel::W32(new_pic + 0x90, 0);
         SetF(new_pic + 0x94, x - 6 - kernel::G<float>(new_pic + 0xA0));
-        SetF(new_pic + 0x98, y - 16);
+        SetF(new_pic + 0x98, y);  // a chevron at its text's y, as the game's own
         kernel::W32(item + kItemPic, new_pic);
         kernel::W32(page + kPicCount, np + 1);
     }
@@ -173,9 +173,23 @@ struct Open {
     uint32_t page = 0;
     uint32_t saved[7] = {};  // the page's text, picture and item arrays and current item
     uint32_t items = 0, values = 0;
+    int rows = 0;
 };
 Open g_open;
 const uint32_t kSavedAt[7] = {kTextCount, kTexts, kPicCount, kPics, kItemCount, kItems, kCurrent};
+
+// the tab's rows: as many items, texts and chevrons as it has, linked in a ring
+void ShowRows(uint32_t page, uint32_t items, bool chevrons) {
+    const int n = auf::PcRows();
+    for (int i = 0; i < n; i++) {
+        const uint32_t up = uint32_t((i + n - 1) % n), down = uint32_t((i + 1) % n);
+        Link(items + uint32_t(i) * kItemSize, up, items + up * kItemSize, down, items + down * kItemSize);
+    }
+    kernel::W32(page + kTextCount, uint32_t(n) * 2);
+    kernel::W32(page + kPicCount, chevrons ? uint32_t(n) : 0);
+    kernel::W32(page + kItemCount, uint32_t(n));
+    g_open.rows = n;
+}
 
 void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
     uint32_t text = 0, pic = 0;
@@ -211,22 +225,18 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
             kernel::W32(chevron + kPicNext, 0);
             kernel::W32(chevron + 0x90, 0);
             SetF(chevron + 0x94, x - 16);
-            SetF(chevron + 0x98, y - 16);
+            SetF(chevron + 0x98, y);
             kernel::W32(item + kItemPic, chevron);
         }
         kernel::W32(item + kItemIndex, uint32_t(i));
         kernel::W32(item + kAction, 0);
-        const uint32_t up = uint32_t((i + kRows - 1) % kRows), down = uint32_t((i + 1) % kRows);
-        Link(item, up, c.items + up * kItemSize, down, c.items + down * kItemSize);
     }
     g_open.page = page;
     for (int i = 0; i < 7; i++) g_open.saved[i] = kernel::R32(page + kSavedAt[i]);
     g_open.items = c.items;
-    kernel::W32(page + kTextCount, kRows * 2);
     kernel::W32(page + kTexts, c.texts);
-    kernel::W32(page + kPicCount, pic ? kRows : 0);
     kernel::W32(page + kPics, c.pics);
-    kernel::W32(page + kItemCount, kRows);
+    ShowRows(page, c.items, pic != 0);
     kernel::W32(page + kItems, c.items);
     kernel::W32(page + kCurrent, c.items);
     for (int i = 0; i < kRows; i++) Call1(ctx, base, sub_00037AD0, c.items + uint32_t(i) * kItemSize);
@@ -253,9 +263,18 @@ void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
             g_open.page = 0;
             return;
         }
-        for (int i = 0; i < kRows; i++) SetText(kernel::R32(g_open.items + uint32_t(i) * kItemSize + kItemText) + kTextSize, auf::PcValue(i, kLang).c_str());
+        if (auf::PcRows() != g_open.rows) ShowRows(page, g_open.items, kernel::R32(page + kPicCount) != 0);
+        for (int i = 0; i < g_open.rows; i++) {
+            const uint32_t label = kernel::R32(g_open.items + uint32_t(i) * kItemSize + kItemText);
+            SetText(label, auf::PcLabel(i, kLang));
+            SetText(label + kTextSize, auf::PcValue(i, kLang).c_str());
+        }
         return;
     }
+    // the game fills its texts again as a page comes up (seen on the pause: this row read Continue Mission)
+    if (auto row = g_rows.find(page); row != g_rows.end() && kernel::R32(page + kItems) <= row->second &&
+        row->second < kernel::R32(page + kItems) + kernel::R32(page + kItemCount) * kItemSize)
+        SetText(kernel::R32(row->second + kItemText), auf::PcRowName(kLang));
     const uint32_t states = kernel::R32(file + 0x14);
     if (file == Frontend() && page == states + 3 * kStateSize && kernel::R32(page + kItemCount) >= 5) AddRow(ctx, base, file, page, 200, 402);
     if (file == PauseFile() && page == states + 1 * kStateSize && kernel::R32(page + kItemCount) >= 3) AddRow(ctx, base, file, page, 110, 264);
