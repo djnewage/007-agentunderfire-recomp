@@ -10,7 +10,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
 - GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 36bb42e
-- PC features: skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
+- PC features: PC Settings, pointer, achievements, French and German confirmed by Harry; skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
 - Not done: DRIVING.XBE in the smoke test, levels played to their end, PC features
 
 ## Disc
@@ -22,6 +22,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-10-31 - Harry confirms the mouse's direction, the scope, the wheel, loading colours and languages
+- On Windows at 572f01d, Invert mouse off: up and down right, on foot, in the scope and on guns; the wheel stays a zoom in the scope; the three items he was asked (direction, wheel, and the loading colours and language through a driving mission) "all three fixed".
+- Nothing else reported open from his lists. Not exercised by anyone: a multiplayer match; the launcher's packaging; the driving page's pointer and Yes/No boxes after widening were asked about, not separately reported.
 
 ### 2026-10-31 - The mouse's up and down were backwards everywhere, hidden by Invert mouse
 - Harry: Invert mouse is ticked; forward looks up out of the scope, down in it. So with it off (the default) forward looked down, on foot and on guns, since the first mouse work: input::TakeMouse's y is up positive, and pitch grows downwards. Every "fine" from him was with it ticked. Noted as odd twice on paper and left, because he called it right; the setting should have been asked about the first time.
