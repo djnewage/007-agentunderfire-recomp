@@ -207,7 +207,7 @@ X86_FUNC(sub_000B5B00) {
             g_cursor = (g_cursor + auf::kPcRows + (event == kEventUp ? -1 : 1)) % auf::kPcRows;
             Sound(ctx, base, object);
         } else if (event == kEventLeft || event == kEventRight) auf::PcStep(g_cursor, event == kEventLeft ? -1 : 1);
-        else if (event == kEventA) auf::PcStep(g_cursor, 1);
+        else if (event == kEventA) auf::PcStep(g_cursor, auf::PcClickDir(kPageValueX));
         return;
     }
     const bool rows = !kernel::R32(object + kTab) && !kernel::R32(object + kPrompt);

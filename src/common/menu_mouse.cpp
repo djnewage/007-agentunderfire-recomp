@@ -146,6 +146,10 @@ void MenuMouse(int port, input::Pad& p) {
     else if (kImage == kDriving) next = input::kBlack, prev = input::kWhite;
     else if (kImage == kBond) next = input::kDown, prev = input::kUp;  // the d-pad's up and down are the weapon on foot
     if (kImage == kDriving && !menu && OnGun() && input::UsingKeyboard()) {
+        // the weapons as on foot: the d-pad's down and up, by 1 and 3, Q and the wheel
+        next = input::kDown, prev = input::kUp;
+        if (KeyHeld('1') || KeyHeld('Q')) Press(p, input::kDown);
+        if (KeyHeld('3')) Press(p, input::kUp);
         for (int c : {input::kA, input::kX, input::kLT, input::kRT}) p.analog[c - input::kA] = 0;
         if (held & 1) Press(p, input::kRT);
         if (held & 2) Press(p, input::kLT);
@@ -153,6 +157,14 @@ void MenuMouse(int port, input::Pad& p) {
     }
     if (menu) {
         if (KeyHeld(0x0D)) p.analog[0] = 255;  // Enter: A
+        // the arrow keys are the d-pad in any menu (DRIVING.XBE's keys have them on the left stick, once)
+        const int vks[4] = {0x26, 0x28, 0x25, 0x27}, pads[4] = {input::kUp, input::kDown, input::kLeft, input::kRight};
+        for (int i = 0; i < 4; i++)
+            if (KeyHeld(vks[i])) {
+                Press(p, pads[i]);
+                if (i < 2) p.ly = 0;
+                else p.lx = 0;
+            }
         // the buttons out of what they play in play
         for (int c = 0; c < input::kA + 8; c++) {
             auto keys = input::ControlKeys(c);

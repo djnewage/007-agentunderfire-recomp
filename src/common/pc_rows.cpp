@@ -21,7 +21,8 @@ const char* const kGames[3] = {"Game's", "Du jeu", "Vom Spiel"};
 const char* PcRowName(int lang) { return kRowNames[lang % 3]; }
 const char* PcLabel(int row, int lang) { return kLabels[lang % 3][row % kPcRows]; }
 
-std::string PcValue(int row, int lang) {
+namespace {
+std::string Plain(int row, int lang) {
     const app::Settings& s = app::Get();
     lang %= 3;
     char b[32] = "";
@@ -42,6 +43,18 @@ std::string PcValue(int row, int lang) {
         default: break;
     }
     return b;
+}
+}  // namespace
+
+// the arrows are for the mouse: a click on the left one lowers (PcClickDir)
+std::string PcValue(int row, int lang) {
+    std::string v = Plain(row, lang);
+    return v.empty() ? v : "< " + v + " >";
+}
+
+int PcClickDir(float value_x) {
+    float x, y;
+    return (PointerButtons() & 1) && PointerAt(x, y) && x < value_x + 22 ? -1 : 1;
 }
 
 void PcStep(int row, int dir) {

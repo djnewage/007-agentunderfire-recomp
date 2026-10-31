@@ -272,7 +272,7 @@ X86_FUNC(sub_00040A00) {
         const int row = int(kernel::R32(kernel::R32(page + kCurrent) + kItemIndex));
         if (event == kEventLeft || event == kEventRight || event == kEventA || event == kEventB) {
             if (event == kEventB) ClosePage();
-            else if (event == kEventA) auf::PcStep(row, 1);
+            else if (event == kEventA) auf::PcStep(row, auf::PcClickDir(file == PauseFile() ? 330 : 370));
             else auf::PcStep(row, event == kEventLeft ? -1 : 1);
             ctx.esp += 4;
             return;

@@ -41,6 +41,7 @@ constexpr int kPcRows = 8;
 const char* PcRowName(int lang);
 const char* PcLabel(int row, int lang);
 std::string PcValue(int row, int lang);
+int PcClickDir(float value_x);   // what a press of A does to a value: down with the mouse on its left arrow
 void PcStep(int row, int dir);  // the last row opens the settings window
 bool PointerWanted();             // the arrow shows: each image's own test
 void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file);  // src/bond/pc_settings.cpp
