@@ -23,6 +23,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Driving and the gun past 60: in-between frames (sdk branch frame-interp)
+- Harry: driving and mission 2 above 60, whichever way is best regardless of time. Time-based physics was ruled out: steps are built into 104 places of 1/50 and all tick counts, and handling would change. In-between frames: sdk runtime/gpu/interp.cpp, opt-in by GameInfo::step_interpolation (DRIVING.XBE only, with the uncapped option, when the cap is past 60).
+- Each step's clears, draws and copies are recorded as they pass to the backend. At Present the list is replayed N times with vertex shader constants blended from the same draw in the step before (matched by what it draws, in order), then at 1, so the picture is up to one step late. No blend after a camera cut or when nothing moved.
+- What a replay needs that memory no longer holds: stream, texture and palette headers (one vertex buffer repointed per draw: the HUD scrambled) and vertices up to 64 KB (one small buffer rewritten per draw with a wait: the reflection's first quad vanished and the HUD lost its radar). Kept per draw and fed from a two-step region of guest memory.
+- Time: 6 ms drawing, 2.5 ms a replay headless. Frames are as many as fit before the next tick, so the game never waits: 1202 frames for 601 steps at 120, about 2360 for 595 at 240. XBE_INTERP_TEST=N draws N a step for snap bursts; three of them at mis02b show the full HUD, radar and even movement (RMSE 0.032 frame to frame).
+- Not known until Windows: D3D12's cost at his 6880x2880, presents of one surface in a row. World particles written to dynamic buffers stay at the step's place while the camera blends. Slow motion stays held at half for now.
+
 ### 2026-11-01 - On foot unlocked: the frame rate cap goes past 60
 - Harry wants unlocked FPS before launch. The cap could not pass 60: a present interval of 1 counts in 60 a second (now app::g_pace_hz, SDK at the fork's main 8de73e5).
 - That alone ran the game fast: 0x25CA0 measures the frame's seconds, then takes 0x138760's, 1/60 a frame at any rate; 140 frames a second gave 11.6 s of game time in 5 s. An earlier note here said it ran off the clock: true only at or below 60. 0x138760 now returns the measured time, up to a tenth of a second.
