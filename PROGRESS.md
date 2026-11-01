@@ -23,8 +23,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
-### 2026-11-01 - Open: a flicker around the pause and leaving a mission
-- Harry: going into the start menu and exiting a mission flickers; not new. Not found: two headless tries gave nothing (the snap file makes no pictures; REF=3 slows the game so far that the wall-clock pad's presses land too early and it idles back to default.xbe). The harness does not use D3D12 either. Waiting on which moment and how it looks.
+### 2026-11-01 - The flicker: the desktop for a frame at a relaunch
+- Harry's video: after Quit Mission fades to black, frame 280 of 298 is his Windows desktop, one frame. The new exe's window opened in the same step as telling the old to go, and a window just shown has nothing until its next present. SDK branch handover-gap: the old instance goes three presents after the window opens. Windows only, cannot run here. SDK's main brought along, with the redone settings window. Not merged to the fork's main until Harry has confirmed it and the games' gates pass.
 
 ### 2026-11-01 - The strips' tab reads RECOMP
 - Harry's shot: on foot "PC Settings" ran off the strip; he asked for Recomp. Now RECOMP on both pauses in every language; the main menu's row keeps its name. The Briefing label stayed coloured under the tab: a label's colour is four floats at +0xA4, and only the first was changed.
