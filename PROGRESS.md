@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Cut scene frame rate: measured, not fixed
+- Harry: low frame rate on cut scenes. His log's only sustained slow stretch is a driving mission's end cut scene, F3 capture at 244 s: 77 of 347 frames over 25 ms in 10 s, longest 62.5 ms, 258 draws, render target 6880x2880. On foot the slow lines are short (15-22 frames near 45 ms).
+- Driving runs at 50 frames a second (500 in 10 s, exactly 20.0 ms headless), not the 60 the log's "paced" says and earlier notes claimed. Frame times land on 20 ms steps, so an overrun shows as 40 or 60 ms. Where the 20 ms comes from is not found: no caller of BlockUntilVerticalBlank, and present returns at once.
+- The mission's start headless: 40 ms frames with 1 draw are the loading picture, not a cut scene; the intro after it holds 20 ms. So the end scene's spikes are not reproduced here, and which part is slow (game or GPU) is unknown.
+- Next: Harry to say which cut scenes; reach an end scene headless with frame timing.
+
 ### 2026-11-01 - Front end's Back prompt shows Backspace on keys
 - Harry confirmed the quit fade no longer flickers. His shot of Select Mission: ENTER drawn, but the red B still there.
 - That B is not in the atlas: a 32x64 DXT3 picture of its own, beside the A's, FNV 0xE8116B93FAE4A5F7, the same in all three languages. It now joins the known pictures (src/common/buttons.cpp); pictures of one shape are told apart by hash.
