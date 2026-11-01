@@ -84,7 +84,7 @@ void Make(uint32_t object) {
     std::memcpy(&kernel::G<uint8_t>(g_chevron), &kernel::G<uint8_t>(chevron), kBytes);
     std::memcpy(&kernel::G<uint8_t>(g_widget), &kernel::G<uint8_t>(kernel::R32(object + kBriefingTab)), kBytes);
     kernel::W32(g_widget + kStringId, kOurString);
-    const char* text = auf::PcRowName(auf::Language());
+    const char* text = auf::PcTabName();
     g_string = mem::AllocHostContiguous(uint32_t(std::strlen(text) + 1), 16);
     std::memcpy(&kernel::G<uint8_t>(g_string), text, std::strlen(text) + 1);
     g_map_widget = kernel::R32(object + kMapTab);
@@ -180,16 +180,8 @@ void LayOutTabs(X86Context& ctx, uint8_t* base, uint32_t object) {
         width[i] = float(int32_t(ctx.eax));
         total += width[i];
     }
-    constexpr float kLeft = 110, kRight = 632, kWidest = 40, kNarrowest = 10;
-    float gap = std::min(kWidest, (kRight - kLeft - total) / float(n - 1));
-    if (gap < kNarrowest) {  // a long language beside a Map tab: its short name
-        std::memcpy(&kernel::G<uint8_t>(g_string), "PC", 3);
-        Call1(ctx, base, sub_000B20D0, g_widget);
-        Call1(ctx, base, sub_000B3740, g_string);
-        total += float(int32_t(ctx.eax)) - width[n - 1];
-        width[n - 1] = float(int32_t(ctx.eax));
-        gap = std::min(kWidest, (kRight - kLeft - total) / float(n - 1));
-    }
+    constexpr float kLeft = 110, kRight = 632, kWidest = 40;
+    const float gap = std::min(kWidest, (kRight - kLeft - total) / float(n - 1));
     float x = kLeft;
     for (int i = 0; i < n; i++) {
         SetF(widgets[i], x);

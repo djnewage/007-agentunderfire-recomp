@@ -103,6 +103,7 @@ std::string Plain(int id, int lang) {
 }
 }  // namespace
 
+const char* PcTabName() { return "RECOMP"; }
 const char* PcRowName(int lang) { return kRowNames[lang % 3]; }
 int PcRows() { return kTabs[g_tab].count + 1; }
 const char* PcLabel(int row, int lang) { return row ? kLabels[lang % 3][IdOf(row)] : kTabLabel[lang % 3]; }

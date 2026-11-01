@@ -37,7 +37,7 @@ constexpr uint32_t kOptionsState = 9;
 // the pause's tab strip: a page's plain texts at +0 (count) and +8, 0x278 each (x, its centre, +0x90, y +0x94, w +0x98, red +0xA4, 1 on the
 // tab showing, the string +0x24), the tabs at y 113; its strip's bands at +0xC and +0x14, 0x1C4 each (y +0x1C, 111)
 constexpr uint32_t kPlainCount = 0, kPlains = 8, kPlainSize = 0x278, kBandCount = 0xC, kBands = 0x14, kBandSize = 0x1C4;
-constexpr float kTabY = 113, kPcTabX = 577;
+constexpr float kTabY = 113, kPcTabX = 560;
 
 // cdecl: the argument, the return address (the callee's ret takes it), the argument off
 void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uint32_t arg) {
@@ -202,7 +202,7 @@ void AddTab(uint32_t page) {
     const auto known = g_pc_tabs.find(page);
     if (known != g_pc_tabs.end() && kernel::R32(page + kPlains) <= known->second &&
         known->second < kernel::R32(page + kPlains) + kernel::R32(page + kPlainCount) * kPlainSize) {
-        SetText(known->second, auf::PcRowName(kLang));
+        SetText(known->second, auf::PcTabName());
         return;
     }
     const std::vector<uint32_t> tabs = TabsOf(page);
@@ -212,11 +212,11 @@ void AddTab(uint32_t page) {
     std::memcpy(&kernel::G<uint8_t>(copy), &kernel::G<uint8_t>(list), n * kPlainSize);
     const uint32_t tab = copy + n * kPlainSize;
     std::memcpy(&kernel::G<uint8_t>(tab), &kernel::G<uint8_t>(tabs.back()), kPlainSize);
-    SetText(tab, auf::PcRowName(kLang));
+    SetText(tab, auf::PcTabName());
     SetF(tab + 0x90, kPcTabX);
-    SetF(tab + 0x98, 110);
+    SetF(tab + 0x98, 70);
     for (const uint32_t t : tabs)
-        if (kernel::G<float>(t + 0xA4) <= 0.6f) SetF(tab + 0xA4, kernel::G<float>(t + 0xA4));
+        if (kernel::G<float>(t + 0xA4) <= 0.6f) std::memcpy(&kernel::G<uint8_t>(tab + 0xA4), &kernel::G<uint8_t>(t + 0xA4), 16);
     kernel::W32(page + kPlains, copy);
     kernel::W32(page + kPlainCount, n + 1);
     g_pc_tabs[page] = tab;
@@ -288,12 +288,12 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
         const uint32_t list = g_open.saved[8], count = g_open.saved[7];
         uint32_t n = 0;
         // the page's own two reds
-        float bright = 1, dim = 0;
+        uint32_t bright = 0, dim = 0;  // a tab of each kind: its four colours at +0xA4
         for (uint32_t i = 0; i < count; i++)
             if (kernel::G<float>(list + i * kPlainSize + 0x94) == kTabY && kernel::G<float>(list + i * kPlainSize + 0x90) != kPcTabX) {
-                const float r = kernel::G<float>(list + i * kPlainSize + 0xA4);
-                if (r > 0.6f) bright = r;
-                else dim = r;
+                const uint32_t t = list + i * kPlainSize;
+                if (kernel::G<float>(t + 0xA4) > 0.6f) bright = t;
+                else dim = t;
             }
         for (uint32_t i = 0; i < count && n < 64; i++) {
             const uint32_t t = list + i * kPlainSize;
@@ -301,7 +301,8 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
             if (ty != kTabY && ty < 300) continue;
             const uint32_t k = kept + n++ * kPlainSize;
             std::memcpy(&kernel::G<uint8_t>(k), &kernel::G<uint8_t>(t), kPlainSize);
-            if (ty == kTabY) SetF(k + 0xA4, kernel::G<float>(k + 0x90) == kPcTabX ? bright : dim);
+            const uint32_t like = kernel::G<float>(t + 0x90) == kPcTabX ? bright : dim;
+            if (ty == kTabY && like) std::memcpy(&kernel::G<uint8_t>(k + 0xA4), &kernel::G<uint8_t>(like + 0xA4), 16);
         }
         kernel::W32(page + kPlains, kept);
         kernel::W32(page + kPlainCount, n);

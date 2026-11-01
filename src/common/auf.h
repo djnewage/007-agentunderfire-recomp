@@ -39,6 +39,7 @@ int MenuClick();
 constexpr int kPcRows = 8;
 int Language();                  // 0 English, 1 French, 2 German: the setting (src/common/pc_rows.cpp)
 const char* PcRowName(int lang);
+const char* PcTabName();         // on the pause's strip, where the name would not fit
 int PcRows();                    // of the tab showing, its chooser (row 0) included
 const char* PcLabel(int row, int lang);
 std::string PcValue(int row, int lang);

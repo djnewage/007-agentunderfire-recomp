@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - The strips' tab reads RECOMP
+- Harry's shot: on foot "PC Settings" ran off the strip; he asked for Recomp. Now RECOMP on both pauses in every language; the main menu's row keeps its name. The Briefing label stayed coloured under the tab: a label's colour is four floats at +0xA4, and only the first was changed.
+
 ### 2026-11-01 - PC Settings' tab opens on the strip
 - Harry: right into the tab landed on the Page row, whose left and right change the page, so no way back by keys. It now opens with no row chosen: left the tab before, down to Page, up from Page back to the strip. Foot: the page's current item 0 (pointer.cpp guards it); driving: the cursor -1. Back goes to the tab before too, in the driving pause by the game's own step. The main menu's page opens on Page as before: it has no tabs.
 
