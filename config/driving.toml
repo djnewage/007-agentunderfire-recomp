@@ -114,3 +114,7 @@ call = "LoadingPictureCentred"
 [[hook]]
 at = 0xBBC5F
 call = "PagePanelDone"
+
+[[hook]]
+at = 0xBBFAB
+call = "TabPlaces"

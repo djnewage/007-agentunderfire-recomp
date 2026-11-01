@@ -36,9 +36,15 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-pc-settings.webp" alt="The PC Settings page in the main menu, with field of view, mouse sensitivity, render scale, MSAA, FXAA, sharpening and texture filtering" width="700">
+  <img src="docs/img/agentunderfire-pc-settings-pause.webp" alt="The pause screen with a PC Settings tab beside Mission, Objectives and Briefing, showing the Graphics page" width="800">
   <br>
-  <i>PC Settings, in the game's own menus.</i>
+  <i>PC Settings as a tab of the pause screen, on foot and driving.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-pc-settings.webp" alt="The PC Settings page from the main menu" width="700">
+  <br>
+  <i>And from the main menu.</i>
 </p>
 
 ### Keyboard and mouse
@@ -84,7 +90,7 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 - **Render scale** draws the picture larger than the screen: the smoothest fine detail, and the slowest.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-sharpness.webp" alt="The distant city with all off, sharpening 50% and sharpening 100%" width="800">
+  <img src="docs/img/agentunderfire-settings-sharpness.webp" alt="A door's hinges and carved lines with all off, sharpening 50% and sharpening 100%" width="800">
   <br>
   <i>Sharpening, enlarged twice.</i>
 </p>

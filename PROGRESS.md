@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - README: the tab's shots, a better sharpening comparison
+- Harry's new shots replace the old page's; the sharpening crop is now a door's hinges and carved lines, not the blurry distant city he pointed out.
+
+### 2026-11-01 - The driving pause's strip laid out by measure
+- Harry's shot of Dangerous Pursuit: "PC" over "MAP", the Map box lit. Tabs are now measured with the game's 0xB3740 once in the draw, and closed up if the row would not fit (Map tabs, long languages); the pointer's boxes come from the same. The draw spaces its own labels (0xBBF50) into the stack, so the hook at 0xBBFAB writes ours over them; moving the widgets did nothing. The lit box (0xBC043 on) goes by the current tab's label, so with the page open +0x110 holds ours from 0xBBC5F to 0xBC730 and the real Map label is drawn after.
+
 ### 2026-11-01 - Harry's tests of the tab; clicks back off it
 - On Windows: PC Settings tab, its rows, pointer, values, the settings applied at once and at the next start, keys, Yes and No, the icon, all good; the strip's look he does not mind. Not reported: a level with a Map tab, the later missions, multiplayer.
 - Bug: from PC Settings a click on another tab did nothing, as the open page returned before the strip. Fixed on foot and driving.

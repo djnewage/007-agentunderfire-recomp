@@ -7,6 +7,7 @@
 // rectangles are the widgets' places in 640x480, their widths from captures of the English text.
 // The page is the pause on its first tab, with +0x420 set to 4 from 0xBB1B1, where the draw has drawn the tabs (which index by it) and
 // turns to the panel, which has nothing for 4, then 3 for the strip (0xBBC5F); back to 0 after the draw (0xBC730); then rows drawn after the draw (a hook at 0xBC730), as the game draws its own. 0xB5B00 gets 0x10 for B and 6 for START.
+#include <algorithm>
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -24,11 +25,13 @@ X86_EXTERN_FUNC(sub_000B20D0);
 X86_EXTERN_FUNC(sub_000B4560);
 X86_EXTERN_FUNC(sub_000B10B0);
 X86_EXTERN_FUNC(sub_000B2BE0);
+X86_EXTERN_FUNC(sub_000B3740);  // the width of a string in the font set
+X86_EXTERN_FUNC(sub_000BC8C0);  // a string by its number
 
 namespace {
 constexpr uint32_t kObject = 0x1DFB08, kUp = 0x2E0, kTab = 0x420, kRow = 0x424, kPrompt = 0x428, kPromptRow = 0x42C;
 constexpr uint32_t kColour = 0x16B910, kBright = 0xFFC4E6FF, kDim = 0xFF65839F;
-constexpr uint32_t kQuitWidget = 0x158, kBriefingTab = 0x10C, kChevron3 = 0x1B8, kStringId = 0x34, kOurString = 0x7FF0;
+constexpr uint32_t kQuitWidget = 0x158, kBriefingTab = 0x10C, kFirstTab = 0x104, kMapTab = 0x110, kChevron3 = 0x1B8, kStringId = 0x34, kOurString = 0x7FF0;
 constexpr uint32_t kEventA = 1, kEventLeft = 7, kEventRight = 9, kEventUp = 0xB, kEventDown = 0xD, kEventB = 0x10, kEventStart = 6;
 constexpr uint32_t kPageTab = 4, kStringsFirst = kOurString + 1;
 constexpr float kPageTop = 150, kPagePitch = 20, kPageX = 110, kPageValueX = 340;
@@ -47,7 +50,11 @@ struct Rect {
 };
 // wide enough for the French and German rows
 const Rect kRows[3] = {{113, 176, 340, 198}, {113, 202, 340, 224}, {113, 228, 340, 250}};
-const Rect kTabs[4] = {{100, 112, 184, 134}, {244, 112, 355, 134}, {413, 112, 500, 134}, {540, 112, 610, 134}};
+// the labels' places, measured once in the draw (LayOutTabs, TabPlaces); these until then
+Rect g_tabs[5] = {{100, 112, 184, 134}, {244, 112, 355, 134}, {413, 112, 500, 134}, {540, 112, 610, 134}, {510, 112, 640, 134}};
+uint32_t g_map_widget = 0;  // the Map tab's, while +0x110 holds ours for the lit box
+bool g_laid_out = false;
+float g_tab_x[5] = {};  // the labels' x, PC Settings' last
 
 float GetF(uint32_t va) { return kernel::G<float>(va); }
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
@@ -77,10 +84,10 @@ void Make(uint32_t object) {
     std::memcpy(&kernel::G<uint8_t>(g_chevron), &kernel::G<uint8_t>(chevron), kBytes);
     std::memcpy(&kernel::G<uint8_t>(g_widget), &kernel::G<uint8_t>(kernel::R32(object + kBriefingTab)), kBytes);
     kernel::W32(g_widget + kStringId, kOurString);
-    const char* text = HasMap(object) ? "PC" : auf::PcRowName(auf::Language());
+    const char* text = auf::PcRowName(auf::Language());
     g_string = mem::AllocHostContiguous(uint32_t(std::strlen(text) + 1), 16);
     std::memcpy(&kernel::G<uint8_t>(g_string), text, std::strlen(text) + 1);
-    SetF(g_widget, HasMap(object) ? 600 : 520);
+    g_map_widget = kernel::R32(object + kMapTab);
     for (int i = 0; i < auf::kPcRows * 2; i++) {
         const uint32_t w = g_page_widgets[i] = mem::AllocHostContiguous(kBytes, 16);
         std::memcpy(&kernel::G<uint8_t>(w), &kernel::G<uint8_t>(quit), kBytes);
@@ -148,18 +155,81 @@ void PageHidesPanel(X86Context& ctx, uint8_t*) {
 // the panel's paths meet at 0xBBC5F; the strip's boxes and labels after it index by the tab: the Map's, whose widgets always exist, so
 // none of the others is bright
 void PagePanelDone(X86Context& ctx, uint8_t*) {
-    if (g_page) kernel::W32(ctx.esi + kTab, 3);
+    if (g_page) {
+        kernel::W32(ctx.esi + kTab, 3);
+        kernel::W32(ctx.esi + kMapTab, g_widget);  // the strip's lit box goes by the current tab's label: ours
+    }
+}
+
+namespace {
+// the tabs with PC Settings' beside them, measured in the game's font: as they are if there is room, or closed up (a Map tab, a long
+// language)
+void LayOutTabs(X86Context& ctx, uint8_t* base, uint32_t object) {
+    if (g_laid_out) return;
+    g_laid_out = true;
+    uint32_t widgets[5];
+    float width[5];
+    int n = 0;
+    for (int i = 0; i < 3 + (HasMap(object) ? 1 : 0); i++) widgets[n++] = i == 3 ? g_map_widget : kernel::R32(object + kFirstTab + uint32_t(i) * 4);
+    widgets[n++] = g_widget;
+    float total = 0;
+    for (int i = 0; i < n; i++) {
+        Call1(ctx, base, sub_000B20D0, widgets[i]);
+        Call1(ctx, base, sub_000BC8C0, kernel::R32(widgets[i] + kStringId));
+        Call1(ctx, base, sub_000B3740, ctx.eax);
+        width[i] = float(int32_t(ctx.eax));
+        total += width[i];
+    }
+    constexpr float kLeft = 110, kRight = 632, kWidest = 40, kNarrowest = 10;
+    float gap = std::min(kWidest, (kRight - kLeft - total) / float(n - 1));
+    if (gap < kNarrowest) {  // a long language beside a Map tab: its short name
+        std::memcpy(&kernel::G<uint8_t>(g_string), "PC", 3);
+        Call1(ctx, base, sub_000B20D0, g_widget);
+        Call1(ctx, base, sub_000B3740, g_string);
+        total += float(int32_t(ctx.eax)) - width[n - 1];
+        width[n - 1] = float(int32_t(ctx.eax));
+        gap = std::min(kWidest, (kRight - kLeft - total) / float(n - 1));
+    }
+    float x = kLeft;
+    for (int i = 0; i < n; i++) {
+        SetF(widgets[i], x);
+        const int slot = i == n - 1 ? 4 : i;
+        g_tab_x[slot] = x;
+        g_tabs[slot] = {x - gap / 2, 112, x + width[i] + gap / 2, 134};
+        x += width[i] + gap;
+    }
+    LOGR("auf: the driving pause's tabs laid out, %d of them, the gap %.0f", n, gap);
+}
+}  // namespace
+
+// the draw spaces its labels itself (0xBBF50), leaving their x at [esp+0x64 + 8 tab] for the strip below: ours instead; on the page the
+// fourth is PC Settings', whose label +0x110 holds
+void TabPlaces(X86Context& ctx, uint8_t*) {
+    if (!g_laid_out) return;
+    for (uint32_t i = 0; i < 4; i++) {
+        const float x = i == 3 && g_page ? g_tab_x[4] : g_tab_x[i];
+        if (x > 0) SetF(ctx.esp + 0x64 + 8 * i, x);
+    }
 }
 
 // after the pause's draw: the page's rows
 void DrawPcPage(X86Context& ctx, uint8_t* base) {
     const uint32_t object = ctx.esi;
-    if (g_page) kernel::W32(object + kTab, 0);
+    if (g_page) {
+        kernel::W32(object + kTab, 0);
+        kernel::W32(object + kMapTab, g_map_widget);
+    }
     if (!kernel::R32(object + kUp) || kernel::R32(0x1BEB1C) != 3) return;
     Make(object);
+    LayOutTabs(ctx, base, object);
     Call1(ctx, base, sub_000B20D0, g_widget);
     kernel::W32(kColour, g_page ? kBright : kDim);
     Call1(ctx, base, sub_000B4560, g_widget + 0x30);
+    if (g_page && HasMap(object)) {  // the draw drew ours in its place
+        Call1(ctx, base, sub_000B20D0, g_map_widget);
+        kernel::W32(kColour, kDim);
+        Call1(ctx, base, sub_000B4560, g_map_widget + 0x30);
+    }
     if (!g_page) return;
     const uint32_t chevron = kernel::R32(object + kChevron3);
     std::memcpy(&kernel::G<uint8_t>(g_page_chevron), &kernel::G<uint8_t>(chevron), 0xA0);
@@ -243,7 +313,7 @@ X86_FUNC(sub_000BC6B0) {
         page_press = press;
         if (page_edge)
             for (int t = 0; t < 4; t++)
-                if (kTabs[t].Has(x, y) && (t < 3 || HasMap(object))) {
+                if (g_tabs[t].Has(x, y) && (t < 3 || HasMap(object))) {
                     ClosePage(object);
                     for (int i = 0; i < t; i++) Event(ctx, base, object, kEventRight);
                     ctx.ecx = object;
@@ -267,10 +337,9 @@ X86_FUNC(sub_000BC6B0) {
         const int tab = int(kernel::R32(object + kTab));
         const uint32_t prompt = kernel::R32(object + kPrompt);
         click = kClickNone;
-        const Rect pc{HasMap(object) ? 590.0f : 510.0f, 112, 640, 134};
-        if (pc.Has(x, y) && edge && !prompt) OpenPage(object);
+        if (g_tabs[4].Has(x, y) && edge && !prompt) OpenPage(object);
         for (int t = 0; t < 4; t++)
-            if (kTabs[t].Has(x, y) && edge && t != tab && !prompt && (t < 3 || HasMap(object))) {
+            if (g_tabs[t].Has(x, y) && edge && t != tab && !prompt && (t < 3 || HasMap(object))) {
                 for (int i = 0; i < 4 && int(kernel::R32(object + kTab)) != t; i++) {
                     const uint32_t ecx = ctx.ecx;
                     Event(ctx, base, object, t < int(kernel::R32(object + kTab)) ? kEventLeft : kEventRight);
