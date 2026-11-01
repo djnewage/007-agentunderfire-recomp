@@ -1,7 +1,7 @@
 // Keyboard prompts: while the keyboard and mouse play, the button pictures of bond_eng.xbe's menus and hints show the keys.
 //
 // Its front end and pause draw the prompts from a 256x256 A8R8G8B8 atlas (A, B, X, Y and the d-pads among other art); "Press A"
-// hints from a 32x64 DXT3 picture of an A. When one is bound (GameInfo::texture_bound) and as the disc has it (its bytes' FNV-1a), it
+// hints and the front end's Back and Select from 32x64 DXT3 pictures of an A and a B. When one is bound (GameInfo::texture_bound) and as the disc has it (its bytes' FNV-1a), it
 // gets a replacement four times larger with those cells drawn as keys: the first binding of each control, A as Enter and B as
 // Backspace where those select and go back (a menu, or Bond not the player's to move), the d-pads as arrow keys. With a controller
 // the replacement goes and the disc's pictures are drawn. The guest's bytes are left alone. Shapes: src/common/strokes.h.
@@ -45,6 +45,7 @@ const std::vector<Cell> kAtlasCells = {
     {{48, 150, 66, 168}, input::kA, 0, 0},     {{69, 150, 87, 168}, input::kX, 0, 0},
 };
 const std::vector<Cell> kPressACells = {{{0, 0, 32, 32}, input::kA, 0, 0}};  // drawn square: the hint's quad is
+const std::vector<Cell> kPressBCells = {{{0, 0, 32, 32}, input::kB, 0, 0}};
 
 struct Known {
     uint32_t format, w, h, bytes;
@@ -53,7 +54,8 @@ struct Known {
     uint32_t canvas;  // texels across and down of the drawing
 };
 const Known kKnown[] = {{0x06, 256, 256, 256 * 256 * 4, 0xC3A73051EF13D69Full, &kAtlasCells, 256},
-                        {0x0E, 32, 64, 32 * 64, 0xA17873E88E43A396ull, &kPressACells, 32}};
+                        {0x0E, 32, 64, 32 * 64, 0xA17873E88E43A396ull, &kPressACells, 32},
+                        {0x0E, 32, 64, 32 * 64, 0xE8116B93FAE4A5F7ull, &kPressBCells, 32}};
 
 // DRIVING.XBE's atlas in its icons' palette: the tall ovals the pause menu's line draws (squeezed to a 12x20 quad), A and B
 // small, the rings, and the d-pads: the round pictures beside them are that line's change page and scroll
@@ -317,9 +319,9 @@ bool ButtonPictures(uint32_t header, uint32_t palette) {
     gpu::TextureDesc d;
     if (!gpu::Describe(header, d)) return false;
     if (kImage == kDriving) return d.format == 0x0B && d.width == 256 && d.height == 256 && ButtonsP8(d, palette);
-    const Known* k = nullptr;
+    const Known* k = nullptr;  // the first of this shape: enough to look at its bytes
     for (const Known& c : kKnown)
-        if (c.format == d.format && c.w == d.width && c.h == d.height) k = &c;
+        if (!k && c.format == d.format && c.w == d.width && c.h == d.height) k = &c;
     if (!k || !mem::IsCommitted(d.data) || !mem::IsCommitted(d.data + k->bytes - 1)) return false;
     std::lock_guard<std::mutex> hold(g_lock);
     const auto* bytes = static_cast<const uint8_t*>(kernel::HostPtr(d.data));
@@ -329,12 +331,16 @@ bool ButtonPictures(uint32_t header, uint32_t palette) {
         uint64_t head = Fnv(bytes, 256);
         auto no = g_not.find(d.data);
         if (no != g_not.end() && no->second == head) return false;
-        if (Fnv(bytes, k->bytes) != k->disc) {
+        const uint64_t hash = Fnv(bytes, k->bytes);
+        const Known* same = nullptr;
+        for (const Known& c : kKnown)
+            if (c.format == d.format && c.w == d.width && c.h == d.height && c.disc == hash) same = &c;
+        if (!same) {
             g_not[d.data] = head;
             return false;
         }
-        it = g_pictures.emplace(d.data, Picture{k, d, {}}).first;
-    } else if (it->second.known != k) {  // the memory holds something else now
+        it = g_pictures.emplace(d.data, Picture{same, d, {}}).first;
+    } else if (it->second.known->format != k->format || it->second.known->w != k->w || it->second.known->h != k->h) {  // the memory holds something else now
         g_pictures.erase(it);
         return false;
     }

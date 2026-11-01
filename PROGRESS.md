@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Front end's Back prompt shows Backspace on keys
+- Harry confirmed the quit fade no longer flickers. His shot of Select Mission: ENTER drawn, but the red B still there.
+- That B is not in the atlas: a 32x64 DXT3 picture of its own, beside the A's, FNV 0xE8116B93FAE4A5F7, the same in all three languages. It now joins the known pictures (src/common/buttons.cpp); pictures of one shape are told apart by hash.
+- Evidence: the log says it was drawn as keys, and AUF_BUTTON_DUMP shows BKSP. The reference renderer keeps the disc's look on this page for the A too, so it can't show this; the Windows exe does, as it does ENTER. Needs Harry's eye.
+
 ### 2026-11-01 - The flicker: the pause menu on and off in the quit's fade; a wrong diagnosis first
 - First reading of Harry's video was wrong: frame 280's desktop is him closing the game (the log's window closed 1.4 s after the relaunch), not a gap in the handover, so SDK branch handover-gap fixes nothing he saw. He reported it still flickers. Read by brightness alone, I had skipped the frames that matter.
 - Compared frame to frame: during the fade after Quit (frames 176 on) the picture alternates between the pause menu showing and not. Reproduced headless with a snap burst (SNAP_FRAMES, saved as snap_N.tga in the run folder): no menu, menu, menu, no menu. His F3 capture of the fade has one draw, a full-screen quad: the draw has stopped, and three buffers darken as they turn. The pause flag clears a frame before it stops, so one holds no menu.
