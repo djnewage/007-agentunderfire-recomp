@@ -23,6 +23,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - In-between frames: flicker open, stopped after three attempts
+- Harry: textures flicker or shift whenever the frame rate is above 60, vsync on or off; still there on c0c59d8. Below or at 60 the blending is off and it is fine. Branch driving-interp, sdk frame-interp; not on main, and fork main untouched.
+- Tried, each cured what it aimed at but not this: (1) motion follows the clock, not squeezed into the time left; (2) a draw with no match follows a matched one of the same matrix (capture 201230 shows one world matrix, so that part is proven); (3) one timeline, no step shown as drawn among blended ones.
+- Other things already fixed in this work: scrambled HUD (per-draw headers, kept vertices), flying radar arrow (matching).
+- Not reproduced headless: the reference renderer's frames look right and static HUD text changes 0 pixels. So either it needs D3D12, or it is in what blending does to registers beyond the matrix, which a still cannot show.
+- Suspects, untested: all 192 registers are blended, not only matrices, so anything per-draw that is not linear (fog, light, texture scroll, flags kept as floats) is moved; D3D12 handling of a surface presented several times, or of a target drawn again within a frame (the reflection target sampled while drawn again; "sampled target reloaded"); the live draw plus replays of one step leaving state the later replay sees; world vertices over 64 KB in dynamic buffers read as the next data.
+- Next, if Harry wants it: headless is blind, so switches for his build, one change each: blend matrix registers only; skip the reflection pass in replays; D3D11 in place of D3D12. Each answer narrows it.
+
 ### 2026-11-01 - Driving and the gun past 60: in-between frames (sdk branch frame-interp)
 - Harry: driving and mission 2 above 60, whichever way is best regardless of time. Time-based physics was ruled out: steps are built into 104 places of 1/50 and all tick counts, and handling would change. In-between frames: sdk runtime/gpu/interp.cpp, opt-in by GameInfo::step_interpolation (DRIVING.XBE only, with the uncapped option, when the cap is past 60).
 - Each step's clears, draws and copies are recorded as they pass to the backend. At Present the list is replayed N times with vertex shader constants blended from the same draw in the step before (matched by what it draws, in order), then at 1, so the picture is up to one step late. No blend after a camera cut or when nothing moved.
