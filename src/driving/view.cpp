@@ -10,7 +10,9 @@
 #include <cstring>
 
 #include "common/auf.h"
+#include "gpu/state.h"
 #include "kernel/kernel.h"
+#include "xdk/d3d8.h"
 #include "xdk/hle.h"
 
 namespace {
@@ -22,6 +24,18 @@ float GetF(uint32_t va) {
 }
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
 }  // namespace
+
+// The radar 0xB9010 draws in its own viewport. Its road map is a quad larger than that, so as it turns it can cover the viewport,
+// and on a wide screen the renderers take such a draw for a pass filling its viewport and leave it unsqueezed where the disc and
+// dots are squeezed: cut off by the viewport, the lines mostly gone. The whole radar is squeezed as one.
+X86_EXTERN_FUNC(__imp__sub_000B9010);
+X86_FUNC(sub_000B9010) {
+    gpu::State& state = d3d::State();
+    const bool was = state.squeeze_beyond;
+    state.squeeze_beyond = true;
+    __imp__sub_000B9010(ctx, base);
+    state.squeeze_beyond = was;
+}
 
 // The fade on leaving a mission (0xB7B60) stops drawing and darkens whatever is in the back buffer with a black quad, each
 // frame. Triple buffered, those are the last three frames, one without the pause menu and one half drawn, and it shows them in

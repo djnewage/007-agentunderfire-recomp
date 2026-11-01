@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Driving radar's road lines back on wide screens
+- Harry: the minimap has lost its lines. Reproduced headless at 16:9: draw of the map texture (P8 256x256, the road lines) wrote only from x 477, the disc sits at 438 to 517. The map's quad is larger than the radar's viewport (477,48,135x135), so gpu::DrawSpan takes it for a pass filling its viewport (kSpanViewport, EoN's Thermovision) and leaves it unsqueezed, clipped by the unsqueezed viewport, while the rest is squeezed whole. Depends on the map's turn, which is why the earlier radar fix looked right.
+- Fixed in the game, no SDK change: src/driving/view.cpp sets State::squeeze_beyond (shift 0) for the radar 0xB9010. Seen on screen headless at three frames in mis02b. D3D12 takes the same flag; not seen on Windows.
+- Worth doing when the SDK next goes through the gate: kSpanViewport should want a quad about the viewport's size.
+
 ### 2026-11-01 - Driving slow motion held to half speed
 - Harry: 60 FPS feels great, slow motion drops to 15. He chose half speed over no slow motion or in-between frames. Event 0x466D0's scale is held to at least 0.5 (src/driving/hooks.cpp), logged as the scene asks.
 - Tested by calling the event with 0.25 at frame 1200 in play, headless. The real scene's value is not read yet: the log line will show it on Windows.
