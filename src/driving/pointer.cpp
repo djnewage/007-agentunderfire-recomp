@@ -128,7 +128,7 @@ void OpenPage(uint32_t object) {
     kernel::W32(object + kTab, 0);
     kernel::W32(object + kPrompt, 0);
     g_page = true;
-    g_cursor = 0;
+    g_cursor = -1;  // on the strip, as the other tabs open: left and right go between tabs, down to the rows
     LOGR("auf: PC Settings opened in the driving pause");
 }
 void ClosePage(uint32_t object) {
@@ -241,8 +241,10 @@ void DrawPcPage(X86Context& ctx, uint8_t* base) {
         kernel::W32(kColour, i / 2 == g_cursor ? kBright : kDim);
         Call1(ctx, base, sub_000B4560, g_page_widgets[i] + 0x30);
     }
-    Call1(ctx, base, sub_000B10B0, g_page_chevron);
-    Call1(ctx, base, sub_000B2BE0, g_page_chevron);
+    if (g_cursor >= 0) {
+        Call1(ctx, base, sub_000B10B0, g_page_chevron);
+        Call1(ctx, base, sub_000B2BE0, g_page_chevron);
+    }
 }
 
 namespace auf {
@@ -272,10 +274,25 @@ X86_FUNC(sub_000B5B00) {
     const uint32_t object = ctx.ecx, event = kernel::R32(ctx.esp + 4);
     if (g_page) {
         ctx.esp += 8;
-        if (event == kEventB) ClosePage(object);
+        // back to the tab before, by the game's step, which sets up what it shows
+        const auto back = [&] {
+            ClosePage(object);
+            kernel::W32(object + kTab, uint32_t(LastTab(object) - 1));
+            Event(ctx, base, object, kEventRight);
+        };
+        if (event == kEventB) back();
         else if (event == kEventStart) {
             ClosePage(object);
             Event(ctx, base, object, kEventStart);
+        } else if (g_cursor < 0) {
+            if (event == kEventLeft) back();
+            if (event == kEventDown) {
+                g_cursor = 0;
+                Sound(ctx, base, object);
+            }
+        } else if (event == kEventUp && g_cursor == 0) {
+            g_cursor = -1;
+            Sound(ctx, base, object);
         } else if (event == kEventUp || event == kEventDown) {
             g_cursor = (g_cursor + auf::PcRows() + (event == kEventUp ? -1 : 1)) % auf::PcRows();
             Sound(ctx, base, object);
@@ -315,7 +332,7 @@ X86_FUNC(sub_000BC6B0) {
             for (int t = 0; t < 4; t++)
                 if (g_tabs[t].Has(x, y) && (t < 3 || HasMap(object))) {
                     ClosePage(object);
-                    for (int i = 0; i < t; i++) Event(ctx, base, object, kEventRight);
+                    for (int i = 0; i < t; i++) Event(ctx, base, object, kEventRight);  // from the first
                     ctx.ecx = object;
                     break;
                 }

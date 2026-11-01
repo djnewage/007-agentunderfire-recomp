@@ -118,7 +118,7 @@ X86_FUNC(sub_00056930) {
         }
         if (free) {
             // as the d-pad's left and right do at 0x39120
-            Call1(ctx, base, sub_00037AD0, current);
+            if (current) Call1(ctx, base, sub_00037AD0, current);  // none on the PC Settings tab's strip
             Call1(ctx, base, sub_00037A30, hit);
             kernel::W32(page + kPageCurrent, hit);
             static uint32_t sound = 0;

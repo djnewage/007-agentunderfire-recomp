@@ -32,7 +32,7 @@ constexpr uint32_t kTextCount = 0x24, kTexts = 0x2C, kPicCount = 0x3C, kPics = 0
 constexpr uint32_t kTextSize = 0x2CC, kPicSize = 0x1F4, kItemSize = 0xDC, kStateSize = 0x3F8;
 constexpr uint32_t kItemText = 0xB0, kItemPic = 0xC4, kItemIndex = 0xC0, kAction = 0x38;
 constexpr uint32_t kTextNext = 0x2C8, kPicNext = 0x1F0;
-constexpr uint32_t kEventLeft = 0, kEventRight = 1, kEventA = 4, kEventB = 5;  // 0x40A00's, seen by pressing each
+constexpr uint32_t kEventLeft = 0, kEventRight = 1, kEventUp = 2, kEventDown = 3, kEventA = 4, kEventB = 5;  // 0x40A00's, seen by pressing each
 constexpr uint32_t kOptionsState = 9;
 // the pause's tab strip: a page's plain texts at +0 (count) and +8, 0x278 each (x, its centre, +0x90, y +0x94, w +0x98, red +0xA4, 1 on the
 // tab showing, the string +0x24), the tabs at y 113; its strip's bands at +0xC and +0x14, 0x1C4 each (y +0x1C, 111)
@@ -314,9 +314,10 @@ void OpenPage(X86Context& ctx, uint8_t* base, uint32_t file, uint32_t page) {
         }
     }
     kernel::W32(page + kItems, c.items);
-    kernel::W32(page + kCurrent, c.items);
     for (int i = 0; i < kRows; i++) Call1(ctx, base, sub_00037AD0, c.items + uint32_t(i) * kItemSize);
-    Call1(ctx, base, sub_00037A30, c.items);
+    // on the pause it opens as its other tabs do, no row chosen (the current item 0): left and right go between tabs, down to the rows
+    kernel::W32(page + kCurrent, paused ? 0 : c.items);
+    if (!paused) Call1(ctx, base, sub_00037A30, c.items);
     LOGR("auf: PC Settings opened");
 }
 
@@ -423,10 +424,30 @@ X86_FUNC(sub_00040A00) {
     static const bool said = std::getenv("AUF_EVENT_LOG") != nullptr;
     if (said) LOGR("auf: menu event %u", event);
     if (page && g_open.page == page) {
-        const int row = int(kernel::R32(kernel::R32(page + kCurrent) + kItemIndex));
-        if (event == kEventLeft || event == kEventRight || event == kEventA || event == kEventB) {
-            if (event == kEventB) ClosePage();
-            else if (event == kEventA) auf::PcStep(row, auf::PcClickDir(file == PauseFile() ? 330 : 370));
+        const uint32_t current = kernel::R32(page + kCurrent), items = g_open.items;
+        if (event == kEventB) {
+            ClosePage();
+            ctx.esp += 4;
+            return;
+        }
+        if (!current) {  // on the strip
+            if (event == kEventLeft) ClosePage();
+            if (event == kEventDown) {
+                kernel::W32(page + kCurrent, items);
+                Call1(ctx, base, sub_00037A30, items);
+            }
+            ctx.esp += 4;
+            return;
+        }
+        const int row = int(kernel::R32(current + kItemIndex));
+        if (event == kEventUp && row == 0 && file == PauseFile()) {
+            Call1(ctx, base, sub_00037AD0, current);
+            kernel::W32(page + kCurrent, 0);
+            ctx.esp += 4;
+            return;
+        }
+        if (event == kEventLeft || event == kEventRight || event == kEventA) {
+            if (event == kEventA) auf::PcStep(row, auf::PcClickDir(file == PauseFile() ? 330 : 370));
             else auf::PcStep(row, event == kEventLeft ? -1 : 1);
             ctx.esp += 4;
             return;

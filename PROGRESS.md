@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - PC Settings' tab opens on the strip
+- Harry: right into the tab landed on the Page row, whose left and right change the page, so no way back by keys. It now opens with no row chosen: left the tab before, down to Page, up from Page back to the strip. Foot: the page's current item 0 (pointer.cpp guards it); driving: the cursor -1. Back goes to the tab before too, in the driving pause by the game's own step. The main menu's page opens on Page as before: it has no tabs.
+
 ### 2026-11-01 - README: the tab's shots, a better sharpening comparison
 - Harry's new shots replace the old page's; the sharpening crop is now a door's hinges and carved lines, not the blurry distant city he pointed out.
 
