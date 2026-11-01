@@ -23,8 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
-### 2026-11-01 - The flicker: the desktop for a frame at a relaunch
-- Harry's video: after Quit Mission fades to black, frame 280 of 298 is his Windows desktop, one frame. The new exe's window opened in the same step as telling the old to go, and a window just shown has nothing until its next present. SDK branch handover-gap: the old instance goes three presents after the window opens. Windows only, cannot run here. SDK's main brought along, with the redone settings window. Not merged to the fork's main until Harry has confirmed it and the games' gates pass.
+### 2026-11-01 - The flicker: the pause menu on and off in the quit's fade; a wrong diagnosis first
+- First reading of Harry's video was wrong: frame 280's desktop is him closing the game (the log's window closed 1.4 s after the relaunch), not a gap in the handover, so SDK branch handover-gap fixes nothing he saw. He reported it still flickers. Read by brightness alone, I had skipped the frames that matter.
+- Compared frame to frame: during the fade after Quit (frames 176 on) the picture alternates between the pause menu showing and not. Reproduced headless with a snap burst (SNAP_FRAMES, saved as snap_N.tga in the run folder): no menu, menu, menu, no menu. His F3 capture of the fade has one draw, a full-screen quad: the draw has stopped, and three buffers darken as they turn. The pause flag clears a frame before it stops, so one holds no menu.
+- The fade (0xB7B60, 60 steps) draws nothing but a black quad over the back buffer, and the three buffers hold the last three frames: with the menu, without, and the older one. Now each step starts from a copy of the picture on screen (src/driving/view.cpp), with the quad's brightness made relative to the last step so the fade still reaches black in the same time; after it, the other buffers take the dark picture. Snap burst's mean brightness: 51.3, 50.5, 16.4, 10.4, 5.4, 1.1, 0.7 (was 50.5, 17.5, 35.5, 9, 5.1, 2.3, 0.6, 5.1) and the menu does not return. The menu still goes once, for the game's last two frames before the fade starts.
+- Runtime detail that cost a try: after Swap the picture on screen is GetBackBuffer(1) on a three-buffer title, -1 is the oldest.
+- The SDK handover-gap change was the wrong diagnosis and is dropped: SDK at the fork's main 38f3033 with the redone settings window, without it. Checked with the reference renderer only; the D3D12 and D3D11 copy paths are not run here.
 
 ### 2026-11-01 - The strips' tab reads RECOMP
 - Harry's shot: on foot "PC Settings" ran off the strip; he asked for Recomp. Now RECOMP on both pauses in every language; the main menu's row keeps its name. The Briefing label stayed coloured under the tab: a label's colour is four floats at +0xA4, and only the first was changed.

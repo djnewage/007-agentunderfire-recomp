@@ -23,6 +23,62 @@ float GetF(uint32_t va) {
 void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); }
 }  // namespace
 
+// The fade on leaving a mission (0xB7B60) stops drawing and darkens whatever is in the back buffer with a black quad, each
+// frame. Triple buffered, those are the last three frames, one without the pause menu and one half drawn, and it shows them in
+// turn: the menu flickered through the fade. Each step now starts from the picture on screen, so the steps add up: the quad's
+// brightness (0xBDD20's argument) becomes the step from the last one, which keeps the game's fade to black over the same time.
+namespace {
+X86_EXTERN_FUNC(sub_001153A0);
+X86_EXTERN_FUNC(sub_001153E0);
+uint32_t BackBuffer(X86Context& ctx, uint8_t* base, int32_t which) {
+    ctx.esp -= 4;
+    const uint32_t out = ctx.esp;
+    X86_PUSH32(out);
+    X86_PUSH32(0);
+    X86_PUSH32(uint32_t(which));
+    X86_PUSH32(0);
+    sub_001153A0(ctx, base);
+    const uint32_t surface = kernel::G<uint32_t>(out);
+    ctx.esp += 4;
+    kernel::G<uint32_t>(surface) -= 1;  // GetBackBuffer's reference
+    return surface;
+}
+// the buffers as the runtime's Swap leaves them: 0 is the one to draw, 1 the picture on screen (its memory rotates), -1 the oldest
+void CopyBuffer(X86Context& ctx, uint8_t* base, uint32_t from, uint32_t to) {
+    X86_PUSH32(0);
+    X86_PUSH32(to);
+    X86_PUSH32(0);
+    X86_PUSH32(0);
+    X86_PUSH32(from);
+    X86_PUSH32(0);
+    sub_001153E0(ctx, base);
+}
+float g_fade_last = 0;  // brightness of the last step, 0 outside the fade
+}  // namespace
+
+X86_EXTERN_FUNC(__imp__sub_000B7B60);
+X86_FUNC(sub_000B7B60) {
+    g_fade_last = 1;
+    __imp__sub_000B7B60(ctx, base);
+    g_fade_last = 0;
+    // the buffers still holding the menu would show until the loading picture: all dark now
+    const uint32_t shown = BackBuffer(ctx, base, 1);
+    CopyBuffer(ctx, base, shown, BackBuffer(ctx, base, 0));
+    CopyBuffer(ctx, base, shown, BackBuffer(ctx, base, -1));
+}
+
+X86_EXTERN_FUNC(__imp__sub_000BDD20);
+X86_FUNC(sub_000BDD20) {
+    if (g_fade_last > 0) {
+        const uint32_t brightness = ctx.esp + 4;
+        const float now = kernel::G<float>(brightness);
+        CopyBuffer(ctx, base, BackBuffer(ctx, base, 1), BackBuffer(ctx, base, 0));
+        kernel::G<float>(brightness) = std::clamp(now / g_fade_last, 0.0f, 1.0f);
+        g_fade_last = std::max(now, 1.0f / 256);
+    }
+    __imp__sub_000BDD20(ctx, base);
+}
+
 X86_EXTERN_FUNC(__imp__sub_00102990);
 X86_FUNC(sub_00102990) {
     float aspect = GetF(ctx.esp + 8);
