@@ -335,6 +335,23 @@ void ClosePage() {
 
 X86_EXTERN_FUNC(__imp__sub_00040A00);
 
+namespace {
+int g_wanted = -1;  // the tab a click asked for, 3 PC Settings
+// a press of the left button on the strip's tabs
+void TabClick(const std::vector<uint32_t>& tabs) {
+    static bool last_press = false;
+    float x, y;
+    const bool press = (auf::PointerButtons() & 1) != 0, edge = press && !last_press;
+    last_press = press;
+    if (!edge || tabs.size() < 3 || !auf::PointerAt(x, y) || y < 104 || y >= 132) return;
+    for (int i = 0; i < 3; i++) {
+        const float c = kernel::G<float>(tabs[size_t(i)] + 0x90);
+        if (x >= c - 60 && x < c + 60) g_wanted = i;
+    }
+    if (x >= kPcTabX - 60) g_wanted = 3;
+}
+}  // namespace
+
 namespace auf {
 // each frame a menu has the input (src/bond/pointer.cpp's hook of 0x56930)
 void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
@@ -346,6 +363,15 @@ void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
             RestoreBands();
             g_open.page = 0;
             return;
+        }
+        // a click on another tab: back to the page under this one, then the steps there, below
+        if (file == PauseFile()) {
+            TabClick(TabsOf(page));
+            if (g_wanted >= 0 && g_wanted != 3) {
+                ClosePage();
+                return;
+            }
+            g_wanted = -1;
         }
         if (auf::PcRows() != g_open.rows) ShowRows(page, g_open.items, kernel::R32(page + kPicCount) != 0);
         for (int i = 0; i < g_open.rows; i++) {
@@ -364,31 +390,20 @@ void PcSettingsFrame(X86Context& ctx, uint8_t* base, uint32_t file) {
     if (file == PauseFile()) {
         AddTab(page);
         // the pointer on the tabs: steps through them with the game's left and right, a step a frame
-        static int wanted = -1;  // 3 PC Settings
-        static bool last_press = false;
-        float x, y;
-        const bool press = (auf::PointerButtons() & 1) != 0, edge = press && !last_press;
-        last_press = press;
         const std::vector<uint32_t> tabs = TabsOf(page);
-        if (edge && tabs.size() >= 3 && auf::PointerAt(x, y) && y >= 104 && y < 132) {
-            for (int i = 0; i < 3; i++) {
-                const float c = kernel::G<float>(tabs[size_t(i)] + 0x90);
-                if (x >= c - 60 && x < c + 60) wanted = i;
-            }
-            if (x >= kPcTabX - 60) wanted = 3;
-        }
-        if (wanted >= 0) {
+        TabClick(tabs);
+        if (g_wanted >= 0) {
             int showing = -1;
             for (size_t i = 0; i < tabs.size() && i < 3; i++)
                 if (kernel::G<float>(tabs[i] + 0xA4) > 0.6f) showing = int(i);
-            if (showing < 0) wanted = -1;
-            else if (wanted == 3 && showing == 2) {
+            if (showing < 0) g_wanted = -1;
+            else if (g_wanted == 3 && showing == 2) {
                 OpenPage(ctx, base, file, page);
-                wanted = -1;
-            } else if (wanted == showing) {
-                wanted = -1;
+                g_wanted = -1;
+            } else if (g_wanted == showing) {
+                g_wanted = -1;
             } else {
-                X86_PUSH32(wanted > showing ? kEventRight : kEventLeft);
+                X86_PUSH32(g_wanted > showing ? kEventRight : kEventLeft);
                 X86_PUSH32(file);
                 X86_PUSH32(0x56930u);
                 __imp__sub_00040A00(ctx, base);

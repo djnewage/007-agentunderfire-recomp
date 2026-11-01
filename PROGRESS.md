@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Harry's tests of the tab; clicks back off it
+- On Windows: PC Settings tab, its rows, pointer, values, the settings applied at once and at the next start, keys, Yes and No, the icon, all good; the strip's look he does not mind. Not reported: a level with a Map tab, the later missions, multiplayer.
+- Bug: from PC Settings a click on another tab did nothing, as the open page returned before the strip. Fixed on foot and driving.
+
 ### 2026-10-31 - PC Settings is a tab along the pause's top
 - Harry: a tab on the strip, not a row on the Mission page. The main menu keeps its row (it has no tabs).
 - On foot: a page's plain texts (+0, +8, 0x278 each; x centre +0x90, y +0x94, red +0xA4) hold the tabs at y 113; one is added beside Briefing on each page. Right from Briefing or a click opens the page over Briefing's arrays, with only the strip's and footer's texts kept and the strip's lit bands moved off. Clicks on any tab step there with the game's own left and right.

@@ -237,6 +237,18 @@ X86_FUNC(sub_000BC6B0) {
         const bool moved = x != page_x || y != page_y;
         page_x = x, page_y = y;
         click = kClickNone;
+        // a click on a tab leaves the page for it
+        static bool page_press = false;
+        const bool press = (PointerButtons() & 1) != 0, page_edge = press && !page_press;
+        page_press = press;
+        if (page_edge)
+            for (int t = 0; t < 4; t++)
+                if (kTabs[t].Has(x, y) && (t < 3 || HasMap(object))) {
+                    ClosePage(object);
+                    for (int i = 0; i < t; i++) Event(ctx, base, object, kEventRight);
+                    ctx.ecx = object;
+                    break;
+                }
         const int row = int((y - kPageTop + 6) / kPagePitch);
         if (x >= kPageX && x < 560 && y >= kPageTop - 6 && row >= 0 && row < auf::PcRows()) {
             if (moved && row != g_cursor) {
