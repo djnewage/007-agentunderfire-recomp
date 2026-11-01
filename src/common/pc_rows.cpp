@@ -11,29 +11,31 @@
 namespace auf {
 namespace {
 enum Id {
-    kRenderScale, kMsaa, kFxaa, kSharpening, kFiltering, kSharpText, kFrameCounter,
+    kRenderScale, kMsaa, kFxaa, kAlphaEdges, kFiltering, kSharpening, kScaleFilter, kSharpText, kWorldTextures, kFrameCounter,
     kDisplayMode, kVsync, kFrameCap, kAspect, kRenderer, kFps60, kFov,
     kMouseSpeed, kInvertMouse, kAutoAim,
     kLanguage, kSkipIntro, kPauseUnfocused, kMore, kIds
 };
 const char* const kRowNames[3] = {"PC Settings", "Param\xE8tres PC", "PC-Einstellungen"};
 const char* const kTabLabel[3] = {"Page", "Page", "Seite"};
-const char* const kTabNames[3][4] = {{"Graphics", "Display", "Controls", "Game"},
-                                     {"Graphismes", "Affichage", "Commandes", "Jeu"},
-                                     {"Grafik", "Anzeige", "Steuerung", "Spiel"}};
+const char* const kTabNames[3][5] = {{"Graphics", "Picture", "Display", "Controls", "Game"},
+                                     {"Graphismes", "Image", "Affichage", "Commandes", "Jeu"},
+                                     {"Grafik", "Bild", "Anzeige", "Steuerung", "Spiel"}};
 const char* const kLabels[3][kIds] = {
-    {"Render Scale", "MSAA", "FXAA", "Sharpening", "Texture Filtering", "Sharp Text and HUD", "Frame Counter",
-     "Display Mode", "Vertical Sync", "Frame Rate Cap", "Aspect Ratio *", "Renderer *", "60 FPS on Foot *", "Field of View",
+    {"Render Scale", "MSAA", "Edge Smoothing", "Smooth Alpha Edges", "Texture Filtering", "Sharpening", "Scaling Filter", "Sharp Text and HUD", "Enhanced Textures", "Frame Counter",
+     "Display Mode", "Vertical Sync", "Frame Rate Cap", "Aspect Ratio *", "Renderer *", "High Frame Rate *", "Field of View",
      "Mouse Sensitivity", "Invert Mouse", "Auto-aim",
      "Language *", "Skip Intro Movies", "Pause in Background", "More Settings"},
-    {"\xC9" "chelle de rendu", "MSAA", "FXAA", "Nettet\xE9", "Filtrage des textures", "Texte et ATH nets", "Compteur d'images",
-     "Mode d'affichage", "Synchro verticale", "Limite d'images", "Format d'image *", "Moteur de rendu *", "60 i/s \xE0 pied *", "Champ de vision",
+    {"\xC9" "chelle de rendu", "MSAA", "Lissage des bords", "Bords alpha lisses", "Filtrage des textures", "Nettet\xE9", "Filtre d'\xE9" "chelle", "Texte et ATH nets", "Textures am\xE9lior\xE9" "es", "Compteur d'images",
+     "Mode d'affichage", "Synchro verticale", "Limite d'images", "Format d'image *", "Moteur de rendu *", "Images/s \xE9lev\xE9" "es *", "Champ de vision",
      "Sensibilit\xE9 souris", "Inverser la souris", "Vis\xE9" "e auto",
      "Langue *", "Passer les intros", "Pause en arri\xE8re-plan", "Plus d'options"},
-    {"Renderskalierung", "MSAA", "FXAA", "Sch\xE4rfe", "Texturfilterung", "Scharfer Text und HUD", "Bildz\xE4hler",
-     "Anzeigemodus", "V-Sync", "Bildratenlimit", "Seitenverh\xE4ltnis *", "Renderer *", "60 FPS zu Fu\xDF *", "Sichtfeld",
+    {"Renderskalierung", "MSAA", "Kantengl\xE4ttung", "Weiche Alpha-Kanten", "Texturfilterung", "Sch\xE4rfe", "Skalierungsfilter", "Scharfer Text und HUD", "Bessere Texturen", "Bildz\xE4hler",
+     "Anzeigemodus", "V-Sync", "Bildratenlimit", "Seitenverh\xE4ltnis *", "Renderer *", "Hohe Bildrate *", "Sichtfeld",
      "Mausempfindlichkeit", "Maus invertieren", "Zielhilfe",
      "Sprache *", "Intros \xFC" "berspringen", "Pause im Hintergrund", "Weitere Optionen"}};
+const char* const kBilinear[3] = {"Bilinear", "Bilin\xE9" "aire", "Bilinear"};
+const char* const kSharp[3] = {"Sharp", "Net", "Scharf"};
 const char* const kOff[3] = {"Off", "Non", "Aus"};
 const char* const kOn[3] = {"On", "Oui", "An"};
 const char* const kGames[3] = {"Game's", "Du jeu", "Vom Spiel"};
@@ -45,7 +47,8 @@ struct Tab {
     int count;
     int ids[kPcRows - 1];
 };
-const Tab kTabs[4] = {{7, {kRenderScale, kMsaa, kFxaa, kSharpening, kFiltering, kSharpText, kFrameCounter}},
+const Tab kTabs[5] = {{7, {kRenderScale, kMsaa, kFxaa, kAlphaEdges, kFiltering, kSharpening, kScaleFilter}},
+                      {4, {kSharpText, kWorldTextures, kFrameCounter, kMore}},
                       {7, {kDisplayMode, kVsync, kFrameCap, kAspect, kRenderer, kFps60, kFov}},
                       {4, {kMouseSpeed, kInvertMouse, kAutoAim, kMore}},
                       {4, {kLanguage, kSkipIntro, kPauseUnfocused, kMore}}};
@@ -70,7 +73,10 @@ std::string Plain(int id, int lang) {
             const char* names[] = {kOff[lang], "2x", "4x", "8x"};
             return names[s.msaa % 4];
         }
-        case kFxaa: return onoff(s.fxaa);
+        case kFxaa: return s.smaa ? "SMAA" : s.fxaa ? "FXAA" : kOff[lang];
+        case kAlphaEdges: return onoff(s.alpha_coverage);
+        case kScaleFilter: return s.scale_filter % 2 ? kSharp[lang] : kBilinear[lang];
+        case kWorldTextures: return onoff(s.world_textures);
         case kSharpening:
             if (!s.sharpen) return kOff[lang];
             std::snprintf(b, sizeof b, "%u%%", s.sharpen);
@@ -129,14 +135,22 @@ int Language() {
 
 void PcStep(int row, int dir) {
     if (!row) {
-        g_tab = (g_tab + 4 + dir) % 4;
+        g_tab = (g_tab + 5 + dir) % 5;
         return;
     }
     app::Settings& s = app::Get();
     switch (IdOf(row)) {
         case kRenderScale: s.render_percent = uint32_t(std::clamp(int(s.render_percent) + dir * 25, 25, 200)); break;
         case kMsaa: s.msaa = (s.msaa + 4 + uint32_t(dir)) % 4; break;
-        case kFxaa: s.fxaa = !s.fxaa; break;
+        case kFxaa: {  // off, FXAA, SMAA, as the settings window's Edge smoothing
+            const int edge = ((s.smaa ? 2 : s.fxaa ? 1 : 0) + 3 + dir) % 3;
+            s.fxaa = edge == 1;
+            s.smaa = edge == 2;
+            break;
+        }
+        case kAlphaEdges: s.alpha_coverage = !s.alpha_coverage; break;
+        case kScaleFilter: s.scale_filter = (s.scale_filter + 1) % 2; break;
+        case kWorldTextures: s.world_textures = !s.world_textures; break;
         case kSharpening: s.sharpen = uint32_t(std::clamp(int(s.sharpen) + dir * 10, 0, 100)); break;
         case kFiltering: {
             const uint32_t order[] = {0, 2, 4, 8, 16};

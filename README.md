@@ -19,6 +19,38 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 `bond_eng.xbe` `66aace3859a5ca9a992f2d1845c2b5f5265fd9d6`, `bond_fre.xbe` `87b2d3c8b7b40916fe29b03490c84c4f690a4c12`,
 `bond_ger.xbe` `88d06191f3ba940394f258f138f0aa37f1ced1dd`, `DRIVING.XBE` `6b58e61ee8ce9aa2a1a357affe188af874cf05f4`.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/img/agentunderfire-on-foot.webp" alt="On foot at night, an armed guard running along a cobbled street" width="800">
+  <br>
+  <i>On foot, 3440x1440.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-driving.webp" alt="The Aston Martin on a night street, with the radar's road map and the weapon panel" width="800">
+  <br>
+  <i>Driving, with the HUD kept in its centre.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-gadget.webp" alt="The Q-Decryptor gadget in hand outside the helipad door at sunset" width="800">
+  <br>
+  <i>The first mission.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-mansion.webp" alt="A wide view of a mansion at night" width="800">
+  <br>
+  <i>A cut scene in the game's letterbox.</i>
+</p>
+
+<p align="center">
+  <img src="docs/img/agentunderfire-keyboard-menu.webp" alt="Select Mission with the Backspace and Enter keys in its prompts" width="800">
+  <br>
+  <i>Menus show your keys while you play on keyboard and mouse.</i>
+</p>
+
 ## Features
 
 Set in the F1 window (or `settings.toml` beside the exe); the runtime's own display, graphics and controller options are there too.
@@ -27,18 +59,20 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Auto-aim** - The game's aim assist is off by default; the F1 window turns it back on.
 - **Field of view** - 50 to 150% of the game's, on foot and driving.
 - **Skip intro movies** - Starts without the logos.
-- **60 FPS on foot** - Paced by the frame rate cap in the F1 window, 60 by default, instead of the console's 30.
+- **High frame rates** - On foot the game follows the frame rate cap (60 by default, up to 240 or unlimited) with its speed tied to real time, instead of the console's 30. Driving missions and mounted guns run at 60 game steps a second instead of PAL's 50, which plays a fifth faster, and above a cap of 60 draw frames in between: blended when driving, carried ahead with no added delay on a gun. Turn Vertical Sync off for the most frames there.
+- **Slow motion** - Driving cut scenes' slow motion is held to half speed, so it is not down to a quarter of the frames.
+- **Screenshots** - F12 saves the frame as a full resolution PNG in the `screenshots` folder beside the game, without the settings window.
 - **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys. On-foot menus show a pointer: the item under it highlights and a click selects it.
-- **PC Settings** - In the game's own menus: a row on the main menu and a tab on the pause screen, on foot and driving, with pages for graphics, display, controls and game. Key bindings and the rest are in the F1 window.
+- **PC Settings** - In the game's own menus: a row on the main menu and a RECOMP tab on the pause screen, on foot and driving, with pages for graphics, picture, display, controls and game. Key bindings and the rest are in the F1 window.
 - **Menu pointer** - In the menus and pause screens the item under the mouse highlights and a click selects it.
 - **Languages** - English, French and German, chosen in the settings window (F1), at the next start.
 - **Achievements** - Each mission, medals, and every gold and platinum.
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-pc-settings-pause.webp" alt="The pause screen with a PC Settings tab beside Mission, Objectives and Briefing, showing the Graphics page" width="800">
+  <img src="docs/img/agentunderfire-pc-settings-pause.webp" alt="The pause screen with a RECOMP tab beside Mission, Objectives and Briefing, showing the Graphics page" width="800">
   <br>
-  <i>PC Settings as a tab of the pause screen, on foot and driving.</i>
+  <i>The RECOMP tab of the pause screen, on foot and driving.</i>
 </p>
 
 <p align="center">
@@ -74,9 +108,9 @@ Keys can be changed in the F1 window.
 In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 3440x1440, taken one after another and lined up, so anything moving differs between them.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe between all settings off and render scale 200%, MSAA 4x and sharpening" width="800">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across a street behind railings between all settings off and everything on" width="800">
   <br>
-  <i>All off vs. render scale 200%, MSAA 4x and sharpening.</i>
+  <i>All off vs. everything on.</i>
 </p>
 
 <p align="center">
@@ -86,7 +120,11 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 </p>
 
 - **MSAA** smooths the edges of the 3D scene and keeps textures sharp. The more samples, the slower.
-- **FXAA** smooths the finished frame, HUD included, and softens it a little.
+- **Edge smoothing** works on the finished frame, HUD included: FXAA softens it a little, SMAA keeps it crisper.
+- **Smooth alpha edges** soften fences, leaves and other cut-out textures, with MSAA on.
+- **Texture filtering** keeps roads and walls sharp into the distance.
+- **Scaling filter** chooses how the frame reaches the screen when render scale is not 100%: bilinear, or sharp.
+- **Enhanced textures** double the 3D scene's textures in the background. They use more video memory and can cause a brief hitch as new ones appear.
 - **Render scale** draws the picture larger than the screen: the smoothest fine detail, and the slowest.
 
 <p align="center">

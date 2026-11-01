@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - RECOMP rows for the new options; README shots
+- Harry: vsync fix confirmed; asked for the new settings in game. Graphics page: render scale, MSAA, edge smoothing (off, FXAA, SMAA), smooth alpha edges, filtering, sharpening, scaling filter. A new Picture page: sharp text, enhanced textures, frame counter. In three languages; "60 FPS on Foot" is "High Frame Rate". Seen on the driving pause headless, pages step.
+- README: his shots for on foot, driving, gadget, mansion, keyboard menu and the pause; slider from his railing shots, 7 as all off (assumed, first of the set) and 10 as everything on (his word). His other two railing shots are not labelled, so the edge and sharpness comparisons stay the older ones.
+
 ### 2026-11-01 - In-between frames: flicker open, stopped after three attempts
 - Harry: textures flicker or shift whenever the frame rate is above 60, vsync on or off; still there on c0c59d8. Below or at 60 the blending is off and it is fine. Branch driving-interp, sdk frame-interp; not on main, and fork main untouched.
 - Tried, each cured what it aimed at but not this: (1) motion follows the clock, not squeezed into the time left; (2) a draw with no match follows a matched one of the same matrix (capture 201230 shows one world matrix, so that part is proven); (3) one timeline, no step shown as drawn among blended ones.
