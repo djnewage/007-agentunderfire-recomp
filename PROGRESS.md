@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - On foot unlocked: the frame rate cap goes past 60
+- Harry wants unlocked FPS before launch. The cap could not pass 60: a present interval of 1 counts in 60 a second (now app::g_pace_hz, SDK at the fork's main 8de73e5).
+- That alone ran the game fast: 0x25CA0 measures the frame's seconds, then takes 0x138760's, 1/60 a frame at any rate; 140 frames a second gave 11.6 s of game time in 5 s. An earlier note here said it ran off the clock: true only at or below 60. 0x138760 now returns the measured time, up to a tenth of a second.
+- Evidence, headless: game time equals wall time at 60, 144 and unpaced (dt 0.00695 at 144). Holding forward 4 s in the first mission ends at the same spot at 60 and 144, same picture. No crash in any run.
+- Not done: driving stays at 60. Each step draws a frame and speed follows steps, so more frames need in-between frames or the physics made time-based. Combat, doors and scripts above 60 not played; Harry to play.
+
 ### 2026-11-01 - Driving radar's road lines back on wide screens
 - Harry: the minimap has lost its lines. Reproduced headless at 16:9: draw of the map texture (P8 256x256, the road lines) wrote only from x 477, the disc sits at 438 to 517. The map's quad is larger than the radar's viewport (477,48,135x135), so gpu::DrawSpan takes it for a pass filling its viewport (kSpanViewport, EoN's Thermovision) and leaves it unsqueezed, clipped by the unsqueezed viewport, while the rest is squeezed whole. Depends on the map's turn, which is why the earlier radar fix looked right.
 - Fixed in the game, no SDK change: src/driving/view.cpp sets State::squeeze_beyond (shift 0) for the radar 0xB9010. Seen on screen headless at three frames in mis02b. D3D12 takes the same flag; not seen on Windows.
