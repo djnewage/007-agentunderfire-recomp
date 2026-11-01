@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - All-games check of the SDK branch frame-interp
+- Throwaway clones, each game's pin merged into the candidate 7d32328: AUF 4 SMOKE OK, PGR2, PGR1, NightFire and True Crime SMOKE OK; PGR1's repro.sh shows a live race. EoN not run: its pin e644a6e conflicts (launcher, handover, boot, and overlay, d3d11, d3d12, d3d_common, main from the fork's newer work), none of them files this work changed beyond what the fork's main brought. The feature is off unless a game sets GameInfo::step_interpolation.
+- Not merged: waits for Harry on going to the fork's main without EoN's smoke.
+
 ### 2026-11-01 - RECOMP rows for the new options; README shots
 - Harry: vsync fix confirmed; asked for the new settings in game. Graphics page: render scale, MSAA, edge smoothing (off, FXAA, SMAA), smooth alpha edges, filtering, sharpening, scaling filter. A new Picture page: sharp text, enhanced textures, frame counter. In three languages; "60 FPS on Foot" is "High Frame Rate". Seen on the driving pause headless, pages step.
 - README: his shots for on foot, driving, gadget, mansion, keyboard menu and the pause; slider from his railing shots, 7 as all off (assumed, first of the set) and 10 as everything on (his word). His other two railing shots are not labelled, so the edge and sharpness comparisons stay the older ones.
