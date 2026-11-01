@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Driving at 60; slow motion explained
+- Harry: only the slow motion parts of cut scenes are low, and asked for driving at 60.
+- The engine runs one step per tick and draws a frame a step. Ticks: 0xE0540 asked for 50 (push at 0x5736D), period 1000 / rate in whole ms, callback 0xE0500. Scheduler 0x587F0: steps = ticks x scale (+0x20), so slow motion steps less often: 40 and 60 ms frames, exactly Harry's log. The console's slow motion has the same few frames; drawing more would need interpolating the world.
+- Now 60 ticks (src/driving/hooks.cpp, the uncapped option, AUF_30FPS keeps 50), 1 ms timer with the tick let through when due, because 1000 / 60 = 16 ms would be 62.5 a second. Measured headless: 60.00 a second in play.
+- It plays a fifth faster: at equal frame numbers, 50 and 60 ticks put the car in about the same place. Tick counts (timers, mission limits, the clock's 1/50 at 0x13ACA0) move with it. Speech and music are real time, so cut scene lines may overlap or be cut. Not seen on Windows.
+
 ### 2026-11-01 - Cut scene frame rate: measured, not fixed
 - Harry: low frame rate on cut scenes. His log's only sustained slow stretch is a driving mission's end cut scene, F3 capture at 244 s: 77 of 347 frames over 25 ms in 10 s, longest 62.5 ms, 258 draws, render target 6880x2880. On foot the slow lines are short (15-22 frames near 45 ms).
 - Driving runs at 50 frames a second (500 in 10 s, exactly 20.0 ms headless), not the 60 the log's "paced" says and earlier notes claimed. Frame times land on 20 ms steps, so an overrun shows as 40 or 60 ms. Where the 20 ms comes from is not found: no caller of BlockUntilVerticalBlank, and present returns at once.

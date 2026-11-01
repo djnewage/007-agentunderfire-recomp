@@ -1,8 +1,12 @@
 // Hooks for DRIVING.XBE, the driving levels (EA's engine, an earlier NightFire Driving.xbe).
+#include <chrono>
+#include <cstdlib>
 #include <cstring>
 
 #include "common/auf.h"
+#include "core/log.h"
 #include "kernel/kernel.h"
+#include "xdk/hle.h"
 
 namespace auf {
 extern const int kImage = kDriving;
@@ -20,3 +24,44 @@ bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
 void ScopeZoom(int) {}
 }  // namespace auf
+
+// Sixty frames a second. The engine runs one step of the game per tick of its timer and draws one frame a step; this PAL build
+// asks 0xE0540 for 50 ticks a second, NightFire's later build of the engine for 60. Everything counts in steps, so the whole level
+// plays a fifth faster, as a step-counting game does at 60. The timer's period is whole milliseconds and 1000 / 60 would be 16,
+// 62.5 ticks against a cap of 60: it runs each millisecond and the tick 0xE0500 (stdcall, 5 arguments) goes through only when due.
+// Slow motion steps less often (+0x20 of the scheduler 0x180364) and still shows only the frames it steps.
+namespace {
+constexpr uint32_t kTicksPerSecond = 60, kTimerRate = 0x1E59E8;
+bool Sixty() {
+    static const bool on = [] {
+        bool v = auf::uncapped && !std::getenv("AUF_30FPS");
+        LOGR("auf: driving at %u steps a second", v ? kTicksPerSecond : 50);
+        return v;
+    }();
+    return on;
+}
+}  // namespace
+
+X86_EXTERN_FUNC(__imp__sub_000E0540);
+X86_FUNC(sub_000E0540) {
+    const bool started = kernel::R32(0x1E59B8) != 0;
+    if (Sixty() && !started) kernel::G<uint32_t>(ctx.esp + 4) = 1000;
+    __imp__sub_000E0540(ctx, base);
+    if (Sixty() && !started) ctx.eax = kernel::G<uint32_t>(kTimerRate) = kTicksPerSecond;
+}
+
+X86_EXTERN_FUNC(__imp__sub_000E0500);
+X86_FUNC(sub_000E0500) {
+    if (Sixty()) {
+        using Clock = std::chrono::steady_clock;
+        static Clock::time_point next = Clock::now();
+        const auto now = Clock::now();
+        if (now < next) {
+            ctx.esp += 4 + 0x14;
+            return;
+        }
+        next += std::chrono::nanoseconds(1000000000 / kTicksPerSecond);
+        if (now > next + std::chrono::milliseconds(100)) next = now;  // a long stop: no burst of steps after it
+    }
+    __imp__sub_000E0500(ctx, base);
+}

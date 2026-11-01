@@ -40,3 +40,4 @@ own code and data, with its addresses).
 - **[game]** 0x5BE11 (text draw): ends a typed-out text's 256-byte stack copy at the shown count, unchecked; Multiplayer's text passes 1071. Clamped by hook ClampTextEnd.
 - **[game]** DRIVING.XBE's prompt atlas: P8, FNV 0x0D17DFB8FC1761F7, five palettes, cells in src/common/buttons.cpp.
 - **[harness]** The reference renderer reads textures fresh each frame (BeginFrame clears g_images). The palette a P8 was first bound with need not be the one a draw uses.
+- **[game]** DRIVING.XBE steps once per timer tick and draws once per step: frame rate, game speed and slow motion (scale +0x20 of 0x180364) are one mechanism. NightFire's later build asks for 60 ticks where this PAL build asks for 50.

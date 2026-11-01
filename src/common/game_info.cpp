@@ -177,8 +177,8 @@ const app::GameInfo app::kGame = {
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
                 {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
-                {"uncapped", &auf::uncapped, nullptr, "60 FPS on foot",
-                 "Paced by the frame rate cap instead of the console's 30. Takes effect at the next start"},
+                {"uncapped", &auf::uncapped, nullptr, "60 FPS",
+                 "On foot paced by the frame rate cap instead of the console's 30; driving at 60 instead of 50, which plays a fifth faster. Takes effect at the next start"},
                 {"fov_percent", nullptr, &auf::fov_percent, "Field of view (%)",
                  "50 to 150; 100 is the game's. On foot and driving; the scope zooms in proportion"}},
     .load = LoadKeys,                     // DRIVING.XBE's keys apart (DrivingKeys)
