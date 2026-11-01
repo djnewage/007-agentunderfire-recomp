@@ -65,3 +65,14 @@ X86_FUNC(sub_000E0500) {
     }
     __imp__sub_000E0500(ctx, base);
 }
+
+// Slow motion: the scene's event 0x466D0 (thiscall, the scale at +4) sets the scheduler's scale, and each step draws one frame, so a
+// quarter of the speed is a quarter of the frames. Held to half: 30 frames a second, the effect kept and the scene over sooner.
+X86_EXTERN_FUNC(__imp__sub_000466D0);
+X86_FUNC(sub_000466D0) {
+    const uint32_t event = ctx.ecx;
+    const float asked = kernel::G<float>(event + 4);
+    if (asked > 0 && asked < 0.5f) kernel::G<float>(event + 4) = 0.5f;
+    LOG_FIRST(16, "auf: slow motion, the scene asks for %.3f", asked);
+    __imp__sub_000466D0(ctx, base);
+}

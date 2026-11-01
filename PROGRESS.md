@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-01 - Driving slow motion held to half speed
+- Harry: 60 FPS feels great, slow motion drops to 15. He chose half speed over no slow motion or in-between frames. Event 0x466D0's scale is held to at least 0.5 (src/driving/hooks.cpp), logged as the scene asks.
+- Tested by calling the event with 0.25 at frame 1200 in play, headless. The real scene's value is not read yet: the log line will show it on Windows.
+
 ### 2026-11-01 - Driving at 60; slow motion explained
 - Harry: only the slow motion parts of cut scenes are low, and asked for driving at 60.
 - The engine runs one step per tick and draws a frame a step. Ticks: 0xE0540 asked for 50 (push at 0x5736D), period 1000 / rate in whole ms, callback 0xE0500. Scheduler 0x587F0: steps = ticks x scale (+0x20), so slow motion steps less often: 40 and 60 ms frames, exactly Harry's log. The console's slow motion has the same few frames; drawing more would need interpolating the world.
