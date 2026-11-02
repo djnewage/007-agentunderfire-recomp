@@ -127,9 +127,9 @@ Keys can be changed in the F1 window.
 In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 1920x1080, taken one after another, brightened here so the dark scene shows.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across an oil rig's towers and ladders at night between all settings off and on" width="800">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across an oil rig's towers and ladders at night between all settings off and render scale 200%, MSAA 4x and sharpening 50%" width="800">
   <br>
-  <i>All off vs. on.</i>
+  <i>All off vs. render scale 200%, MSAA 4x and sharpening 50%.</i>
 </p>
 
 <p align="center">
