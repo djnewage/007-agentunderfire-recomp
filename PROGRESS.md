@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Lit windows jumping above 60
+- Harry: speed fix fine in play. Window lights: not at a cap of 60, on the blending side, and they shift position very briefly. Counted headless driving: about 3% of world draws have no partner in the step before (come into view) and their own matrix, so they sat at the step's place with the rest behind. Such a draw now takes the camera's move read off matched draws of its target, the one most agree on. Registers and the picture are all that is seen here: for his build.
+
 ### 2026-11-02 - Driving at 60 at the right speed
 - Harry chose the speed fix, and USA support for v1.1. USA's Driving.xbe has 60 ticks and 1/60 where PAL has 50 and 1/50; plain tuning data in the .viv files is the same (differences: compressed models, text, PAL/NTSC HUD and movies). src/driving/hooks.cpp sets 77 constants of 1/50 and 5 of 50 found by xbe_port with high votes, and two arguments. The 288 and 576 that also differ are screen heights: left alone (they were first listed here as timing, wrongly).
 - Evidence: holding the gas in mis02b, the same real time puts the car in about the same place at the original 50 ticks and at 60 fixed, and clearly further at 60 unfixed. Not done: mounted gun's mouse rate was measured at the old speed, to check on Windows.
