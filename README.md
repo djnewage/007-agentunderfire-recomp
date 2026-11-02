@@ -135,7 +135,7 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 <p align="center">
   <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of a tower and handrails with all off, MSAA 4x, FXAA and render scale 200%" width="800">
   <br>
-  <i>Edges, enlarged three times: all off, MSAA 4x, FXAA and render scale 200%.</i>
+  <i>Edges, enlarged twice: all off, MSAA 4x, FXAA and render scale 200%.</i>
 </p>
 
 - **MSAA** smooths the edges of the 3D scene and keeps textures sharp. The more samples, the slower.
