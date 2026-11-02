@@ -4,22 +4,28 @@
 #include <cstring>
 
 #include "common/auf.h"
+#include "driving/addr.h"
 #include "core/log.h"
 #include "kernel/kernel.h"
 #include "xdk/hle.h"
 
 namespace auf {
 extern const int kImage = kDriving;
+#ifdef AUF_LANG_USA
+extern const bool kUsa = true;
+#else
+extern const bool kUsa = false;
+#endif
 extern const uint32_t kAddrMission = 0, kAddrRunMedal = 0, kAddrBestMedals = 0;
 // the name of the control file in force, its first letter cleared once read: "data/Control/povcfg0.def" on a mounted gun,
 // ".../drivecfg.def" in the car (0x17FED0, FUN_00050530's singleton; found comparing mis02a's memory with mis02b's)
 bool OnGun() {
-    return !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(0x17FED0 + 13)), "povcfg", 6);
+    return !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(A(0x17FED0) + 13)), "povcfg", 6);
 }
 // the level's state 3: paused, or a movie or the mission's end (0x77A20 and 0x503C0 stop the camera on it; NightFire's later
 // version of this engine has the same at its 0x234E24), or the level not in play yet (0x1E1818, set from its start to the end of
 // the intro)
-bool MenuUp() { return kernel::R32(0x1BEB1C) == 3 || kernel::R32(0x1E1818) != 0; }
+bool MenuUp() { return kernel::R32(A(0x1BEB1C)) == 3 || kernel::R32(A(0x1E1818)) != 0; }
 bool PlayerFree() { return true; }
 bool Zoomed() { return false; }
 void ScopeZoom(int) {}
@@ -35,7 +41,8 @@ void ScopeZoom(int) {}
 // them for 50, the level data's tuning being the same: compared by sdk/tools/symbols/xbe_port.py, each below is 1/50 or 50 here and
 // 1/60 or 60 there. Without them 60 ticks play a fifth too fast. The 576 and 288 that also differ are the screen's, not time.
 namespace {
-constexpr uint32_t kTicksPerSecond = 60, kTimerRate = 0x1E59E8;
+constexpr uint32_t kTicksPerSecond = 60, kTimerRate = A(0x1E59E8);
+#ifndef AUF_LANG_USA  // its numbers are for 60 already
 const uint32_t kSeconds[] = {
     0x133CF8, 0x1340A0, 0x134184, 0x134294, 0x134330, 0x13447C, 0x13451C, 0x134624, 0x1346E4, 0x13479C,
     0x13483C, 0x1348E0, 0x134A28, 0x134AEC, 0x134B80, 0x13573C, 0x1357D0, 0x135974, 0x135984, 0x1359A8,
@@ -47,6 +54,7 @@ const uint32_t kSeconds[] = {
     0x13AFE4, 0x13AFF8, 0x13B124, 0x13B130, 0x13B17C, 0x13B1F4, 0x13B220,
 };
 const uint32_t kRates[] = {0x135738, 0x1385D4, 0x1386F0, 0x13AAF0, 0x13AD80};
+#endif
 bool Sixty() {
     static const bool on = [] {
         bool v = auf::uncapped && !std::getenv("AUF_30FPS");
@@ -59,11 +67,13 @@ bool Sixty() {
 
 X86_EXTERN_FUNC(__imp__sub_000E0540);
 X86_FUNC(sub_000E0540) {
-    const bool started = kernel::R32(0x1E59B8) != 0;
+    const bool started = kernel::R32(A(0x1E59B8)) != 0;
     if (Sixty() && !started) {
         kernel::G<uint32_t>(ctx.esp + 4) = 1000;
+#ifndef AUF_LANG_USA
         for (uint32_t va : kSeconds) kernel::G<float>(va) = 1.0f / kTicksPerSecond;
         for (uint32_t va : kRates) kernel::G<float>(va) = float(kTicksPerSecond);
+#endif
     }
     __imp__sub_000E0540(ctx, base);
     if (Sixty() && !started) ctx.eax = kernel::G<uint32_t>(kTimerRate) = kTicksPerSecond;

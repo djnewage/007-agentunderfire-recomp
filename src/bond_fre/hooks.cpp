@@ -9,6 +9,11 @@
 
 namespace auf {
 extern const int kImage = kBond;
+#ifdef AUF_LANG_USA
+extern const bool kUsa = true;
+#else
+extern const bool kUsa = false;
+#endif
 extern const uint32_t kAddrMission = A(0x2A9F98), kAddrRunMedal = A(0x3B2D08), kAddrBestMedals = A(0x2A9C24);
 
 // a level's pause (0x265C0 sets it; 0x26D70 then skips the frame's input), or the front end, by the game state's name

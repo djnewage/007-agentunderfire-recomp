@@ -7,6 +7,11 @@
 
 namespace auf {
 extern const int kImage = kDefault;
+#ifdef AUF_LANG_USA
+extern const bool kUsa = true;
+#else
+extern const bool kUsa = false;
+#endif
 extern const uint32_t kAddrMission = 0, kAddrRunMedal = 0, kAddrBestMedals = 0;
 bool MenuUp() { return false; }
 bool OnGun() { return false; }

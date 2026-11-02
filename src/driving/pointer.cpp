@@ -16,6 +16,7 @@
 
 #include "app/app.h"
 #include "common/auf.h"
+#include "driving/addr.h"
 #include "core/log.h"
 #include "kernel/kernel.h"
 #include "kernel/memory.h"
@@ -29,8 +30,8 @@ X86_EXTERN_FUNC(sub_000B3740);  // the width of a string in the font set
 X86_EXTERN_FUNC(sub_000BC8C0);  // a string by its number
 
 namespace {
-constexpr uint32_t kObject = 0x1DFB08, kUp = 0x2E0, kTab = 0x420, kRow = 0x424, kPrompt = 0x428, kPromptRow = 0x42C;
-constexpr uint32_t kColour = 0x16B910, kBright = 0xFFC4E6FF, kDim = 0xFF65839F;
+constexpr uint32_t kObject = A(0x1DFB08), kUp = 0x2E0, kTab = 0x420, kRow = 0x424, kPrompt = 0x428, kPromptRow = 0x42C;
+constexpr uint32_t kColour = A(0x16B910), kBright = 0xFFC4E6FF, kDim = 0xFF65839F;
 constexpr uint32_t kQuitWidget = 0x158, kBriefingTab = 0x10C, kFirstTab = 0x104, kMapTab = 0x110, kChevron3 = 0x1B8, kStringId = 0x34, kOurString = 0x7FF0;
 constexpr uint32_t kEventA = 1, kEventLeft = 7, kEventRight = 9, kEventUp = 0xB, kEventDown = 0xD, kEventB = 0x10, kEventStart = 6;
 constexpr uint32_t kPageTab = 4, kStringsFirst = kOurString + 1;
@@ -61,7 +62,7 @@ void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); 
 
 void Call1(X86Context& ctx, uint8_t* base, void (*f)(X86Context&, uint8_t*), uint32_t arg) {
     X86_PUSH32(arg);
-    X86_PUSH32(0xBB284u);
+    X86_PUSH32(A(0xBB284));
     f(ctx, base);
     ctx.esp += 4;
 }
@@ -108,7 +109,7 @@ namespace {
 void Event(X86Context& ctx, uint8_t* base, uint32_t object, uint32_t event) {
     const uint32_t ecx = ctx.ecx;
     X86_PUSH32(event);
-    X86_PUSH32(0xBC6B0u);
+    X86_PUSH32(A(0xBC6B0));
     ctx.ecx = object;
     __imp__sub_000B5B00(ctx, base);  // its ret 4 takes both
     ctx.ecx = ecx;
@@ -211,7 +212,7 @@ void DrawPcPage(X86Context& ctx, uint8_t* base) {
         kernel::W32(object + kTab, 0);
         kernel::W32(object + kMapTab, g_map_widget);
     }
-    if (!kernel::R32(object + kUp) || kernel::R32(0x1BEB1C) != 3) return;
+    if (!kernel::R32(object + kUp) || kernel::R32(A(0x1BEB1C)) != 3) return;
     Make(object);
     LayOutTabs(ctx, base, object);
     Call1(ctx, base, sub_000B20D0, g_widget);
@@ -306,7 +307,7 @@ X86_EXTERN_FUNC(__imp__sub_000BC6B0);
 X86_FUNC(sub_000BC6B0) {
     using namespace auf;
     const uint32_t object = ctx.ecx;
-    const bool up = object && kernel::R32(object + kUp) && kernel::R32(0x1BEB1C) == 3;
+    const bool up = object && kernel::R32(object + kUp) && kernel::R32(A(0x1BEB1C)) == 3;
     g_up.store(up, std::memory_order_relaxed);
     int click = kClickGo;
     float x, y;

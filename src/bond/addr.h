@@ -7,6 +7,8 @@
 #include "bond/addr_fre.h"
 #elif defined(AUF_LANG_GER)
 #include "bond/addr_ger.h"
+#elif defined(AUF_LANG_USA)
+#include "bond/addr_usa.h"
 #endif
 
 #ifdef AUF_ADDR_TABLE

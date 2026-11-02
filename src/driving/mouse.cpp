@@ -13,6 +13,7 @@
 #include <cstring>
 
 #include "common/auf.h"
+#include "driving/addr.h"
 #include "core/input.h"
 #include "core/log.h"
 #include "kernel/kernel.h"
@@ -82,7 +83,7 @@ X86_FUNC(sub_00077A20) {
 // the call.
 X86_EXTERN_FUNC(__imp__sub_00076310);
 X86_FUNC(sub_00076310) {
-    constexpr uint32_t kTarget = 0x1C6C18;
+    constexpr uint32_t kTarget = A(0x1C6C18);
     if (auf::auto_aim) return __imp__sub_00076310(ctx, base);
     const uint32_t was = kernel::R32(kTarget);
     static bool said = false;

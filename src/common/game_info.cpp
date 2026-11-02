@@ -172,6 +172,7 @@ const app::GameInfo app::kGame = {
     // default.xbe launches the language's xbe; the runtime matches names lower case
     .images = {{"default.xbe", "AgentUnderFire"},
                {"bond_eng.xbe", "AgentUnderFireBond"},
+               {"bond.xbe", "AgentUnderFireBond"},  // the USA disc's
                {"bond_fre.xbe", "AgentUnderFireBondFre"},
                {"bond_ger.xbe", "AgentUnderFireBondGer"},
                {"driving.xbe", "AgentUnderFireDriving"}},
@@ -193,10 +194,10 @@ const app::GameInfo app::kGame = {
     .hud_aspect = 4.0f / 3.0f,            // the game lays out its 2D for 4:3: kept in the middle of a wider frame
     .squeeze_screen_programs = true,      // DRIVING.XBE draws its HUD and menus through vertex programs
     .sharpen_2d = true,                   // text and HUD pictures enlarged sharp (Settings::sharp_2d turns it off)
-    .pal_console = true,                  // a PAL disc (region 4)
+    .pal_console = !auf::kUsa,                  // a PAL disc (region 4)
     .mouse_look = true,                   // the mouse looks and aims
     .mouse_direct = true,                 // src/bond/mouse.cpp, src/driving/mouse.cpp
-    .languages = {1, 3, 4},               // English, German, French: default.xbe launches that language's game
+    .languages = auf::kUsa ? std::vector<uint32_t>{1} : std::vector<uint32_t>{1, 3, 4},               // English, German, French: default.xbe launches that language's game
     .achievements = auf::AchievementSet(), // conditions on bond_eng.xbe's memory
     .texture_bound = auf::ButtonPictures,  // the prompts' pictures as the keys (src/common/buttons.cpp)
     .step_interpolation = [] { return auf::kImage == auf::kDriving && auf::uncapped; },  // on foot draws and moves by the clock

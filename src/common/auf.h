@@ -12,6 +12,7 @@ struct X86Context;
 
 namespace auf {
 enum Image { kDefault, kBond, kDriving };
+extern const bool kUsa;       // the USA disc: its programs, English only, 60 Hz (each image's hooks.cpp)
 extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp); driving at 60, not 50 (src/driving/hooks.cpp)
