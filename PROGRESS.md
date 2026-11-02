@@ -23,6 +23,16 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Mediterranean Crisis's frame rate: runs of alike draws merged (sdk branch merge-draws)
+- Harry's log there: normal stretches about 1300 draws a frame, slow ones up to 16061, 27 FPS, 35 ms on the render thread and all of it per
+  draw cost, at any render scale. Headless route: Load Mission, Yes, Select Mission opens on the save's mission (.local/med.txt).
+- The mission's first view: 8423 draws, 68000 vertices, about 8 a draw; the title draws its world surface by surface.
+  7621 of 8426 had no state command since the draw before.
+- `GameInfo::merge_draws` (bond images, not DRIVING.XBE, other games off; XBE_MERGE_DRAWS=0/1 overrides): the render thread's recording joins such
+  indexed triangle lists and strips into one list. Left alone: 2D, vertex programs, visibility tests, flat shading.
+- Evidence: 8426 to 814 draws in that view, whole run 12.66M to 1.46M; vertex upload 16 to 10.5 MB a frame; reference pictures match but for sea and sway;
+  smoke 4 OK. No GPU here: Harry's perf log decides the frame rate.
+
 ### 2026-11-02 - Merged: driving's speed, steady windows and cars
 - All-games check on the SDK: AUF, PGR2, PGR1, NightFire, True Crime pass; PGR1's repro shows a live race when run alone (under load it ended on car select: its fixed delays). EoN's pin conflicts as before, not run. Fork's main and this repo's main moved. Left for v1.0.0: public repository, a launcher run without a GitHub login, then the tag. Next: USA support.
 

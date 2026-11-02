@@ -201,6 +201,7 @@ const app::GameInfo app::kGame = {
     .texture_bound = auf::ButtonPictures,  // the prompts' pictures as the keys (src/common/buttons.cpp)
     .step_interpolation = [] { return auf::kImage == auf::kDriving && auf::uncapped; },  // on foot draws and moves by the clock
     .step_ahead = [] { return auf::kImage == auf::kDriving && auf::OnGun() && !auf::MenuUp(); },
+    .merge_draws = auf::kImage != auf::kDriving,
     .auto_fills_screen = true,            // the 3D views widen and the 2D stays 4:3: "from the screen's shape" can fill an ultrawide
     .default_keys = Keys,                 // a shooter's keys on foot, a driving layout in DRIVING.XBE
 };
