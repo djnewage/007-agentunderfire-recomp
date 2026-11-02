@@ -34,6 +34,17 @@ The launcher sets the game up on your PC from your own disc: no Visual Studio, n
 
 To build by hand instead, see [Building](#building).
 
+### What's in a release
+
+| File | Size | What it is |
+|---|---|---|
+| `AgentUnderFireLauncher.exe` | 2.5 MB | **The only file to download by hand.** It fetches the rest itself. |
+| `AgentUnderFire-PAL-package.zip` | 83.1 MB | Runtime and compiler for the PAL disc, no game code. The launcher fetches it for that disc; don't unzip it by hand. |
+| `AgentUnderFire-USA-package.zip` | 78.3 MB | The same for the USA disc. |
+| `*-package.zip.json` | | The size and SHA-256 the launcher checks each download against. You can ignore them. |
+
+Sizes are v1.0.0's. Getting the game ready took 111 s on a clean Windows Sandbox with the PAL disc; yours depends on your PC and connection.
+
 ## Screenshots
 
 <p align="center">
@@ -182,4 +193,4 @@ For developers; players should use the launcher above.
 3. Install Visual Studio 2022 with C++ desktop development and run `build.bat`. The exes are in `out\build\release`.
    Run `AgentUnderFire.exe`; it starts the others itself.
 
-PAL is five programs (the launcher and movies, the game in each of three languages, and the driving levels), USA three, and the build recompiles those of the disc in `assets`. On Windows each program's code is a DLL. `release-package.bat`, after `build.bat`, makes that disc's package for a release: one per disc, each from a checkout holding that disc.
+PAL is five programs (the launcher and movies, the game in each of three languages, and the driving levels), USA three, and the build recompiles those of the disc in `assets`. On Windows each program's code is a DLL. `release-package.bat`, after `build.bat`, makes that disc's package for a release: one per disc, each from a checkout holding that disc. A `v*` tag only makes a draft release with the launcher: attach both zips and their `.json` files, then publish it by hand.

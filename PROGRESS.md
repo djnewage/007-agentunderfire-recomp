@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - v1.0.0 published; README lists its files
+- The SDK session reports v1.0.0 published. README says what each asset is and which one a player downloads (sizes and the 111 s Sandbox PAL install as that session measured them).
+
 ### 2026-11-02 - SDK at the fork's main 5469868
 - launcher.log filtering and one log line reworded (the SDK session's prebuilt-tidy).
 
