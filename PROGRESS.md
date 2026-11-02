@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Above 60 accepted with a known issue
+- His 240 FPS recording of buildings: 51 of 2554 distinct frames have a patch going back and returning, at most 5 small patches. One black shard for one frame (real debris or not, unknown). Signs and posts move unevenly, about 0, 60, 30, 10 pixels between frames: no frames can be shown while the title makes its next step, then the picture catches up. Likely what is left of the flicker; not proven. A proper cure is replays on a thread of their own, for later. Harry accepted it as a known issue in the release notes.
+
 ### 2026-11-02 - Car flicker: a build to split it on his PC
 - Harry chose the diagnostic round. XBE_INTERP_PIECES=0 turns off the logic for pieces come into view; XBE_INTERP_LOG=1 writes "jump:" lines for draws at a car's distance moving far on screen between the two steps blended.
 - The log showed it headless at once: at one step all 51 pieces of the car were new together, each given the camera's move. A program now needs 4 matched draws for each new one to count as scenery.
