@@ -124,21 +124,27 @@ Keys can be changed in the F1 window.
 
 ## Graphics settings
 
-In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 3440x1440, taken one after another and lined up, so anything moving differs between them.
+In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 1920x1080, taken one after another, brightened here so the dark scene shows.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across the Aston Martin by an iron railing between all settings off and everything on" width="800">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across an oil rig's towers and ladders at night between all settings off and on" width="800">
   <br>
-  <i>All off vs. everything on.</i>
+  <i>All off vs. on.</i>
 </p>
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of an iron railing with all off, MSAA 4x, FXAA and render scale 200%" width="800">
+  <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of a tower and handrails with all off, MSAA 4x, FXAA and render scale 200%" width="800">
   <br>
   <i>Edges, enlarged three times: all off, MSAA 4x, FXAA and render scale 200%.</i>
 </p>
 
 - **MSAA** smooths the edges of the 3D scene and keeps textures sharp. The more samples, the slower.
+<p align="center">
+  <img src="docs/img/agentunderfire-settings-smaa.webp" alt="A tower and handrails with edge smoothing off and with SMAA" width="800">
+  <br>
+  <i>Edge smoothing off vs. SMAA, enlarged twice.</i>
+</p>
+
 - **Edge smoothing** works on the finished frame, HUD included: FXAA softens it a little, SMAA keeps it crisper.
 - **Smooth alpha edges** soften fences, leaves and other cut-out textures, with MSAA on.
 - **Texture filtering** keeps roads and walls sharp into the distance.
@@ -147,7 +153,7 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 - **Render scale** draws the picture larger than the screen: the smoothest fine detail, and the slowest.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-sharpness.webp" alt="A door's hinges and carved lines with all off, sharpening 50% and sharpening 100%" width="800">
+  <img src="docs/img/agentunderfire-settings-sharpness.webp" alt="A ladder on a riveted wall with sharpening off, 50% and 100%" width="800">
   <br>
   <i>Sharpening, enlarged twice.</i>
 </p>
