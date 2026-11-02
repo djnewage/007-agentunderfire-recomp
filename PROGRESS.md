@@ -9,7 +9,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 7d32328
+- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main
 - PC features: PC Settings, pointer, achievements, French and German confirmed by Harry; skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
 - Not done: DRIVING.XBE in the smoke test, levels played to their end, PC features
 
@@ -22,6 +22,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-11-02 - Steady frames merged
+- Harry on frames-steady: counter holds, wheels better, walls and HUD fine, the gun fine; his log, cap 240, vsync off: 1831 frames for 598 steps. All-games check on the SDK: AUF, PGR2, PGR1 (repro shows a live race), NightFire, True Crime pass; EoN's pin conflicts as before, not run; the change is interp.cpp alone, which EoN does not use. The launcher logging commit that reached the fork's main meanwhile merged in, AUF smoke again. Fork's main and this repo's main moved; README shots and the release notes come with it. Left: public repository, a launcher run without a GitHub login, tag v1.0.0 on Harry's word.
 
 ### 2026-11-02 - README: his labelled shots
 - Retaken at 1920x1080 from one spot, each file named by its setting: slider (off, on), edges, sharpening, SMAA. Checked by eye against the labels. Smooth alpha edges and 16x filtering show next to nothing at this spot, so no picture of them. RECOMP tab with the new rows; the gun. "On" is render scale 200%, MSAA 4x, sharpening 50%.
