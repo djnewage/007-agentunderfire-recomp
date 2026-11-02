@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Steady frames above 60; wheels
+- Harry: built with the launcher, so the launcher works. Video: wheels pop out from behind the car; the counter sits at 60 with spikes past 100, vsync off. His log: 600 frames for 600 steps with a 722 now and then, so the back-off from one late step had put the limit at 1. Now late steps must keep coming (about 1 in 10, held), recovery after 120 steps, 1800 at most. Headless, no vsync, firing rockets: 1800 frames for 600 steps. Simulated vsync at 100 and 144 Hz still ends at 600 steps, after some 10 to 20 s of trying.
+- Wheels: a turning draw whose place moved more than a tenth counted as a different draw and was left at the step's place. The leap in the matrix's own units now decides alike for all. Not seen headless: for his build.
+
 ### 2026-11-02 - Release prepared, not published
 - release.bat left the French and German exes out of its zip: added. README: Getting started with the launcher. docs/releases/v1.0.0.md drafted. launcher/game.json was right already.
 - launcher.bat still had the template's GAME_SHORT=Game: the launcher built, its copy failed and the script said it had failed. Set to AgentUnderFire.
