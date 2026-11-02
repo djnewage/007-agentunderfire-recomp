@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - A shape filling part of the screen for a frame
+- Harry's Mission 7 playthrough video: 135 of 4197 distinct frames have a patch going back and returning; at one, a large dark shape over a wall for about 2 recording frames, less than a step, so not the game's. Thought to be a small piece passing the camera blended through a place nearly on it. Small or turning draws with w under 2, or changing sign, are no longer blended. Not seen headless: for his build. His last on-foot mission, 30 to 50 FPS for stretches at render scale 2.5: mission and cause not known yet.
+- USA: needs a launcher change (each disc its own programs); Harry to choose.
+
 ### 2026-11-02 - Merged: driving's speed, steady windows and cars
 - All-games check on the SDK: AUF, PGR2, PGR1, NightFire, True Crime pass; PGR1's repro shows a live race when run alone (under load it ended on car select: its fixed delays). EoN's pin conflicts as before, not run. Fork's main and this repo's main moved. Left for v1.0.0: public repository, a launcher run without a GitHub login, then the tag. Next: USA support.
 
