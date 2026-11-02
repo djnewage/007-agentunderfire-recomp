@@ -9,7 +9,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   266 functions; layout proven from bond_eng.xbe's code
 - Push buffers: none (no game code calls MakeSpace or touches the device; RunPushBuffer not called)
 - Smoke: scripts/smoke.sh, default.xbe -> START -> bond_eng.xbe's first mission, about 6 minutes, then the driving part, SMOKE OK
-- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 37fa3dc
+- GitHub: hk21x/007-agentunderfire-recomp; SDK at the fork's main 7d32328
 - PC features: PC Settings, pointer, achievements, French and German confirmed by Harry; skip intro, field of view, mouse on foot confirmed by Harry; skip intro, field of view, mouse, 60 FPS, radar and culling confirmed by Harry
 - Not done: DRIVING.XBE in the smoke test, levels played to their end, PC features
 
@@ -22,6 +22,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Every library 1.0.4039. Sections include a DSOUND section though the library table does not list it.
 
 ## Log
+
+### 2026-11-02 - Past 60 merged
+- Harry chose to merge without EoN's smoke; the fork's main fast-forwarded to 7d32328 with the feature, this repo's main to it too. EoN is to be checked when its SDK line is reconciled with main. Next: launcher and release, his new screenshots.
 
 ### 2026-11-01 - All-games check of the SDK branch frame-interp
 - Throwaway clones, each game's pin merged into the candidate 7d32328: AUF 4 SMOKE OK, PGR2, PGR1, NightFire and True Crime SMOKE OK; PGR1's repro.sh shows a live race. EoN not run: its pin e644a6e conflicts (launcher, handover, boot, and overlay, d3d11, d3d12, d3d_common, main from the fork's newer work), none of them files this work changed beyond what the fork's main brought. The feature is off unless a game sets GameInfo::step_interpolation.
