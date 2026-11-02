@@ -6,6 +6,24 @@ project(game LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# the disc in assets chooses the programs: the USA disc is default.xbe, bond.xbe and Driving.xbe, each the same game at its own
+# addresses (src/*_usa and config/*_usa*.toml, written by tools/map_bond.py)
+file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/assets/default.xbe AUF_DISC)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/assets/default.xbe)
+if(AUF_DISC STREQUAL "dff80de4f889ef5ee70ac748a0391f2ed220d0e9")
+    set(AUF_USA ON)
+    set(AUF_CONFIGS auf_usa game_usa_game bond_usa bond_usa_game driving_usa driving_usa_game)
+else()
+    set(AUF_CONFIGS auf game bond bond_game bond_fre bond_fre_game bond_ger bond_ger_game driving driving_game)
+endif()
+# on Windows the game's code is a DLL per program, built on the player's PC (sdk's cmake/XbeRecomp.cmake); the harness links it in.
+# The package carries this disc's configs
+if(WIN32)
+    set(XBE_GAME_DLL ON)
+    list(TRANSFORM AUF_CONFIGS PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/config/ OUTPUT_VARIABLE XBE_GAME_CONFIGS)
+    list(TRANSFORM XBE_GAME_CONFIGS APPEND .toml)
+endif()
+
 # the SDK: sdk/ here, two folders up inside the SDK's templates, a checkout beside this repository, else downloaded
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/sdk/cmake/XbeRecomp.cmake)
     set(SDK ${CMAKE_CURRENT_SOURCE_DIR}/sdk)
@@ -39,11 +57,7 @@ function(xbe_partitions scan out)
     endif()
     set(${out} ${n} PARENT_SCOPE)
 endfunction()
-# the disc in assets chooses the programs: the USA disc is default.xbe, bond.xbe and Driving.xbe, each the same game at its own
-# addresses (src/*_usa and config/*_usa*.toml, written by tools/map_bond.py)
-file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/assets/default.xbe AUF_DISC)
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/assets/default.xbe)
-if(AUF_DISC STREQUAL "dff80de4f889ef5ee70ac748a0391f2ed220d0e9")
+if(AUF_USA)
     xbe_partitions(game_usa_game.toml GAME_PARTITIONS)
     xbe_partitions(bond_usa_game.toml BOND_PARTITIONS)
     xbe_partitions(driving_usa_game.toml DRIVING_PARTITIONS)

@@ -216,7 +216,8 @@ def main():
         return 1 if bad else 0
     for lang in sys.argv[1:] or ['fre', 'ger']:
         bad += rewrite(Pair('assets/bond_eng.xbe', 'assets/bond_%s.xbe' % lang), 'bond', lang, 'src/bond/addr_%s.h' % lang, 'config/bond.toml', 'config/bond_%s.toml' % lang,
-                       [('includes = ["bond_game.toml"]', 'includes = ["bond_%s_game.toml"]' % lang), ('bond_eng.xbe', 'bond_%s.xbe' % lang), ('generated/bond', 'generated/bond_%s' % lang)])
+                       [('includes = ["bond_game.toml"]', 'includes = ["bond_%s_game.toml"]' % lang), ('bond_eng.xbe', 'bond_%s.xbe' % lang), ('generated/bond', 'generated/bond_%s' % lang),
+                        ('AgentUnderFireBond.dll', 'AgentUnderFireBond%s.dll' % lang.capitalize())])
     return 1 if bad else 0
 
 

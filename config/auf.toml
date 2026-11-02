@@ -3,6 +3,9 @@
 # found by hand is signed into the SDK, then every xbe rescanned (each rescan must reproduce its scan file).
 includes = ["game.toml"]
 
+[xbe]
+library = "AgentUnderFire.dll"  # the game code DLL; this config is the one the build on the player's PC reads
+
 # XDK 4039: named from PGR1's (3948), NightFire's (4831) and PGR2's (5659) bodies, aligned in link order, or by hand from
 # the instructions (methods pushed, device fields, ret size); .local/a_*.txt hold the evidence
 

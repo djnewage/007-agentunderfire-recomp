@@ -30,5 +30,9 @@
             "bond.xbe",
             "Driving.xbe"
         ]
+    },
+    "packages": {
+        "3dbed4eb51701a53676e0ace4cdea1752dc04697": "AgentUnderFire-PAL-package.zip",
+        "dff80de4f889ef5ee70ac748a0391f2ed220d0e9": "AgentUnderFire-USA-package.zip"
     }
 }

@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - The prebuilt model (branch prebuilt; SDK at the fork's main 2933e64)
+- On Windows each program's code is now a DLL built on the player's PC from a package holding the runtime and compiler, no game code: `XBE_GAME_DLL` in CMakeLists.txt, `library` in the hand configs (map_bond.py names them for French and German), `XBE_GAME_CONFIGS` this disc's configs, game.json `packages` by default.xbe's SHA-1, release-package.bat at the repo's root (a zip per disc, each from a checkout holding that disc). The harness still links the code in.
+- Evidence here, all eight programs recompiled: every override, `__imp__` call, direct call and hook is in its exports.def, imports.def or hook_exports.h. No Windows link or run from here: next is Harry's build, package and launcher on each disc.
+
 ### 2026-11-02 - USA through the launcher: configure stopped on the icon
 - Harry's launcher log: the Windows-only icon step named the French and German targets, which a USA build lacks. Skipped when the target is absent. The Linux configure never runs that step, so smoke could not see it.
 - Harry, 2026-11-02, after the fix: "USA works now", built through the launcher on Windows. A full USA playthrough and multiplayer not done. Harry's crash fix also confirmed ("Bugs fixed").
