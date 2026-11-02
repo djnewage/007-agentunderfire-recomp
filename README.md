@@ -19,6 +19,19 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 `bond_eng.xbe` `66aace3859a5ca9a992f2d1845c2b5f5265fd9d6`, `bond_fre.xbe` `87b2d3c8b7b40916fe29b03490c84c4f690a4c12`,
 `bond_ger.xbe` `88d06191f3ba940394f258f138f0aa37f1ced1dd`, `DRIVING.XBE` `6b58e61ee8ce9aa2a1a357affe188af874cf05f4`.
 
+## Getting started
+
+The launcher builds the game on your PC from your own disc: no Visual Studio, no Git and no command line, nothing installed in Windows and no admin rights needed.
+
+**You need:** Windows 10 or 11, 64 bit, a GPU with Direct3D 12 or Direct3D 11, your own copy of the game (an `.iso` image of your disc, or a folder with its files), and an internet connection for the build tools.
+
+1. Download `AgentUnderFireLauncher.exe` from the [latest release](https://github.com/hk21x/007-agentunderfire-recomp/releases/latest).
+2. Put it in a folder of its own and run it. Windows may warn about an unrecognised app: choose **More info**, then **Run anyway**.
+3. Choose your disc image or folder, accept Microsoft's license for its C++ libraries, and press **Build**. The first build takes a while.
+4. Press **Play**.
+
+To build by hand instead, see [Building](#building).
+
 ## Screenshots
 
 <p align="center">
@@ -136,6 +149,9 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 - **Sharpening** makes the picture crisper. Around 50% is a good start.
 
 ## Building
+
+For developers; players should use the launcher above.
+
 
 1. Clone with submodules: `git clone --recurse-submodules https://github.com/hk21x/007-agentunderfire-recomp`.
 2. Extract your disc into `assets` (`default.xbe`, `bond_eng.xbe`, `bond_fre.xbe`, `bond_ger.xbe`, `DRIVING.XBE`, `assets\`, `driving.dat\`).

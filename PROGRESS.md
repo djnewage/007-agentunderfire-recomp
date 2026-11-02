@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Release prepared, not published
+- release.bat left the French and German exes out of its zip: added. README: Getting started with the launcher. docs/releases/v1.0.0.md drafted. launcher/game.json was right already.
+- Blockers, Harry's: the repository is private (404 without a login) and the launcher fetches it from GitHub without one. The launcher has not been run for this game. Tag v1.0.0 only on his word.
+
 ### 2026-11-02 - Past 60 merged
 - Harry chose to merge without EoN's smoke; the fork's main fast-forwarded to 7d32328 with the feature, this repo's main to it too. EoN is to be checked when its SDK line is reconciled with main. Next: launcher and release, his new screenshots.
 
