@@ -25,11 +25,11 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 
 The launcher sets the game up on your PC from your own disc: no Visual Studio, no Git and no command line, nothing installed in Windows and no admin rights needed. A release holds the runtime and a compiler, and none of the game's code.
 
-**You need:** Windows 10 or 11, 64 bit, a GPU with Direct3D 12 or Direct3D 11, your own copy of the game (an `.iso` image of your disc, or a folder with its files), and an internet connection for the build tools.
+**You need:** Windows 10 or 11, 64 bit, a GPU with Direct3D 12 or Direct3D 11, your own copy of the game (an `.iso` image of your disc, or a folder with its files), and an internet connection for the package.
 
 1. Download `AgentUnderFireLauncher.exe` from the [latest release](https://github.com/hk21x/007-agentunderfire-recomp/releases/latest).
 2. Put it in a folder of its own and run it. Windows may warn about an unrecognised app: choose **More info**, then **Run anyway**.
-3. Choose your disc image or folder and press **Get the game ready**. The launcher downloads the package for your disc and compiles the game's code from it; how long that takes depends on your PC and connection.
+3. Choose your disc image or folder and press **Get the game ready**. The launcher downloads the package for your disc and compiles the game's code from your disc; how long that takes depends on your PC and connection.
 4. Press **Play**. When a new version is out, the launcher offers **Update**.
 
 To build by hand instead, see [Building](#building).
