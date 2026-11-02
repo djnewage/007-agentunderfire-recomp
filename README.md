@@ -53,6 +53,12 @@ To build by hand instead, see [Building](#building).
 </p>
 
 <p align="center">
+  <img src="docs/img/agentunderfire-mounted-gun.webp" alt="A rifle mounted on a moving truck on a highway, mission 2" width="800">
+  <br>
+  <i>On the gun in mission 2, aimed with the mouse.</i>
+</p>
+
+<p align="center">
   <img src="docs/img/agentunderfire-mansion.webp" alt="A wide view of a mansion at night" width="800">
   <br>
   <i>A cut scene in the game's letterbox.</i>
@@ -121,15 +127,15 @@ Keys can be changed in the F1 window.
 In PC Settings or the settings window (F1, Graphics). These are shots of one spot at 3440x1440, taken one after another and lined up, so anything moving differs between them.
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across a street behind railings between all settings off and everything on" width="800">
+  <img src="docs/img/agentunderfire-settings-wipe.webp" alt="A wipe across the Aston Martin by an iron railing between all settings off and everything on" width="800">
   <br>
   <i>All off vs. everything on.</i>
 </p>
 
 <p align="center">
-  <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of a handrail with all off and with two combinations of settings" width="800">
+  <img src="docs/img/agentunderfire-settings-edges.webp" alt="Close-up of an iron railing with all off, MSAA 4x, FXAA and render scale 200%" width="800">
   <br>
-  <i>Edges, enlarged three times.</i>
+  <i>Edges, enlarged three times: all off, MSAA 4x, FXAA and render scale 200%.</i>
 </p>
 
 - **MSAA** smooths the edges of the 3D scene and keeps textures sharp. The more samples, the slower.

@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - README: his labelled shots
+- Slider from all off and everything on; edges from all off, MSAA 4x, FXAA and render scale 200%, shots lined up by a measured shift of at most 16 pixels. RECOMP tab with the new rows; the gun. His two sharpening shots were not in the folder: the older sharpness picture stays.
+
 ### 2026-11-02 - Steady frames above 60; wheels
 - Harry: built with the launcher, so the launcher works. Video: wheels pop out from behind the car; the counter sits at 60 with spikes past 100, vsync off. His log: 600 frames for 600 steps with a 722 now and then, so the back-off from one late step had put the limit at 1. Now late steps must keep coming (about 1 in 10, held), recovery after 120 steps, 1800 at most. Headless, no vsync, firing rockets: 1800 frames for 600 steps. Simulated vsync at 100 and 144 Hz still ends at 600 steps, after some 10 to 20 s of trying.
 - Wheels: a turning draw whose place moved more than a tenth counted as a different draw and was left at the step's place. The leap in the matrix's own units now decides alike for all. Not seen headless: for his build.
