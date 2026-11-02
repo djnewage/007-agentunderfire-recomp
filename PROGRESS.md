@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - A crash after Mediterranean Crisis's save: the game's own over-read
+- Harry's dump: read of guest 0x2C0 at 0x14AE52. 0x14AD30 batches a model's parts and at a batch's end reads the next entry's key with no check of the list's end; 0x14B22B's list is on the stack, where the entry past the 5 parts held the same stale key and no material (dump: list at D005FD34, esi at its end D005FD70, key 0x1000ED). src/bond/hooks.cpp puts a key no part has past the end during the call. Not reproduced: it needs that stack content.
+- Gate for the launcher's release_xbes: PGR2, PGR1 with repro, NightFire, True Crime pass; EoN's pin conflicts as before. PAL smoke 4 OK. USA headless 180 s from title into the first mission, no trap.
+
 ### 2026-11-02 - The USA disc (branch usa, sdk branch usa-disc)
 - USA: default.xbe, bond.xbe, Driving.xbe, English, 60 Hz. The same code as PAL's with blocks moved: `tools/map_bond.py usa <folder>` writes src/{game,bond,driving}_usa, addr_usa.h and config/*_usa.toml; `Pair(moved=True)` allows reordered blocks (Driving.xbe 413687 instructions aligned). CMake chooses the programs by assets/default.xbe's SHA-1. src/driving now takes its data addresses through A().
 - Mapping fault fixed: a code address no run covers fell to "a number nearby", landing inside an instruction. Every config entry, table entry and function was then compared with PAL's by its instructions, numbers masked. Bond and default all agree. Two in Driving.xbe do not, on purpose (the tool leaves them out): no SetGammaRamp function; the pause draws its lit box from the tab's widget so TabPlaces has nothing to move. kSeconds and kRates are PAL only; the tick and the slow motion hooks stay.

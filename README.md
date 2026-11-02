@@ -15,6 +15,8 @@ Playable on Windows: on-foot missions, driving missions and mounted guns, in Eng
 
 ## Supported version
 
+The USA Xbox release is supported too: its `default.xbe` SHA-1 is `dff80de4f889ef5ee70ac748a0391f2ed220d0e9`, with `bond.xbe` and `Driving.xbe`; the build chooses its programs by the disc in `assets`.
+
 The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4eb51701a53676e0ace4cdea1752dc04697`,
 `bond_eng.xbe` `66aace3859a5ca9a992f2d1845c2b5f5265fd9d6`, `bond_fre.xbe` `87b2d3c8b7b40916fe29b03490c84c4f690a4c12`,
 `bond_ger.xbe` `88d06191f3ba940394f258f138f0aa37f1ced1dd`, `DRIVING.XBE` `6b58e61ee8ce9aa2a1a357affe188af874cf05f4`.
