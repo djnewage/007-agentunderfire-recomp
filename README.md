@@ -29,8 +29,8 @@ The launcher sets the game up on your PC from your own disc: no Visual Studio, n
 
 1. Download `AgentUnderFireLauncher.exe` from the [latest release](https://github.com/hk21x/007-agentunderfire-recomp/releases/latest).
 2. Put it in a folder of its own and run it. Windows may warn about an unrecognised app: choose **More info**, then **Run anyway**.
-3. Choose your disc image or folder and install. The launcher downloads this disc's package (about 80 MB) and compiles the game's code from your disc, about a minute on a recent PC.
-4. Press **Play**.
+3. Choose your disc image or folder and press **Get the game ready**. The launcher downloads the package for your disc and compiles the game's code from it; how long that takes depends on your PC and connection.
+4. Press **Play**. When a new version is out, the launcher offers **Update**.
 
 To build by hand instead, see [Building](#building).
 
