@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - Merged: driving's speed, steady windows and cars
+- All-games check on the SDK: AUF, PGR2, PGR1, NightFire, True Crime pass; PGR1's repro shows a live race when run alone (under load it ended on car select: its fixed delays). EoN's pin conflicts as before, not run. Fork's main and this repo's main moved. Left for v1.0.0: public repository, a launcher run without a GitHub login, then the tag. Next: USA support.
+
 ### 2026-11-02 - Above 60 accepted with a known issue
 - His 240 FPS recording of buildings: 51 of 2554 distinct frames have a patch going back and returning, at most 5 small patches. One black shard for one frame (real debris or not, unknown). Signs and posts move unevenly, about 0, 60, 30, 10 pixels between frames: no frames can be shown while the title makes its next step, then the picture catches up. Likely what is left of the flicker; not proven. A proper cure is replays on a thread of their own, for later. Harry accepted it as a known issue in the release notes.
 
