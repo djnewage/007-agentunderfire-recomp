@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - SDK at the fork's main: the launcher's new look
+- The launcher in classic Steam's style reached the fork's main (d509dad), with the settings window's palette shared; the game code DLL stays on the prebuilt branch. Harry to run the new launcher.
+
 ### 2026-11-02 - README: support and tips
 - Discord link as the other games' READMEs have it; a tips section with the vsync advice, the logs and the launcher's. SDK already at the fork's main.
 
