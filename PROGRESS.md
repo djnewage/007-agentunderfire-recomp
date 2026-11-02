@@ -23,6 +23,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - The USA disc (branch usa, sdk branch usa-disc)
+- USA: default.xbe, bond.xbe, Driving.xbe, English, 60 Hz. The same code as PAL's with blocks moved: `tools/map_bond.py usa <folder>` writes src/{game,bond,driving}_usa, addr_usa.h and config/*_usa.toml; `Pair(moved=True)` allows reordered blocks (Driving.xbe 413687 instructions aligned). CMake chooses the programs by assets/default.xbe's SHA-1. src/driving now takes its data addresses through A().
+- Mapping fault fixed: a code address no run covers fell to "a number nearby", landing inside an instruction. Every config entry, table entry and function was then compared with PAL's by its instructions, numbers masked. Bond and default all agree. Two in Driving.xbe do not, on purpose (the tool leaves them out): no SetGammaRamp function; the pause draws its lit box from the tab's widget so TabPlaces has nothing to move. kSeconds and kRates are PAL only; the tick and the slow motion hooks stay.
+- Scans: `build/linux/xbe_symbols assets/<xbe> sdk/xdk --out config/<x>_usa_game.toml`, then `out` set to generated/<x>_usa (the game_usa, bond_usa and driving_usa folders).
+- Launcher (SDK): game.json `release_xbes`, SHA-1 to that disc's xbes. launcher_cli took USA's three and PAL's five; PGR2 and NightFire unchanged.
+- Evidence headless, assets a USA folder: movies, relaunch to BOND.XBE, menus with PC Settings, Mission 1 in play; mis02a on the gun, mis02b in the car; pause tabs and RECOMP page with its lit box. Not checked: a Windows build, multiplayer, keyboard prompts on USA, a USA playthrough. The disc's extracted copy here is from Harry's zip.
+
 ### 2026-11-02 - Mediterranean Crisis's frame rate: runs of alike draws merged (sdk branch merge-draws)
 - Harry's log there: normal stretches about 1300 draws a frame, slow ones up to 16061, 27 FPS, 35 ms on the render thread and all of it per
   draw cost, at any render scale. Headless route: Load Mission, Yes, Select Mission opens on the save's mission (.local/med.txt).
