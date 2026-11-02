@@ -141,8 +141,12 @@ class Pair:
 
     def any(self, a):
         s = self.section_of(self.sa, a)
-        if s and s[0] in ('.text', 'D3D', 'D3DX', 'XGRPH', 'DSOUND', 'XPP', 'DOLBY') and a in self.code:
-            return self.code[a]
+        if s and s[0] in ('.text', 'D3D', 'D3DX', 'XGRPH', 'DSOUND', 'XPP', 'DOLBY'):
+            if a in self.code:
+                return self.code[a]
+            if a in self.vals:  # the library's own variables stand in its code's sections
+                return self.data(a)
+            return self.code_addr(a) or self.data(a)  # by a number nearby only last: that can land inside an instruction
         return self.data(a)
 
 
@@ -204,7 +208,9 @@ def main():
         bad += rewrite(Pair('assets/bond_eng.xbe', x + '/bond.xbe'), 'bond', 'usa', 'src/bond/addr_usa.h', 'config/bond.toml', 'config/bond_usa.toml',
                        [('"bond_game.toml"', '"bond_usa_game.toml"'), ('bond_eng.xbe', 'bond.xbe'), ('generated/bond', 'generated/bond_usa')])
         bad += rewrite(Pair('assets/DRIVING.XBE', x + '/Driving.xbe', True), 'driving', 'usa', 'src/driving/addr_usa.h', 'config/driving.toml', 'config/driving_usa.toml',
-                       [('"driving_game.toml"', '"driving_usa_game.toml"'), ('DRIVING.XBE', 'Driving.xbe'), ('generated/driving', 'generated/driving_usa')])
+                       [('"driving_game.toml"', '"driving_usa_game.toml"'), ('DRIVING.XBE', 'Driving.xbe'), ('generated/driving', 'generated/driving_usa'),
+                        # not in this build: no caller of SetGammaRamp; the pause's lit box takes its place from the tab's widget, no list of places on the stack
+                        ('D3DDevice_SetGammaRamp                               = 0x114980\n', ''), ('[[hook]]\nat = 0xBBFAB\ncall = "TabPlaces"\n', '')])
         bad += rewrite(Pair('assets/default.xbe', x + '/default.xbe', True), 'game', 'usa', None, 'config/auf.toml', 'config/auf_usa.toml',
                        [('"game.toml"', '"game_usa_game.toml"'), ('generated/game', 'generated/game_usa')])
         return 1 if bad else 0

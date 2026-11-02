@@ -23,7 +23,6 @@ D3DDevice_MakeSpace                                  = 0x11A900
 D3DDevice_Reset                                      = 0x114780
 D3DDevice_SelectVertexShader                         = 0x118730
 D3DDevice_SetFlickerFilter                           = 0x114660
-D3DDevice_SetGammaRamp                               = 0x102750
 D3DDevice_SetRenderStateNotInline                    = 0x116420
 D3DDevice_SetRenderState_BackFillMode                = 0x116A00
 D3DDevice_SetRenderState_DoNotCullUncompressed       = 0x117470
@@ -98,7 +97,7 @@ D3DDevice_GetVisibilityTestResult                    = 0x1145A0
 [data]
 # as bond_eng.xbe: the deferred texture state follows the dirty flags, the index data before them
 D3D_DirtyFlags = 0x122268
-D3D_IndexData  = 0x122264
+D3D_IndexData  = 0x12206C
 
 [[hook]]
 at = 0xBC5E0
@@ -116,6 +115,3 @@ call = "LoadingPictureCentred"
 at = 0xBBCAF
 call = "PagePanelDone"
 
-[[hook]]
-at = 0xBC016
-call = "TabPlaces"
