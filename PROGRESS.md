@@ -26,6 +26,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 ### 2026-11-02 - The prebuilt model (branch prebuilt; SDK at the fork's main 2933e64)
 - On Windows each program's code is now a DLL built on the player's PC from a package holding the runtime and compiler, no game code: `XBE_GAME_DLL` in CMakeLists.txt, `library` in the hand configs (map_bond.py names them for French and German), `XBE_GAME_CONFIGS` this disc's configs, game.json `packages` by default.xbe's SHA-1, release-package.bat at the repo's root (a zip per disc, each from a checkout holding that disc). The harness still links the code in.
 - Evidence here, all eight programs recompiled: every override, `__imp__` call, direct call and hook is in its exports.def, imports.def or hook_exports.h. No Windows link or run from here: next is Harry's build, package and launcher on each disc.
+- Harry's PC, both discs through the launcher with a package beside it: PAL "works fine" for hops, saves, frame rate and input, French and German; USA "all working now". PAL: 82 MB package, 49.8 s install (unpack 1.5 s, compile 48.2 s, 141 files). Those builds carried pointer.cpp's fix, committed here: an overridden function's forward declaration needs X86_FUNC in DLL mode, X86_EXTERN_FUNC does not compile.
+- Still to come: both packages rebuilt from the committed branch, a clean PC test, the real download through the launcher (never run), the tag.
 
 ### 2026-11-02 - USA through the launcher: configure stopped on the icon
 - Harry's launcher log: the Windows-only icon step named the French and German targets, which a USA build lacks. Skipped when the target is absent. The Linux configure never runs that step, so smoke could not see it.

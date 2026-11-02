@@ -23,13 +23,13 @@ The European (PAL) Xbox release, title id 4541000D. `default.xbe` SHA-1 `3dbed4e
 
 ## Getting started
 
-The launcher builds the game on your PC from your own disc: no Visual Studio, no Git and no command line, nothing installed in Windows and no admin rights needed.
+The launcher sets the game up on your PC from your own disc: no Visual Studio, no Git and no command line, nothing installed in Windows and no admin rights needed. A release holds the runtime and a compiler, and none of the game's code.
 
 **You need:** Windows 10 or 11, 64 bit, a GPU with Direct3D 12 or Direct3D 11, your own copy of the game (an `.iso` image of your disc, or a folder with its files), and an internet connection for the build tools.
 
 1. Download `AgentUnderFireLauncher.exe` from the [latest release](https://github.com/hk21x/007-agentunderfire-recomp/releases/latest).
 2. Put it in a folder of its own and run it. Windows may warn about an unrecognised app: choose **More info**, then **Run anyway**.
-3. Choose your disc image or folder, accept Microsoft's license for its C++ libraries, and press **Build**. The first build takes a while.
+3. Choose your disc image or folder and install. The launcher downloads this disc's package (about 80 MB) and compiles the game's code from your disc, about a minute on a recent PC.
 4. Press **Play**.
 
 To build by hand instead, see [Building](#building).
@@ -182,4 +182,4 @@ For developers; players should use the launcher above.
 3. Install Visual Studio 2022 with C++ desktop development and run `build.bat`. The exes are in `out\build\release`.
    Run `AgentUnderFire.exe`; it starts the others itself.
 
-The game is five programs (the launcher and movies, the game in each of three languages, and the driving levels), and the build recompiles them all, which takes a while.
+PAL is five programs (the launcher and movies, the game in each of three languages, and the driving levels), USA three, and the build recompiles those of the disc in `assets`. On Windows each program's code is a DLL. `release-package.bat`, after `build.bat`, makes that disc's package for a release: one per disc, each from a checkout holding that disc.

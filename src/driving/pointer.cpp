@@ -27,7 +27,7 @@ X86_EXTERN_FUNC(sub_000B4560);
 X86_EXTERN_FUNC(sub_000B10B0);
 X86_EXTERN_FUNC(sub_000B2BE0);
 X86_EXTERN_FUNC(sub_000B3740);  // the width of a string in the font set
-X86_EXTERN_FUNC(sub_000BC8C0);  // a string by its number
+X86_FUNC(sub_000BC8C0);  // a string by its number, overridden below
 
 namespace {
 constexpr uint32_t kObject = A(0x1DFB08), kUp = 0x2E0, kTab = 0x420, kRow = 0x424, kPrompt = 0x428, kPromptRow = 0x42C;
