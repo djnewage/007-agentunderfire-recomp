@@ -32,3 +32,16 @@ bool OnGun() { return false; }
 void ClampTextEnd(X86Context& ctx, uint8_t*) {
     if (ctx.eax > 0xFF) ctx.eax = 0xFF;
 }
+
+// A model's parts, drawn from a list: 0x14AD30 (cdecl: filter, entity, first index, count, list of 12 byte entries, flag) batches
+// parts of one key, and at the end of a batch reads the next entry's key without looking whether the list has ended. Past the end of
+// 0x14B22B's list is the stack: Harry's crash, a stale entry with this key and no material, read at 0x14AE52 as null + 0x2C0.
+// A key no part has stands past the end during the call.
+X86_EXTERN_FUNC(__imp__sub_0014AD30);
+X86_FUNC(sub_0014AD30) {
+    const uint32_t past_key = kernel::R32(ctx.esp + 0x14) + kernel::R32(ctx.esp + 0x10) * 12 + 8;
+    const uint32_t kept = kernel::R32(past_key);
+    kernel::W32(past_key, 0xFFFFFFFF);
+    __imp__sub_0014AD30(ctx, base);
+    kernel::W32(past_key, kept);
+}
