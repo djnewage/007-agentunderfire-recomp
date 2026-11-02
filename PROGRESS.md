@@ -25,6 +25,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ### 2026-11-02 - USA through the launcher: configure stopped on the icon
 - Harry's launcher log: the Windows-only icon step named the French and German targets, which a USA build lacks. Skipped when the target is absent. The Linux configure never runs that step, so smoke could not see it.
+- Harry, 2026-11-02, after the fix: "USA works now", built through the launcher on Windows. A full USA playthrough and multiplayer not done. Harry's crash fix also confirmed ("Bugs fixed").
 
 ### 2026-11-02 - A crash after Mediterranean Crisis's save: the game's own over-read
 - Harry's dump: read of guest 0x2C0 at 0x14AE52. 0x14AD30 batches a model's parts and at a batch's end reads the next entry's key with no check of the list's end; 0x14B22B's list is on the stack, where the entry past the 5 parts held the same stale key and no material (dump: list at D005FD34, esi at its end D005FD70, key 0x1000ED). src/bond/hooks.cpp puts a key no part has past the end during the call. Not reproduced: it needs that stack content.
