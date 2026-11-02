@@ -25,6 +25,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ### 2026-11-02 - Release prepared, not published
 - release.bat left the French and German exes out of its zip: added. README: Getting started with the launcher. docs/releases/v1.0.0.md drafted. launcher/game.json was right already.
+- launcher.bat still had the template's GAME_SHORT=Game: the launcher built, its copy failed and the script said it had failed. Set to AgentUnderFire.
 - Blockers, Harry's: the repository is private (404 without a login) and the launcher fetches it from GitHub without one. The launcher has not been run for this game. Tag v1.0.0 only on his word.
 
 ### 2026-11-02 - Past 60 merged
