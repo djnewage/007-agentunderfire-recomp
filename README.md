@@ -160,6 +160,16 @@ In PC Settings or the settings window (F1, Graphics). These are shots of one spo
 
 - **Sharpening** makes the picture crisper. Around 50% is a good start.
 
+## Community and support
+
+Join the [Discord server](https://discord.gg/PQjkKsdtc) for help getting the game running, to report problems, and to talk about the port with other players.
+
+## Tips and troubleshooting
+
+- **The most frames above 60:** in driving missions and on mounted guns, set a Frame Rate Cap above 60 and turn **Vertical Sync off**. With it on, the extra frames are limited by your screen and can settle near 60. On foot the cap and your screen decide as usual.
+- **Something wrong:** the first lines of `logs\auf.log` beside the game (`AgentUnderFire\play\logs` with the launcher) list your settings and GPU. Please include that file when you report a problem.
+- **The launcher's build failing:** send `AgentUnderFire\launcher.log`. After a network problem, press Build again and it carries on where it stopped. If it stops while unpacking the Windows SDK, the folder path is too long: move the launcher to a short folder such as `C:\Games\AgentUnderFire`.
+
 ## Building
 
 For developers; players should use the launcher above.

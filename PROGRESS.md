@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - README: support and tips
+- Discord link as the other games' READMEs have it; a tips section with the vsync advice, the logs and the launcher's. SDK already at the fork's main.
+
 ### 2026-11-02 - Steady frames merged
 - Harry on frames-steady: counter holds, wheels better, walls and HUD fine, the gun fine; his log, cap 240, vsync off: 1831 frames for 598 steps. All-games check on the SDK: AUF, PGR2, PGR1 (repro shows a live race), NightFire, True Crime pass; EoN's pin conflicts as before, not run; the change is interp.cpp alone, which EoN does not use. The launcher logging commit that reached the fork's main meanwhile merged in, AUF smoke again. Fork's main and this repo's main moved; README shots and the release notes come with it. Left: public repository, a launcher run without a GitHub login, tag v1.0.0 on Harry's word.
 
