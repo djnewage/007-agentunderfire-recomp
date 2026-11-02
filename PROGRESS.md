@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - SDK at the fork's main 5469868
+- launcher.log filtering and one log line reworded (the SDK session's prebuilt-tidy).
+
 ### 2026-11-02 - The prebuilt model (branch prebuilt; SDK at the fork's main 2933e64)
 - On Windows each program's code is now a DLL built on the player's PC from a package holding the runtime and compiler, no game code: `XBE_GAME_DLL` in CMakeLists.txt, `library` in the hand configs (map_bond.py names them for French and German), `XBE_GAME_CONFIGS` this disc's configs, game.json `packages` by default.xbe's SHA-1, release-package.bat at the repo's root (a zip per disc, each from a checkout holding that disc). The harness still links the code in.
 - Evidence here, all eight programs recompiled: every override, `__imp__` call, direct call and hook is in its exports.def, imports.def or hook_exports.h. No Windows link or run from here: next is Harry's build, package and launcher on each disc.
