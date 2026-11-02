@@ -78,7 +78,7 @@ Set in the F1 window (or `settings.toml` beside the exe); the runtime's own disp
 - **Auto-aim** - The game's aim assist is off by default; the F1 window turns it back on.
 - **Field of view** - 50 to 150% of the game's, on foot and driving.
 - **Skip intro movies** - Starts without the logos.
-- **High frame rates** - On foot the game follows the frame rate cap (60 by default, up to 240 or unlimited) with its speed tied to real time, instead of the console's 30. Driving missions and mounted guns run at 60 game steps a second instead of PAL's 50, which plays a fifth faster, and above a cap of 60 draw frames in between: blended when driving, carried ahead with no added delay on a gun. Turn Vertical Sync off for the most frames there.
+- **High frame rates** - On foot the game follows the frame rate cap (60 by default, up to 240 or unlimited) with its speed tied to real time, instead of the console's 30. Driving missions and mounted guns run at 60 game steps a second instead of PAL's 50, at the same game speed, and above a cap of 60 draw frames in between: blended when driving, carried ahead with no added delay on a gun. Turn Vertical Sync off for the most frames there.
 - **Slow motion** - Driving cut scenes' slow motion is held to half speed, so it is not down to a quarter of the frames.
 - **Screenshots** - F12 saves the frame as a full resolution PNG in the `screenshots` folder beside the game, without the settings window.
 - **Mouse and keyboard** - The mouse looks directly on foot and aims mounted guns directly, works the menus, and zooms a scope with the wheel. Menus and hints on foot show your keys. On-foot menus show a pointer: the item under it highlights and a click selects it.
