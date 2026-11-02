@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-02 - The USA disc reviewed
+- Harry's USA image (extracted to .local/usa, kept out of git). Not compatible as it stands: default.xbe, bond.xbe, Driving.xbe are another compile (Feb 2002; PAL Mar 2002), XDK 4039 too, English only, loose assets (Assets/maps/*.xbc, no .viv). The launcher and hooks know PAL's hashes and addresses. sdk/tools/symbols/xbe_port.py places about 9 in 10 of the addresses named in src (bond 89 of 107, driving 52 of 57, default 0 of 3).
+- Driving: USA asks 60 ticks where PAL asks 50 (0x5747D, 0x5736D), and has 1/60 where PAL has 1/50 (86 and 1 against 19 and 104 in the file). So PAL at 60 ticks is a fifth too fast, by EA's own numbers, not the design's speed.
+
 ### 2026-11-02 - SDK at the fork's main: the launcher's new look
 - The launcher in classic Steam's style reached the fork's main (d509dad), with the settings window's palette shared; the game code DLL stays on the prebuilt branch. Harry to run the new launcher.
 
