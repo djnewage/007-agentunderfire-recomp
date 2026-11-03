@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "common/auf.h"
+#include "core/log.h"
 #include "kernel/kernel.h"
 
 namespace auf {
@@ -38,10 +39,20 @@ void ClampTextEnd(X86Context& ctx, uint8_t*) {
 // A model's parts, drawn from a list: 0x14AD30 (cdecl: filter, entity, first index, count, list of 12 byte entries, flag) batches
 // parts of one key, and at the end of a batch reads the next entry's key without looking whether the list has ended. Past the end of
 // 0x14B22B's list is the stack: Harry's crash, a stale entry with this key and no material, read at 0x14AE52 as null + 0x2C0.
-// A key no part has stands past the end during the call.
+// A key no part has stands past the end during the call, for a list on the stack only: past a global list (0x14AF80's) may be
+// anything. 0x14B22B's list holds 8 and its start index (the third argument, a word the call reads first) follows it: a full
+// list's key slot is that index, which the mark set to 0xFFFF, and the call began 65535 entries on (a USA player's crash, 1.0.0).
+// That slot is left alone; a key there is the index's own bytes, no part's.
 X86_EXTERN_FUNC(__imp__sub_0014AC40);
 X86_FUNC(sub_0014AC40) {
-    const uint32_t past_key = kernel::R32(ctx.esp + 0x14) + kernel::R32(ctx.esp + 0x10) * 12 + 8;
+    const uint32_t start = kernel::R32(ctx.esp + 0xC), list = kernel::R32(ctx.esp + 0x14);
+    const uint32_t past_key = list + kernel::R32(ctx.esp + 0x10) * 12 + 8;
+    const bool on_stack = list > ctx.esp && list - ctx.esp < 0x1000;
+    const bool apart = past_key + 4 <= start || past_key >= start + 4;
+    if (!on_stack || !apart) {
+        if (on_stack) LOG_FIRST(4, "auf: a full list of model parts, its start index after it left alone");
+        return __imp__sub_0014AC40(ctx, base);
+    }
     const uint32_t kept = kernel::R32(past_key);
     kernel::W32(past_key, 0xFFFFFFFF);
     __imp__sub_0014AC40(ctx, base);
