@@ -23,6 +23,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-04 - SDK at the fork's main 97b1654
+- The launcher updates an install built the old way in place to the prebuilt one (play\.next staging, old build tools offered for removal).
+
 ### 2026-11-03 - 1.0.0's crash on the USA disc: my end mark landed on the start index
 - A USA player's dump (Ryzen Z1, 7.7 GB): read of guest 0x2C0 in AgentUnderFireBond.dll, esi = list + 0xFFFF * 12 (D005FD34 + BFFF4 = D011FD28). 0x14B22B's caller keeps 8 entries from esp+0x18 and the start index word at esp+0x80: entry 8's key slot (0x20 + 12 * 8). With 8 parts the mark (2026-11-02) wrote 0xFFFF there and the call began 65535 entries on. So it can happen on either disc.
 - Fixed: the mark only for a list on the stack, and never over the start index; a log line when it is left out. Headless, US Bad Diplomacy from Harry's save and the ISO's files (all 318 read identically by the disc reader) ran 3 minutes without a crash before and after; the full-list case did not come up headless, so the evidence is the dump and the caller's layout.
