@@ -20,6 +20,7 @@
 #include "core/input.h"
 #include "core/log.h"
 #include "kernel/kernel.h"
+#include "vr/vr.h"
 #include "xdk/hle.h"
 
 namespace {
@@ -62,6 +63,22 @@ bool Counts(float& x, float& y) {
 
 X86_EXTERN_FUNC(__imp__sub_00024570);
 X86_FUNC(sub_00024570) {
+    // A headset (vr/vr.h): the head turns the same angles. Its yaw is added as it changes, so the stick and mouse still turn the
+    // body; its pitch is the view's own, level with the room. Only while the player has the view (not a menu, a cut scene).
+    if (kernel::R32(ctx.esp + 8) == 0) {
+        static bool had = false;
+        static float last_yaw = 0;
+        float yaw, pitch;
+        if (auf::PlayerFree() && !auf::MenuUp() && vr::Head(yaw, pitch)) {
+            if (had) SetF(kYaw, GetF(kYaw) + std::remainder(yaw - last_yaw, 360.0f));
+            SetF(kPitch, -std::clamp(pitch, -85.0f, 85.0f));
+            if (!had) LOGR("auf: the headset turns the view");
+            had = true;
+            last_yaw = yaw;
+        } else {
+            had = false;
+        }
+    }
     float x, y;
     if (kernel::R32(ctx.esp + 8) == 0 && Counts(x, y)) {
         float rx = GetF(kYawRate), ry = GetF(kPitchRate);
