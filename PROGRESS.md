@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - Issue #7: a setting for the white flash when hit
+- Taking damage, the player's code at 0xBB4A6 posts setflashcolor 1 1 1 0.3 (event 0x334110, handler 0xAF9E0 by the response table at 0x215C60); 0x71110 runs the handler at once, so the damage code's return 0xBB4F4 is at esp+0x18 there.
+- `hit_flash` (Game tab's Hit Flash, settings.toml, AUF_HIT_FLASH headless), on by default: off leaves that one call out; scripts' own setflashcolor stays. Mapped to French, German and USA, each address reading as English's.
+- Not seen headless: no run got Bond shot (Bad Diplomacy's pale frame was the mission-failed fade; Mission 1's walk never moved). Harry's test decides.
+
 ### 2026-11-09 - Issue #8: R did not reload a mounted gun
 - The gun's controls (data\Control\povcfg0.def in each mission's .viv, RefPack): GAMEACTION_POVRELOAD is +button0, A; fire is the right trigger, aim the left. src/common/menu_mouse.cpp sent R to X on a gun, and clears A there (the left button fires).
 - Headless, PAL mis02a: an empty magazine (0 - 400) reloads by itself when fire is let go; with rounds spent, X left 47, A filled it to 50.
