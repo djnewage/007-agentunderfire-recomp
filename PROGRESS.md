@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - Issues #4 and #6: waiting
+- #4 (16:10, the Steam Deck): the SDK session's aspect-16x10 (89cafb8, GameInfo::fills_narrow_screens) is tested on AUF headless at 1280x800 and on Harry's PC ("fine"). It reaches fork main after Harry's go on the all-games candidate; then AUF sets `.fills_narrow_screens = true` in GameInfo order. A smaller fill_from of mine stays unpushed on local branches fill-1610 and sdk fill-narrow.
+- #6 (USA save, the driving mission's result not kept): the player's save (00 Agent) records Trouble in Paradise only (0x38 = 1), and Select Mission opens on Precious Cargo. Each program rewrites auf.log, so the driving session's log is gone. USA and PAL relaunch bond the same way with the same launch data, and US bond takes PAL's driving result as PAL bond does (both go on to mis02b). Not reproduced: no headless way to finish a driving mission. Asked for the steps and the logs right after the driving mission.
+- Also from the SDK session: a latent race in bond's first map load (sub_165D40 reads [0x374404], set at 0x15E9E6 in 0x15E5D0, cleared by 0x165E60), seen on render-mt2. To look at.
+
 ### 2026-11-09 - Issue #7: a setting for the white flash when hit
 - Taking damage, the player's code at 0xBB4A6 posts setflashcolor 1 1 1 0.3 (event 0x334110, handler 0xAF9E0 by the response table at 0x215C60); 0x71110 runs the handler at once, so the damage code's return 0xBB4F4 is at esp+0x18 there.
 - `hit_flash` (Game tab's Hit Flash, settings.toml, AUF_HIT_FLASH headless), on by default: off leaves that one call out; scripts' own setflashcolor stays. Mapped to French, German and USA, each address reading as English's.
