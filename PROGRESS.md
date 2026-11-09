@@ -23,6 +23,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - Issue #4: 16:10 screens filled (SDK at the fork's main 89cafb8)
+- The SDK session's aspect-16x10 reached fork main with Harry's go (with the all-games candidate: EoN's line, per-size colour targets, F1 placement on resize). AUF sets `.fills_narrow_screens = true`: on a 16:10 or 3:2 screen the console reports a 4:3 TV, the views widen by FrameAspect / 4:3 (1.2 on 16:10) and the 2D stays 4:3 in the middle.
+- Harry tested that branch on Windows at 1280x800 ("fine"); here smoke, and smoke with OUTPUT=1280x800.
+
 ### 2026-11-09 - Issues #4 and #6: waiting
 - #4 (16:10, the Steam Deck): the SDK session's aspect-16x10 (89cafb8, GameInfo::fills_narrow_screens) is tested on AUF headless at 1280x800 and on Harry's PC ("fine"). It reaches fork main after Harry's go on the all-games candidate; then AUF sets `.fills_narrow_screens = true` in GameInfo order. A smaller fill_from of mine stays unpushed on local branches fill-1610 and sdk fill-narrow.
 - #6 (USA save, the driving mission's result not kept): the player's save (00 Agent) records Trouble in Paradise only (0x38 = 1), and Select Mission opens on Precious Cargo. Each program rewrites auf.log, so the driving session's log is gone. USA and PAL relaunch bond the same way with the same launch data, and US bond takes PAL's driving result as PAL bond does (both go on to mis02b). Not reproduced: no headless way to finish a driving mission. Asked for the steps and the logs right after the driving mission.
