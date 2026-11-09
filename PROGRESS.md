@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - Issue #8: R did not reload a mounted gun
+- The gun's controls (data\Control\povcfg0.def in each mission's .viv, RefPack): GAMEACTION_POVRELOAD is +button0, A; fire is the right trigger, aim the left. src/common/menu_mouse.cpp sent R to X on a gun, and clears A there (the left button fires).
+- Headless, PAL mis02a: an empty magazine (0 - 400) reloads by itself when fire is let go; with rounds spent, X left 47, A filled it to 50.
+- R now presses A on a gun. A controller's A reloaded all along. Keys cannot be held headless: the evidence is the pad test and the file.
+
 ### 2026-11-04 - SDK at the fork's main 97b1654
 - The launcher updates an install built the old way in place to the prebuilt one (play\.next staging, old build tools offered for removal).
 

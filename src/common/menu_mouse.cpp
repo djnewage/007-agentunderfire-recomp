@@ -153,7 +153,7 @@ void MenuMouse(int port, input::Pad& p) {
         for (int c : {input::kA, input::kX, input::kLT, input::kRT}) p.analog[c - input::kA] = 0;
         if (held & 1) Press(p, input::kRT);
         if (held & 2) Press(p, input::kLT);
-        if (KeyHeld('R')) Press(p, input::kX);
+        if (KeyHeld('R')) Press(p, input::kA);  // reload: povcfg0.def's GAMEACTION_POVRELOAD is +button0, A (X does nothing there)
     }
     if (menu) {
         if (KeyHeld(0x0D)) p.analog[0] = 255;  // Enter: A
