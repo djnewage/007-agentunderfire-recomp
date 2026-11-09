@@ -23,6 +23,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - The multi-core renderer (branch mt2, SDK render-mt2 07f92a7)
+- Harry wants AUF on the multi-core renderer before its next release. render-mt2 (the PGR2 session's) is fork main 89cafb8 plus it; AUF pins it on this branch until it reaches fork main.
+- The "map-load race" from Harry's AUF-mt2 runs: traced headless, the load (0x28480), the set (0x165C40), the use (0x165D40) and the unload before the next map (0x28700, 0x165E60) all run on one guest thread, in order. Both deaths were the first map load with the game read from X:\AUF-mt2\assets, a network drive (the third death was the share's in-page error): a map file read cut short leaves [0x374404] unset. Not a race; to the SDK session (host read errors on a share).
+- Still to do: Harry's new against old comparison on his PC (frame cap and vsync off), never finished.
+
 ### 2026-11-09 - Issue #4: 16:10 screens filled (SDK at the fork's main 89cafb8)
 - The SDK session's aspect-16x10 reached fork main with Harry's go (with the all-games candidate: EoN's line, per-size colour targets, F1 placement on resize). AUF sets `.fills_narrow_screens = true`: on a 16:10 or 3:2 screen the console reports a 4:3 TV, the views widen by FrameAspect / 4:3 (1.2 on 16:10) and the 2D stays 4:3 in the middle.
 - Harry tested that branch on Windows at 1280x800 ("fine"); here smoke, and smoke with OUTPUT=1280x800.
