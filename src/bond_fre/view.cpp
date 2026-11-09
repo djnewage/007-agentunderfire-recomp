@@ -15,6 +15,7 @@
 
 #include "common/auf.h"
 #include "kernel/kernel.h"
+#include "vr/vr.h"
 #include "xdk/hle.h"
 
 namespace {
@@ -51,7 +52,7 @@ X86_FUNC(sub_0015CC10) {
 
 X86_EXTERN_FUNC(__imp__sub_0013A260);
 X86_FUNC(sub_0013A260) {
-    if (kernel::R32(ctx.esp) != A(0x14B654)) ScaleFov(ctx.esp + 8);
+    if (vr::Enabled() || kernel::R32(ctx.esp) != A(0x14B654)) ScaleFov(ctx.esp + 8);  // in a headset the weapon is in the same view
     __imp__sub_0013A260(ctx, base);
 }
 X86_EXTERN_FUNC(__imp__sub_0013A2E0);

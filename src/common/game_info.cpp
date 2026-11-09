@@ -7,6 +7,7 @@
 #include <toml++/toml.hpp>
 #endif
 
+#include "vr/vr.h"
 #include "app/app.h"
 #include "common/auf.h"
 #include "core/input.h"
@@ -20,6 +21,8 @@ bool hit_flash = true;
 uint32_t fov_percent = 100;
 
 float FovScale() {
+    // a headset: the game's 60 degrees upright become 100, about what a headset shows (the frame says what it was drawn with)
+    if (vr::Enabled()) return 100.0f / 60.0f;
     uint32_t pct = std::clamp<uint32_t>(fov_percent, 50, 150);
     static uint32_t said = 100;
     if (said != pct) {

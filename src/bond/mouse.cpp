@@ -75,6 +75,7 @@ X86_FUNC(sub_00024570) {
             last_yaw = yaw;
         } else {
             had = false;
+            vr::Flat();
         }
     }
     float x, y;
