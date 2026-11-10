@@ -8,6 +8,7 @@
 // rate, 0.0008 radians a count (measured 0.00076 from 1 to 100 counts a frame, mis02a and mis09). Headless (no mouse): AUF_MOUSE_TEST=dx,dy,from,to, counts a call for calls from..to.
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -17,6 +18,7 @@
 #include "core/input.h"
 #include "core/log.h"
 #include "kernel/kernel.h"
+#include "vr/vr.h"
 #include "xdk/hle.h"
 
 namespace {
@@ -60,6 +62,52 @@ X86_FUNC(sub_00077A20) {
     const uint32_t cam = ctx.ecx;
     float x = 0, y = 0;
     Counts(x, y);  // taken off a gun too: what the mouse did in an intro or a menu must not turn the gun when it starts
+    // A headset's right hand aims the gun. The camera is the gun's: each update it is turned as far as the hand has turned
+    // since the last (the rates are radians over 5.6 a frame, as the mouse's below; up and down at half that), and a share
+    // of what is still between where the hand points and where the camera really is (vr::CameraYaw and CameraPitch, from
+    // the renderer's matrices, an update or two late: the turns asked for since are counted in). The hand's heading and the
+    // camera's differ by an offset, taken when the hand takes the gun and moved by the right stick, which so turns the
+    // gun and the player together. The frame is drawn at where the camera will be, and the renderer turns it to the head.
+    if (cam && auf::OnGun() && !auf::MenuUp() && vr::HandAims()) {
+        static bool had = false;
+        static float last_yaw = 0, last_pitch = 0, offset = 0, turns[2] = {}, rises[2] = {};
+        float yaw, pitch, cam_yaw = 0, cam_pitch = 0;
+        if (vr::Head(yaw, pitch)) {
+            constexpr float kPerRadian = 1 / 5.6f, kRad = 3.14159265f / 180, kShare = 0.25f, kStick = 90.0f / 60;  // degrees an update
+            const bool known = vr::CameraYaw(cam_yaw) && vr::CameraPitch(cam_pitch);
+            if (!had) {
+                offset = known ? cam_yaw - yaw : 0;
+                last_yaw = yaw, last_pitch = pitch;
+                turns[0] = turns[1] = rises[0] = rises[1] = 0;
+                LOGR("auf: the right hand aims the mounted gun");
+            }
+            const float stick = vr::TakeTurn() - vr::TurnStick() * kStick;  // to the left positive
+            offset += stick;
+            float turn = std::remainder(yaw - last_yaw, 360.0f) + stick, rise = pitch - last_pitch;
+            if (known) {
+                turn += kShare * (yaw + offset - (cam_yaw + turns[0] + turns[1]));
+                rise += kShare * (pitch - (cam_pitch + rises[0] + rises[1]));
+            }
+            turn = std::clamp(turn, -20.0f, 20.0f), rise = std::clamp(rise, -12.0f, 12.0f);
+            if (known) {
+                vr::Yaw(cam_yaw + turns[0] + turns[1] + turn - offset);
+                vr::Pitch(cam_pitch + rises[0] + rises[1] + rise);
+            }
+            const float side_rate = -turn * kRad * kPerRadian;             // a positive rate turns right
+            const float up_rate = -rise * kRad * kPerRadian * kUpScale;    // a positive rate looks down
+            SetF(cam + kSideRate, side_rate), SetF(cam + kSideTarget, side_rate);
+            SetF(cam + kUpRate, up_rate), SetF(cam + kUpTarget, up_rate);
+            for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);
+            __imp__sub_00077A20(ctx, base);
+            for (uint32_t ramp : kRamps) SetF(cam + ramp, 0);
+            turns[1] = turns[0], turns[0] = turn;
+            rises[1] = rises[0], rises[0] = rise;
+            had = true;
+            last_yaw = yaw, last_pitch = pitch;
+            return;
+        }
+        had = false;
+    }
     if (!cam || !auf::OnGun() || auf::MenuUp() || !UsingMouse()) return __imp__sub_00077A20(ctx, base);
     // what built up where this was not called arrives at once: a third of a radian a frame at most
     x = std::clamp(x, -kMostCounts, kMostCounts), y = std::clamp(y, -kMostCounts, kMostCounts);

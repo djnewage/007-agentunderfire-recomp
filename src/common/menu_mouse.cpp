@@ -154,7 +154,7 @@ void MenuMouse(int port, input::Pad& p) {
             vr::SetUnits(1);   // EAGL's are metres (speeds are m/s)
         }
         if (menu) vr::Flat();
-        else vr::Ahead();
+        else if (!(OnGun() && vr::HandAims())) vr::Ahead();  // (a gun the hand aims: the camera's update marks the frame, mouse.cpp)
     }
     // On foot the weapon and the gadget are the d-pad's (down the next weapon, right the next gadget), which a headset's
     // hand controllers do not have: White (their left A) is the next weapon too.
