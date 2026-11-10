@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "kernel/kernel.h"
 #include "vr/vr.h"
 #include "common/auf.h"
 #include "core/input.h"
@@ -142,8 +143,49 @@ void MenuMouse(int port, input::Pad& p) {
     // on foot Enter is the console's A everywhere, and where Bond is not the player's to move (a cutscene, a hint's "Press A") the left
     // button too
     if (kImage == kBond && !menu && input::UsingKeyboard() && (KeyHeld(0x0D) || (!PlayerFree() && (held & 1)))) Press(p, input::kA);
+    // Unlock all missions (auf::unlock_missions): a mission's best medal, 0 for one not finished, is raised to bronze (1)
+    // while the front end is up. The twelve are at kAddrBestMedals (achievement_set.cpp).
+    if (unlock_missions && kImage == kBond && menu && !LevelPaused() && kAddrBestMedals) {
+        bool raised = false;
+        for (uint32_t i = 0; i < 12; i++)
+            if (kernel::R32(kAddrBestMedals + i * 4) == 0) kernel::W32(kAddrBestMedals + i * 4, 1), raised = true;
+        if (raised) LOGR("auf: every mission's best medal is at least bronze (unlock_missions)");
+    }
     // a headset: a paused level stays around the player, its menu on the HUD ahead
     if (menu && LevelPaused()) vr::Hold();
+    // the driving levels and the mounted guns: the world around the car, the camera looking ahead
+    if (kImage == kDriving) {
+        static bool set = false;
+        if (!set) {
+            set = true;
+            vr::Layout(1);     // the left stick steers
+            vr::SetUnits(1);   // EAGL's are metres (speeds are m/s)
+        }
+        if (menu) vr::Flat();
+        else vr::Ahead();
+    }
+    // On foot the weapon and the gadget are the d-pad's (down the next weapon, right the next gadget), which a headset's
+    // hand controllers do not have: White (their left A) is the next weapon too.
+    if (kImage == kBond && !menu) {
+        if (p.analog[input::kWhite - input::kA] > 128) Press(p, input::kDown);
+        // the next gadget: the right stick pulled back or pressed in (vr.cpp plays both as the right thumb button). The right
+        // hand's A stays the game's action button: taking it for the gadgets left the player without one
+        if (p.buttons & (1u << input::kRThumb)) Press(p, input::kRight);
+        // In a headset the trigger works what is in the hand: once a gadget has been chosen (the d-pad's left or right) it is
+        // the game's use-gadget button (B) and not fire, until a weapon is chosen again (up or down). What is in Bond's hand
+        // is not read from the game: it is what the player last chose here.
+        static bool gadget = false;
+        const bool chose_gadget = p.buttons & ((1u << input::kLeft) | (1u << input::kRight));
+        const bool chose_weapon = p.buttons & ((1u << input::kUp) | (1u << input::kDown));
+        if (chose_gadget && !gadget) LOGR("auf: a gadget chosen: the trigger uses it");
+        if (chose_weapon && gadget) LOGR("auf: a weapon chosen: the trigger fires");
+        if (chose_gadget) gadget = true;
+        if (chose_weapon) gadget = false;
+        if (gadget && vr::Running() && p.analog[input::kRT - input::kA] > 64) {
+            p.analog[input::kRT - input::kA] = 0;
+            Press(p, input::kB);
+        }
+    }
     // in a menu the left stick plays the d-pad, which is all the menus read (a headset's hand controllers have no d-pad)
     if (menu) {
         constexpr int kPushed = 18000;

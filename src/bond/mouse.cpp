@@ -66,6 +66,7 @@ X86_FUNC(sub_00024570) {
     if (kernel::R32(ctx.esp + 8) == 0) {
         static bool had = false;
         static float last_yaw = 0;
+        static std::chrono::steady_clock::time_point free_at{};  // when the player last had the view
         float yaw, pitch;
         if (auf::PlayerFree() && !auf::MenuUp() && vr::Head(yaw, pitch)) {
             if (had) SetF(kYaw, GetF(kYaw) + std::remainder(yaw - last_yaw, 360.0f));
@@ -74,31 +75,48 @@ X86_FUNC(sub_00024570) {
             // the server places the view, moved whenever the angle passes a limit), 67 degrees in one session. What the camera
             // really did with the last value written is in its matrix (ViewPitch), so the offset is known a frame late and
             // taken off.
-            static float written = 0, offset = 0, expected = 0;
-            static bool wrote = false;
+            static float written = 0, offset = 0, expected = 0, last_seen = 0, last_written = 0;
+            static bool wrote = false, answers = true;
             const float want = -std::clamp(pitch, -80.0f, 80.0f);  // the camera's pitch wanted, downwards
             float seen;
             if (wrote && auf::ViewPitch(seen)) {
+                // Does the camera answer what is written? When the angle written moved, the camera moved as far, or it is the
+                // game's for now (a drop into a vent, a limit of its own). An offset is learnt only from a camera that
+                // answers: taking a held camera's difference for one sent the angle written round and round.
+                const float moved = std::remainder(written - last_written, 360.0f), turned = std::remainder(seen - last_seen, 360.0f);
+                if (std::fabs(moved) > 1.0f) answers = std::fabs(turned - moved) < 0.3f * std::fabs(moved) + 1.0f;
                 const float now = std::remainder(seen - written, 360.0f);
-                if (std::fabs(now - offset) > 0.5f) {
+                if (answers && std::fabs(now - offset) > 0.5f) {
                     if (std::fabs(now - offset) > 5) LOGR("auf: the camera's pitch stands %.1f degrees from the angle written", now);
                     offset = now;
                 }
-                // the camera did not go where it was sent (a limit of the game's): the picture is turned from where it is
+                last_seen = seen;
+                // the camera is not where it was sent: the picture is turned from where it is
                 if (std::fabs(seen - expected) > 1.5f) vr::Pitch(-seen);
             }
+            last_written = written;
             written = std::remainder(want - offset, 360.0f);
             expected = want;
             wrote = true;
             SetF(kPitch, written);
             if (!had) LOGR("auf: the headset turns the view");
+            free_at = std::chrono::steady_clock::now();
             had = true;
             last_yaw = yaw;
         } else if (!auf::LevelPaused()) {
             // (paused, the level stays around the player, menu_mouse.cpp, and the hand's place is kept: what it turns through
             // meanwhile is added when play goes on, so the world stays where it was)
-            had = false;
-            vr::Flat();
+            // The game has the view for a moment (the Q-Claw's pull, a ladder, a short scripted move): the world stays around
+            // the player, the camera where the game takes it, seen from where the head is; its pitch from its matrix. Longer
+            // than a few seconds is a cut scene: on the screen.
+            float seen;
+            if (!auf::MenuUp() && std::chrono::steady_clock::now() - free_at < std::chrono::seconds(4)) {
+                vr::Hold();
+                if (auf::ViewPitch(seen)) vr::Pitch(-seen);
+            } else {
+                had = false;
+                vr::Flat();
+            }
         }
     }
     float x, y;

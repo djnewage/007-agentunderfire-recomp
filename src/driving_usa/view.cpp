@@ -14,6 +14,7 @@
 #include "common/auf.h"
 #include "gpu/state.h"
 #include "kernel/kernel.h"
+#include "vr/vr.h"
 #include "xdk/d3d8.h"
 #include "xdk/hle.h"
 
@@ -104,6 +105,9 @@ X86_FUNC(sub_00102400) {
             fov = 2 * std::atan(k * std::tan(fov * kPi / 360)) * 180 / kPi;
             SetF(ctx.esp + 8, aspect * k);
         }
+        // a headset: 100 degrees upright in place of the game's 52 (66 across at 4:3), by the tangent, so its own zooms keep
+        // their proportion
+        if (vr::Enabled()) fov = 2 * std::atan(std::tan(50 * kPi / 180) / std::tan(25.96f * kPi / 180) * std::tan(fov * kPi / 360)) * 180 / kPi;
         SetF(ctx.esp + 4, std::min(fov, 170.0f));
     }
     __imp__sub_00102400(ctx, base);
@@ -119,7 +123,7 @@ X86_FUNC(sub_0007E240) {
     constexpr float kCullMargin = 2.2f, kMost = 80.0f;
     float half = GetF(ctx.esp + 0xC) * auf::FovScale();
     float wide = std::atan(std::max(auf::FrameWidth(), 1.0f) * kCullMargin * std::tan(half * kPi / 180)) * 180 / kPi;
-    SetF(ctx.esp + 0xC, std::min(wide, kMost));
+    SetF(ctx.esp + 0xC, vr::Enabled() ? kMost : std::min(wide, kMost));  // a headset looks about: as wide as it goes
     __imp__sub_0007E240(ctx, base);
 }
 

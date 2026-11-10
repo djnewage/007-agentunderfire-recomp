@@ -16,6 +16,7 @@ extern const bool kUsa;       // the USA disc: its programs, English only, 60 Hz
 extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp); driving at 60, not 50 (src/driving/hooks.cpp)
+extern bool unlock_missions;  // every mission can be chosen: each one's best medal is at least bronze while the front end is up (menu_mouse.cpp)
 extern bool hit_flash;        // the white flash when Bond is hit, on by default (src/bond/hooks.cpp)
 extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/mouse.cpp, src/driving/mouse.cpp)
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
