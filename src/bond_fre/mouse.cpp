@@ -71,6 +71,7 @@ X86_FUNC(sub_00024570) {
         float yaw, pitch;
         if (auf::PlayerFree() && !auf::MenuUp() && vr::Head(yaw, pitch)) {
             if (had) SetF(kYaw, GetF(kYaw) + std::remainder(yaw - last_yaw, 360.0f));
+            SetF(kYaw, GetF(kYaw) + vr::TakeTurn());  // the right stick's steps
             // The pitch written here is not the camera's: the game adds an offset of its own (a Quake's delta angles: set when
             // the server places the view, moved whenever the angle passes a limit), 67 degrees in one session. What the camera
             // really did with the last value written is in its matrix (ViewPitch), so the offset is known a frame late and
