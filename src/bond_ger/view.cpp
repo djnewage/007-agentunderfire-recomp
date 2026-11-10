@@ -10,6 +10,7 @@
 // The field of view scales the angle those helpers are given; the scope divides the "fov" setting (0xBD78x), so it
 // zooms in proportion. The first person weapon, drawn through 0x13A350 from 0x14B654, keeps its own.
 #include "bond/addr.h"
+#include <cmath>
 #include <algorithm>
 #include <cstring>
 
@@ -34,7 +35,16 @@ void ScaleFov(uint32_t va) { SetF(va, std::min(GetF(va) * auf::FovScale(), 2.9f)
 // tangent in EoN's driving levels, the same complaint
 constexpr float kCullMargin = 2.2f;
 float g_margin = 1.0f;
+float g_view_down = 0;
+bool g_view_known = false;
 }  // namespace
+
+namespace auf {
+bool ViewPitch(float& down) {
+    down = g_view_down;
+    return g_view_known;
+}
+}  // namespace auf
 
 X86_EXTERN_FUNC(__imp__sub_00138A50);
 X86_FUNC(sub_00138A50) {
@@ -45,14 +55,34 @@ X86_FUNC(sub_00138A50) {
 
 X86_EXTERN_FUNC(__imp__sub_0015CC40);
 X86_FUNC(sub_0015CC40) {
-    // (view matrix, near, far, field of view, the frustum): five planes of 0x20 bytes there, their count at +0xC0
-    const uint32_t frustum = kernel::R32(ctx.esp + 0x14);
+    // (view matrix, near, far, field of view, the frustum). In a headset the title's camera is the aiming hand and the head
+    // looks elsewhere: the frustum is built around the head instead. The matrix's first three rows are the camera's axes
+    // (0x13CF20 multiplies a row vector by it: x right, y down, z towards the viewer): turned to the head's for the call.
+    const uint32_t matrix = kernel::R32(ctx.esp + 4);
+    float turn[9], kept[3][3];
+    // the camera's own pitch, for the head look (mouse.cpp): the third row is the axis towards the viewer, in the world (z up).
+    // Not the views drawn from nowhere (an identity or a matrix at the origin: the front end's, a model's)
+    if (matrix && (GetF(matrix + 0x30) != 0 || GetF(matrix + 0x34) != 0 || GetF(matrix + 0x38) != 0)) {
+        g_view_down = std::asin(std::clamp(GetF(matrix + 0x28), -1.0f, 1.0f)) * 180 / 3.14159265f;
+        g_view_known = true;
+    }
+    const bool turned = matrix && vr::TitleTurn(turn);
+    if (turned) {
+        for (int j = 0; j < 3; j++)
+            for (int c = 0; c < 3; c++) kept[j][c] = GetF(matrix + uint32_t(j * 0x10 + c * 4));
+        // the turn is in axes with y up; these rows are right, down, towards the viewer (seen in the matrix: looking level,
+        // the second row is the world's down), so its terms across y change sign
+        static const float f[3] = {1, -1, 1};
+        for (int i = 0; i < 3; i++)
+            for (int c = 0; c < 3; c++)
+                SetF(matrix + uint32_t(i * 0x10 + c * 4),
+                     f[i] * (f[0] * turn[i] * kept[0][c] + f[1] * turn[3 + i] * kept[1][c] + f[2] * turn[6 + i] * kept[2][c]));
+    }
     g_margin = kCullMargin;
     __imp__sub_0015CC40(ctx, base);
-    // In a headset the title's camera is the aiming hand and the head looks elsewhere: no plane around the hand's view holds
-    // all the head sees (a gun held down, or to one side). No planes: nothing is left out for where it is. What the rooms
-    // hide from the camera's place is still left out.
-    if (vr::Enabled() && frustum) kernel::W32(frustum + 0xC0, 0);
+    if (turned)
+        for (int j = 0; j < 3; j++)
+            for (int c = 0; c < 3; c++) SetF(matrix + uint32_t(j * 0x10 + c * 4), kept[j][c]);
     g_margin = 1.0f;
 }
 

@@ -21,6 +21,9 @@ extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/m
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
 float FovScale();             // fov_percent as a factor, 0.5 to 1.5
 float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4:3 screen
+// bond_eng.xbe: how far down the camera looked in the last view drawn, in degrees, from its own matrix (src/bond/view.cpp);
+// false before any
+bool ViewPitch(float& down);
 bool LevelPaused();           // bond_eng.xbe: a level's pause menu is up, the level behind it
 bool MenuUp();                // a menu has the controller (each image's own test): the mouse plays A, B and the d-pad
 bool OnGun();                 // DRIVING.XBE: a mounted gun's controls are in force, not the car's

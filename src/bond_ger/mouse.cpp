@@ -71,7 +71,27 @@ X86_FUNC(sub_00024570) {
         float yaw, pitch;
         if (auf::PlayerFree() && !auf::MenuUp() && vr::Head(yaw, pitch)) {
             if (had) SetF(kYaw, GetF(kYaw) + std::remainder(yaw - last_yaw, 360.0f));
-            SetF(kPitch, -std::clamp(pitch, -85.0f, 85.0f));
+            // The pitch written here is not the camera's: the game adds an offset of its own (a Quake's delta angles: set when
+            // the server places the view, moved whenever the angle passes a limit), 67 degrees in one session. What the camera
+            // really did with the last value written is in its matrix (ViewPitch), so the offset is known a frame late and
+            // taken off.
+            static float written = 0, offset = 0, expected = 0;
+            static bool wrote = false;
+            const float want = -std::clamp(pitch, -80.0f, 80.0f);  // the camera's pitch wanted, downwards
+            float seen;
+            if (wrote && auf::ViewPitch(seen)) {
+                const float now = std::remainder(seen - written, 360.0f);
+                if (std::fabs(now - offset) > 0.5f) {
+                    if (std::fabs(now - offset) > 5) LOGR("auf: the camera's pitch stands %.1f degrees from the angle written", now);
+                    offset = now;
+                }
+                // the camera did not go where it was sent (a limit of the game's): the picture is turned from where it is
+                if (std::fabs(seen - expected) > 1.5f) vr::Pitch(-seen);
+            }
+            written = std::remainder(want - offset, 360.0f);
+            expected = want;
+            wrote = true;
+            SetF(kPitch, written);
             if (!had) LOGR("auf: the headset turns the view");
             had = true;
             last_yaw = yaw;
