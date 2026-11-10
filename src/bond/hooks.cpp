@@ -25,6 +25,14 @@ bool MenuUp() {
     return name && !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(name)), "frontend", 8);
 }
 bool OnGun() { return false; }
+// as MenuUp, without the front end
+bool LevelPaused() {
+    if (!kernel::R32(A(0x3B2428)) && !kernel::R32(A(0x3B2418))) return false;
+    uint32_t state = kernel::R32(A(0x3B2414));
+    if (!state) return false;
+    const uint32_t name = kernel::R32(state + 0x10);
+    return !(name && !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(name)), "frontend", 8));
+}
 }  // namespace auf
 
 // A text's typing-out at 0x5BE11 ends its 256-byte copy at the count of letters shown, which a fast text's speed takes

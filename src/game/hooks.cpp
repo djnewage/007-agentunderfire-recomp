@@ -14,6 +14,7 @@ extern const bool kUsa = false;
 #endif
 extern const uint32_t kAddrMission = 0, kAddrRunMedal = 0, kAddrBestMedals = 0;
 bool MenuUp() { return false; }
+bool LevelPaused() { return false; }
 bool OnGun() { return false; }
 bool PlayerFree() { return true; }
 bool Zoomed() { return false; }

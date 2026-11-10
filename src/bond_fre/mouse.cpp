@@ -75,7 +75,9 @@ X86_FUNC(sub_00024570) {
             if (!had) LOGR("auf: the headset turns the view");
             had = true;
             last_yaw = yaw;
-        } else {
+        } else if (!auf::LevelPaused()) {
+            // (paused, the level stays around the player, menu_mouse.cpp, and the hand's place is kept: what it turns through
+            // meanwhile is added when play goes on, so the world stays where it was)
             had = false;
             vr::Flat();
         }

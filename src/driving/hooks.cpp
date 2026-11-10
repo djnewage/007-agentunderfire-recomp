@@ -19,6 +19,7 @@ extern const bool kUsa = false;
 extern const uint32_t kAddrMission = 0, kAddrRunMedal = 0, kAddrBestMedals = 0;
 // the name of the control file in force, its first letter cleared once read: "data/Control/povcfg0.def" on a mounted gun,
 // ".../drivecfg.def" in the car (0x17FED0, FUN_00050530's singleton; found comparing mis02a's memory with mis02b's)
+bool LevelPaused() { return false; }
 bool OnGun() {
     return !std::strncmp(reinterpret_cast<const char*>(&kernel::G<uint8_t>(A(0x17FED0) + 13)), "povcfg", 6);
 }

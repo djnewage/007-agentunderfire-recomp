@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "vr/vr.h"
 #include "common/auf.h"
 #include "core/input.h"
 #include "core/log.h"
@@ -141,6 +142,16 @@ void MenuMouse(int port, input::Pad& p) {
     // on foot Enter is the console's A everywhere, and where Bond is not the player's to move (a cutscene, a hint's "Press A") the left
     // button too
     if (kImage == kBond && !menu && input::UsingKeyboard() && (KeyHeld(0x0D) || (!PlayerFree() && (held & 1)))) Press(p, input::kA);
+    // a headset: a paused level stays around the player, its menu on the HUD ahead
+    if (menu && LevelPaused()) vr::Hold();
+    // in a menu the left stick plays the d-pad, which is all the menus read (a headset's hand controllers have no d-pad)
+    if (menu) {
+        constexpr int kPushed = 18000;
+        if (p.ly > kPushed) Press(p, input::kUp);
+        if (p.ly < -kPushed) Press(p, input::kDown);
+        if (p.lx < -kPushed) Press(p, input::kLeft);
+        if (p.lx > kPushed) Press(p, input::kRight);
+    }
     int next = input::kRight, prev = input::kLeft;
     if (menu) next = input::kDown, prev = input::kUp;
     else if (kImage == kDriving) next = input::kBlack, prev = input::kWhite;

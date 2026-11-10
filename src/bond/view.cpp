@@ -43,8 +43,14 @@ X86_FUNC(sub_001387E0) {
 
 X86_EXTERN_FUNC(__imp__sub_0015CD00);
 X86_FUNC(sub_0015CD00) {
+    // (view matrix, near, far, field of view, the frustum): five planes of 0x20 bytes there, their count at +0xC0
+    const uint32_t frustum = kernel::R32(ctx.esp + 0x14);
     g_margin = kCullMargin;
     __imp__sub_0015CD00(ctx, base);
+    // In a headset the title's camera is the aiming hand and the head looks elsewhere: no plane around the hand's view holds
+    // all the head sees (a gun held down, or to one side). No planes: nothing is left out for where it is. What the rooms
+    // hide from the camera's place is still left out.
+    if (vr::Enabled() && frustum) kernel::W32(frustum + 0xC0, 0);
     g_margin = 1.0f;
 }
 
