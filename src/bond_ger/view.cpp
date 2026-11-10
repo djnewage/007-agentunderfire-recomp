@@ -15,7 +15,9 @@
 #include <cstring>
 
 #include "common/auf.h"
+#include "gpu/state.h"
 #include "kernel/kernel.h"
+#include "xdk/d3d8.h"
 #include "vr/vr.h"
 #include "xdk/hle.h"
 
@@ -88,16 +90,21 @@ X86_FUNC(sub_0015CC40) {
 
 X86_EXTERN_FUNC(__imp__sub_0013A590);
 X86_FUNC(sub_0013A590) {
+    // the weapon in Bond's hand is drawn through here from 0x14B654: a headset's renderer puts it in the player's (State::held),
+    // until the next view is set up
+    d3d::State().held = kernel::R32(ctx.esp) == A(0x14B654);
     if (vr::Enabled() || kernel::R32(ctx.esp) != A(0x14B654)) ScaleFov(ctx.esp + 8);  // in a headset the weapon is in the same view
     __imp__sub_0013A590(ctx, base);
 }
 X86_EXTERN_FUNC(__imp__sub_0013A610);
 X86_FUNC(sub_0013A610) {
+    d3d::State().held = false;
     ScaleFov(ctx.esp + 8);
     __imp__sub_0013A610(ctx, base);
 }
 X86_EXTERN_FUNC(__imp__sub_0013A680);
 X86_FUNC(sub_0013A680) {
+    d3d::State().held = false;
     ScaleFov(ctx.esp + 8);
     __imp__sub_0013A680(ctx, base);
 }
