@@ -23,6 +23,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-10 - VR: the player's shots leave from the hand (USA); the rumble on the hand controllers
+- A survey of the recompiled code (USA): every shot of the player's takes its start and axes from Weapon::GetMuzzlePosition, 0x9D110 (Weapon vtable 0x1DE150 +0x214; thiscall: pos, forward, left, up; ret 0x10). The shoot event (0x331030) goes through 0x9CC40 to vtable +0x16C, 0xA28D0 (SSR4000: 0xA4340), then BulletAttack 0x83680 (cdecl, 22 arguments; gi.trace [0x328A6C]) or ProjectileAttack 0x87920. For an owner (+0x2CC) that is the Player (vtable 0x1E1370, ClassDef 0x333CB0) the start is the view's origin (0xAED60) and the axes the aim's (player +0x758, from 0xB7600); an Actor's shots take another branch. Tracers (0x833E0, 0x84790) and tag effects (0x644E0) place tag_barrel through 0x63E70, which for the first person weapon (entity +0x138 bit 1, set at 0xB5CCB) works back from where the view model is drawn.
+- src/bond_usa/muzzle.cpp: 0x9D110 gives the hand's place in the world for the Player's weapon (the camera's matrix from the frustum hook, auf::ViewCamera, and vr::TitleHand); 0x63E70 the same, a quarter of a metre ahead, for the first person weapon's tags. USA only: no PAL addresses.
+- The title's rumble for controller 1 buzzes the hand controllers (vr::Rumble, a 50 ms vibration renewed each frame).
+- Not seen in the headset yet. Not covered: vehicle weapons (0x9F620), the beam at 0xA1A60 (a laser sight?).
+
 ### 2026-11-09 - VR: the driving levels' camera read where the game keeps it (USA)
 - Two surveys of the files (FINDINGS.md has the result): which mission is which program and camera, and Driving.xbe's camera object, its modes and their kinds.
 - src/driving/camera.cpp: FrameCamera, from the view builder's hook, sets each frame's pose from the camera's own matrix (vr::View with that frame's levelling): the chase, bumper, gun, tumble and collision kinds are views of the world, levelled; the scripted kinds, the cut scenes' camera and a menu go on the screen. The matrix's rows are matched against the renderer's reading of the camera once (twenty frames agreeing) and their signs logged. USA addresses only: on the PAL disc nothing is known and the renderer's reading, a frame or two late, is used as before.

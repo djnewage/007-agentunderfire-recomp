@@ -25,6 +25,8 @@ float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4
 // bond_eng.xbe: how far down the camera looked in the last view drawn, in degrees, from its own matrix (src/bond/view.cpp);
 // false before any
 bool ViewPitch(float& down);
+// bond_eng.xbe: the same view's camera in the world: three rows (right, down, towards the viewer), then where it is
+bool ViewCamera(float rows[12]);
 // DRIVING.XBE (src/driving/camera.cpp): the frame's camera for a headset, from the view builder's hook; the camera's
 // heading (degrees, to the left, continuous) and pitch (upwards) where the game keeps it, false when not known; and the
 // offset between a mounted gun's heading and the hand's while the hand aims it

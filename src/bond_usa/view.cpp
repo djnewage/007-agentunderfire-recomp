@@ -42,10 +42,15 @@ void ScaleFov(uint32_t va) { SetF(va, std::min(GetF(va) * auf::FovScale(), 2.9f)
 constexpr float kCullMargin = 2.2f;
 float g_margin = 1.0f;
 float g_view_down = 0;
+float g_view_rows[12] = {};
 bool g_view_known = false;
 }  // namespace
 
 namespace auf {
+bool ViewCamera(float rows[12]) {
+    std::memcpy(rows, g_view_rows, sizeof(g_view_rows));
+    return g_view_known;
+}
 bool ViewPitch(float& down) {
     down = g_view_down;
     return g_view_known;
@@ -70,6 +75,8 @@ X86_FUNC(sub_0015C810) {
     // Not the views drawn from nowhere (an identity or a matrix at the origin: the front end's, a model's)
     if (matrix && (GetF(matrix + 0x30) != 0 || GetF(matrix + 0x34) != 0 || GetF(matrix + 0x38) != 0)) {
         g_view_down = std::asin(std::clamp(GetF(matrix + 0x28), -1.0f, 1.0f)) * 180 / 3.14159265f;
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 3; c++) g_view_rows[r * 3 + c] = GetF(matrix + uint32_t(r * 0x10 + c * 4));
         g_view_known = true;
     }
     const bool turned = matrix && vr::TitleTurn(turn);
