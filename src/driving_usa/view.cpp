@@ -100,6 +100,7 @@ X86_EXTERN_FUNC(__imp__sub_00102400);
 X86_FUNC(sub_00102400) {
     float aspect = GetF(ctx.esp + 8);
     if (aspect > 1.2f) {  // the game's views, not the auxiliary one
+        auf::FrameCamera(ctx, base);  // a headset: this frame's camera, the game having moved it
         float k = auf::FrameWidth(), fov = GetF(ctx.esp + 4) * auf::FovScale();
         if (k > 1.0f + 1e-3f) {
             fov = 2 * std::atan(k * std::tan(fov * kPi / 360)) * 180 / kPi;

@@ -23,6 +23,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-09 - VR: the driving levels' camera read where the game keeps it (USA)
+- Two surveys of the files (FINDINGS.md has the result): which mission is which program and camera, and Driving.xbe's camera object, its modes and their kinds.
+- src/driving/camera.cpp: FrameCamera, from the view builder's hook, sets each frame's pose from the camera's own matrix (vr::View with that frame's levelling): the chase, bumper, gun, tumble and collision kinds are views of the world, levelled; the scripted kinds, the cut scenes' camera and a menu go on the screen. The matrix's rows are matched against the renderer's reading of the camera once (twenty frames agreeing) and their signs logged. USA addresses only: on the PAL disc nothing is known and the renderer's reading, a frame or two late, is used as before.
+- The mounted gun (mouse.cpp): the hand's heading and pitch against the camera's, exactly, each update; the right stick moves the offset between them. Before: the renderer's reading with a prediction, and on the gun no levelling at all (Tristan: aim a little off the crosshair, the horizon still tilted).
+- The car: in a headset the bumper camera is asked for once a level (0x74F60 with the Bumper kind's index; option vr_car_bumper). Tristan chose the bumper view over the chase one, and reported the car level tilted.
+- Not seen in the headset yet. Open: whether the bumper camera clips into a car (the button passes over it), the on-foot shots leaving from the view's centre, ten seconds of stutter in the vent.
+
 ### 2026-11-09 - VR: saves, the frame loop, the gun in the hand, driving (branches vr)
 - A console save in the recomp: the game only takes a save named `BOND: AUF` (the wide string at file offset 0x1C3448 of bond.xbe). Its folder is the XAPI hash of that name, 91633FEE2CF5 (0x16F47C: acc = (acc * 0x10000 + wchar) mod 0xFFFFFFFFFFC5, twelve hex digits), and SaveMeta.xbx is FF FE + UTF-16 `Name=BOND: AUF\r\n` (the format at 0x1F4854). With `Name=007` the game listed the folder, read the name and passed on (the save area's opens are now in the log: files.cpp). xbsavegame.dat is dword size, 20 byte signature, data; the runtime's XboxSignatureKey is 16 zero bytes, so a console's signature does not verify: HMAC-SHA1 with the zero key over the data after the 24 byte header does (the second HMAC with XboxHDKey does not). The 100% save from speedrun.com (resource kfdqb) loads so. Kept in .local/save_dl/working with the script. The game does not save by itself at a mission's end.
 - unlock_missions removed: raising the best medals at kAddrBestMedals does not open Select Mission.

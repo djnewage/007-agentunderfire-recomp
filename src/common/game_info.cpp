@@ -18,6 +18,7 @@ bool skip_intro = false;
 bool uncapped = true;
 bool auto_aim = false;
 bool hit_flash = true;
+bool car_bumper = true;
 uint32_t fov_percent = 100;
 
 float FovScale() {
@@ -183,6 +184,7 @@ const app::GameInfo app::kGame = {
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
                 {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
+                {"vr_car_bumper", &auf::car_bumper, nullptr, "VR: drive from the bumper", "In a headset the car levels start in the view from the car's nose, not the chase camera behind it. The camera button still changes it"},
                 {"hit_flash", &auf::hit_flash, nullptr, "Hit flash", "The white flash on screen when Bond is hit. On by default; off for those it troubles"},
                 {"uncapped", &auf::uncapped, nullptr, "High frame rate",
                  "Paced by the frame rate cap instead of the console's 30 on foot; driving at 60 steps a second instead of 50 at the same speed, with frames in between above that. Vertical sync off gets the most. Takes effect at the next start"},

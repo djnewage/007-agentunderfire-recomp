@@ -16,6 +16,7 @@ extern const bool kUsa;       // the USA disc: its programs, English only, 60 Hz
 extern const int kImage;      // which exe this is (each image's hooks.cpp)
 extern bool skip_intro;
 extern bool uncapped;         // on foot paced by the frame rate cap, not the console's 30 (src/bond/framerate.cpp); driving at 60, not 50 (src/driving/hooks.cpp)
+extern bool car_bumper;       // DRIVING.XBE in a headset: the car is driven from its bumper camera, not the chase one (src/driving/camera.cpp)
 extern bool hit_flash;        // the white flash when Bond is hit, on by default (src/bond/hooks.cpp)
 extern bool auto_aim;         // the game's auto-aim, off by default (src/bond/mouse.cpp, src/driving/mouse.cpp)
 extern uint32_t fov_percent;  // the 3D views' field of view, percent of the game's
@@ -24,6 +25,12 @@ float FrameWidth();           // the frame's width over the game's 4:3, 1 on a 4
 // bond_eng.xbe: how far down the camera looked in the last view drawn, in degrees, from its own matrix (src/bond/view.cpp);
 // false before any
 bool ViewPitch(float& down);
+// DRIVING.XBE (src/driving/camera.cpp): the frame's camera for a headset, from the view builder's hook; the camera's
+// heading (degrees, to the left, continuous) and pitch (upwards) where the game keeps it, false when not known; and the
+// offset between a mounted gun's heading and the hand's while the hand aims it
+void FrameCamera(X86Context& ctx, uint8_t* base);
+bool CameraAngles(float& heading, float& pitch);
+void GunOffset(bool on, float offset);
 bool LevelPaused();           // bond_eng.xbe: a level's pause menu is up, the level behind it
 bool MenuUp();                // a menu has the controller (each image's own test): the mouse plays A, B and the d-pad
 bool OnGun();                 // DRIVING.XBE: a mounted gun's controls are in force, not the car's

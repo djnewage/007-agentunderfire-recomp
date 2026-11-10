@@ -9,7 +9,9 @@ Status: [x] done and confirmed in the headset, [~] built but not yet confirmed, 
 - [x] On-foot world view at 100 degrees, filling the headset
 - [x] True stereo: every frame drawn once per eye, with the headset's real eye spacing
 - [ ] World scale tuned so objects and rooms feel life-size (setting `vr_units`, guessed at 32 per metre)
-- [~] Driving missions and mounted guns in world view with stereo, the horizon levelled from the camera
+- [~] Driving engine levels (missions 2, 3, 7, 9): the camera read exactly each frame, levelled; cut scene cameras on the screen
+- [~] Mounted guns (missions 2, 7b, 9): the right hand aims, the stick turns, the crosshair on the gun's aim
+- [~] Car levels (missions 3, 7a): first person from the bumper camera, chase still on the camera button
 - [ ] Clean hand-over between the three programs (intro, on foot, driving) with the headset on
 - [ ] Desktop mirror window showing one clean eye for streaming and recording
 
