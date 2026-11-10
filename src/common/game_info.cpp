@@ -18,7 +18,6 @@ bool skip_intro = false;
 bool uncapped = true;
 bool auto_aim = false;
 bool hit_flash = true;
-bool unlock_missions = false;
 uint32_t fov_percent = 100;
 
 float FovScale() {
@@ -184,7 +183,6 @@ const app::GameInfo app::kGame = {
                {"driving.xbe", "AgentUnderFireDriving"}},
     .options = {{"skip_intro", &auf::skip_intro, nullptr, "Skip intro movies", "Starts without the EA, MGM and logo movies"},
                 {"auto_aim", &auf::auto_aim, nullptr, "Auto-aim", "The game's aim assist, on foot and on mounted guns. Off by default"},
-                {"unlock_missions", &auf::unlock_missions, nullptr, "Unlock all missions", "Every mission can be chosen from Select Mission, as if each had been finished with a bronze medal. Saving keeps them"},
                 {"hit_flash", &auf::hit_flash, nullptr, "Hit flash", "The white flash on screen when Bond is hit. On by default; off for those it troubles"},
                 {"uncapped", &auf::uncapped, nullptr, "High frame rate",
                  "Paced by the frame rate cap instead of the console's 30 on foot; driving at 60 steps a second instead of 50 at the same speed, with frames in between above that. Vertical sync off gets the most. Takes effect at the next start"},

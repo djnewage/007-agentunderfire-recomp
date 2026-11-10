@@ -143,14 +143,6 @@ void MenuMouse(int port, input::Pad& p) {
     // on foot Enter is the console's A everywhere, and where Bond is not the player's to move (a cutscene, a hint's "Press A") the left
     // button too
     if (kImage == kBond && !menu && input::UsingKeyboard() && (KeyHeld(0x0D) || (!PlayerFree() && (held & 1)))) Press(p, input::kA);
-    // Unlock all missions (auf::unlock_missions): a mission's best medal, 0 for one not finished, is raised to bronze (1)
-    // while the front end is up. The twelve are at kAddrBestMedals (achievement_set.cpp).
-    if (unlock_missions && kImage == kBond && menu && !LevelPaused() && kAddrBestMedals) {
-        bool raised = false;
-        for (uint32_t i = 0; i < 12; i++)
-            if (kernel::R32(kAddrBestMedals + i * 4) == 0) kernel::W32(kAddrBestMedals + i * 4, 1), raised = true;
-        if (raised) LOGR("auf: every mission's best medal is at least bronze (unlock_missions)");
-    }
     // a headset: a paused level stays around the player, its menu on the HUD ahead
     if (menu && LevelPaused()) vr::Hold();
     // the driving levels and the mounted guns: the world around the car, the camera looking ahead
