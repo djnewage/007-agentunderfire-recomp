@@ -29,13 +29,27 @@ void SetF(uint32_t va, float f) { std::memcpy(&kernel::G<uint32_t>(va), &f, 4); 
 
 // the hand in the world: from the camera's place along its axes (right, down, towards the viewer), the hand being given
 // to its right, above it and towards the viewer; ahead metres further along the aim
-bool Hand(float out[3], float ahead) {
+// (from: the place the game itself gave, the view's origin; the camera matrix's own place is not used, the frustum hook
+// seeing more views than the player's)
+bool Hand(const float from[3], float out[3], float ahead) {
     float rows[12], at[3];
     if (!auf::ViewCamera(rows) || !vr::TitleHand(at)) return false;
+    // the camera kept is not the player's just now (a cut scene's, another view's): its axes are not to be used either
+    float off = 0;
+    for (int c = 0; c < 3; c++) off += (rows[9 + c] - from[c]) * (rows[9 + c] - from[c]);
+    if (off > 64.0f * 64.0f) return false;
     const float back = at[2] - ahead * vr::Units();
-    for (int c = 0; c < 3; c++) out[c] = rows[9 + c] + rows[c] * at[0] - rows[3 + c] * at[1] + rows[6 + c] * back;
+    for (int c = 0; c < 3; c++) out[c] = from[c] + rows[c] * at[0] - rows[3 + c] * at[1] + rows[6 + c] * back;
     return true;
 }
+float GetF(uint32_t va) {
+    float f;
+    std::memcpy(&f, &kernel::G<uint32_t>(va), 4);
+    return f;
+}
+// the view's origin as the player's last shot had it, and when: the flash and the tracers of that shot start from it
+float g_eye[3] = {};
+uint64_t g_eye_at = 0;
 }  // namespace
 
 X86_EXTERN_FUNC(__imp__sub_0009D110);
@@ -43,18 +57,25 @@ X86_FUNC(sub_0009D110) {
     const uint32_t weapon = ctx.ecx, pos = kernel::R32(ctx.esp + 4);
     __imp__sub_0009D110(ctx, base);
     const uint32_t owner = weapon ? kernel::R32(weapon + kOwner) : 0;
+    if (!pos || !owner || kernel::R32(owner) != kPlayerVtable) return;
+    const float from[3] = {GetF(pos), GetF(pos + 4), GetF(pos + 8)};
+    for (int c = 0; c < 3; c++) g_eye[c] = from[c];
+    g_eye_at = vr::Ticks();
     float hand[3];
-    if (!pos || !owner || kernel::R32(owner) != kPlayerVtable || !Hand(hand, 0)) return;
+    if (!Hand(from, hand, 0)) return;
     for (int c = 0; c < 3; c++) SetF(pos + uint32_t(c * 4), hand[c]);
     LOG_FIRST(1, "auf: the player's shots leave from the hand");
 }
 
+// (the place is counted from the view's origin of the shot just fired, not from the camera the frustum hook kept, which
+// is at times another view's: with that, shots and tracers went astray)
 X86_EXTERN_FUNC(__imp__sub_00063E70);
 X86_FUNC(sub_00063E70) {
     const uint32_t entity = kernel::R32(ctx.esp + 8), pos = kernel::R32(ctx.esp + 0x10);
     __imp__sub_00063E70(ctx, base);
     float hand[3];
-    if (!entity || !pos || !(kernel::R32(entity + kFirstPerson) & 2) || !Hand(hand, kBarrel)) return;
+    if (!entity || !pos || !(kernel::R32(entity + kFirstPerson) & 2)) return;
+    if (!g_eye_at || vr::Ticks() - g_eye_at > 400 || !Hand(g_eye, hand, kBarrel)) return;
     for (int c = 0; c < 3; c++) SetF(pos + uint32_t(c * 4), hand[c]);
     LOG_FIRST(1, "auf: the held weapon's flash and tracers start at the hand");
 }
