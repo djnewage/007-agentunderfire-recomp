@@ -97,3 +97,6 @@ Status: [x] done and confirmed in the headset, [~] built but not yet confirmed, 
 - [~] Muzzle flash and tracers from the hand (USA)
 - [~] No drops to the screen in play: short 2D-only gaps kept in the world, a frozen player kept in the world, a cut of the camera on the screen
 - [~] Right stick back or pressed: the next gadget only
+- [~] Sniper scope: the scope's picture on a screen before the eyes, the hand aims slowed by the zoom, shots to the reticle
+- [x] One headset session at the start: the launcher opens none
+- [ ] One headset session across the on-foot and driving programs

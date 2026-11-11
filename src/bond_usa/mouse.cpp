@@ -72,7 +72,29 @@ X86_FUNC(sub_00024370) {
         static std::chrono::steady_clock::time_point free_at{};  // when the player last had the view
         float yaw, pitch;
         if (auf::PlayerFree() && !auf::MenuUp() && vr::Head(yaw, pitch)) {
-            if (had) SetF(kYaw, GetF(kYaw) + std::remainder(yaw - last_yaw, 360.0f));
+            // Through a scope (auf::Zoomed) the frame is the game's own picture on a small screen before the eyes
+            // (vr::Scope), and the hand turns the view by its movement times the game's own rate there, which falls as
+            // the zoom grows: at four times, four degrees of the hand are one of the view, which a hand can hold. What
+            // was kept back is given when the scope is left, so the view is the hand's again.
+            static bool scoped = false;
+            static float kept_yaw = 0, scope_pitch = 0, hand_pitch = 0;  // (the pitch by steps too: the zoom changes in the scope)
+            const bool zoomed = auf::Zoomed();
+            const float slow = zoomed ? std::clamp(GetF(kYawRate), 0.1f, 1.0f) : 1.0f;
+            if (zoomed && !scoped) {
+                kept_yaw = 0, scope_pitch = hand_pitch = pitch;
+                LOGR("auf: through a scope: its picture before the eyes, the hand at %.2f of its movement", slow);
+            }
+            if (!zoomed && scoped) {
+                SetF(kYaw, GetF(kYaw) + kept_yaw);
+                LOGR("auf: out of the scope");
+            }
+            scoped = zoomed;
+            if (had) {
+                const float turned = std::remainder(yaw - last_yaw, 360.0f);
+                SetF(kYaw, GetF(kYaw) + turned * slow);
+                if (zoomed) kept_yaw += turned * (1 - slow);
+            }
+            if (zoomed) scope_pitch += (pitch - hand_pitch) * slow, hand_pitch = pitch, pitch = scope_pitch;
             SetF(kYaw, GetF(kYaw) + vr::TakeTurn());  // the right stick's steps
             // The pitch written here is not the camera's: the game adds an offset of its own (a Quake's delta angles: set when
             // the server places the view, moved whenever the angle passes a limit), 67 degrees in one session. What the camera
@@ -104,6 +126,7 @@ X86_FUNC(sub_00024370) {
             SetF(kPitch, written);
             if (!had) LOGR("auf: the headset turns the view");
             away = 0;
+            if (zoomed) vr::Scope();
             free_at = std::chrono::steady_clock::now();
             had = true;
             last_yaw = yaw;

@@ -58,6 +58,7 @@ X86_FUNC(sub_0009D110) {
     __imp__sub_0009D110(ctx, base);
     const uint32_t owner = weapon ? kernel::R32(weapon + kOwner) : 0;
     if (!pos || !owner || kernel::R32(owner) != kPlayerVtable) return;
+    if (auf::Zoomed()) return;  // through a scope the shot is the game's: from the view's origin to the reticle
     const float from[3] = {GetF(pos), GetF(pos + 4), GetF(pos + 8)};
     for (int c = 0; c < 3; c++) g_eye[c] = from[c];
     g_eye_at = vr::Ticks();
@@ -74,7 +75,7 @@ X86_FUNC(sub_00063E70) {
     const uint32_t entity = kernel::R32(ctx.esp + 8), pos = kernel::R32(ctx.esp + 0x10);
     __imp__sub_00063E70(ctx, base);
     float hand[3];
-    if (!entity || !pos || !(kernel::R32(entity + kFirstPerson) & 2)) return;
+    if (!entity || !pos || !(kernel::R32(entity + kFirstPerson) & 2) || auf::Zoomed()) return;
     if (!g_eye_at || vr::Ticks() - g_eye_at > 400 || !Hand(g_eye, hand, kBarrel)) return;
     for (int c = 0; c < 3; c++) SetF(pos + uint32_t(c * 4), hand[c]);
     LOG_FIRST(1, "auf: the held weapon's flash and tracers start at the hand");

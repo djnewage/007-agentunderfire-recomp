@@ -60,6 +60,14 @@ void Init() {
     if (const char* e = std::getenv("AUF_AUTO_AIM"); e && *e) auf::auto_aim = *e == '1';
     if (const char* e = std::getenv("AUF_HIT_FLASH"); e && *e) auf::hit_flash = *e == '1';
     if (const char* e = std::getenv("AUF_FOV"); e && *e) auf::fov_percent = uint32_t(std::atoi(e));
+    // A headset: the launcher only plays the logo movies and hands over to the game. With a session of its own the headset
+    // saw the game start, leave and start again; it has none, and its movies, which would show on the desktop alone, are
+    // passed over.
+    if (auf::kImage == auf::kDefault && vr::Enabled()) {
+        vr::Off();
+        auf::skip_intro = true;
+        LOGR("auf: a headset: the launcher goes straight to the game, which opens the headset's session");
+    }
     if (auf::skip_intro) LOGR("auf: the logo movies are skipped (skip_intro)");
 }
 
