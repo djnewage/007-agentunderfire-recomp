@@ -67,6 +67,7 @@ X86_FUNC(sub_00024570) {
     // body; its pitch is the view's own, level with the room. Only while the player has the view (not a menu, a cut scene).
     if (kernel::R32(ctx.esp + 8) == 0) {
         static bool had = false;
+        static int away = 0;  // the game has the view: 1 the world kept meanwhile, 2 on the screen
         static float last_yaw = 0;
         static std::chrono::steady_clock::time_point free_at{};  // when the player last had the view
         float yaw, pitch;
@@ -102,6 +103,7 @@ X86_FUNC(sub_00024570) {
             wrote = true;
             SetF(kPitch, written);
             if (!had) LOGR("auf: the headset turns the view");
+            away = 0;
             free_at = std::chrono::steady_clock::now();
             had = true;
             last_yaw = yaw;
@@ -111,8 +113,55 @@ X86_FUNC(sub_00024570) {
             // The game has the view for a moment (the Q-Claw's pull, a ladder, a short scripted move): the world stays around
             // the player, the camera where the game takes it, seen from where the head is; its pitch from its matrix. Longer
             // than a few seconds is a cut scene: on the screen.
-            float seen;
-            if (!auf::MenuUp() && std::chrono::steady_clock::now() - free_at < std::chrono::seconds(4)) {
+            // What it is, the camera tells: one that stays where it was is a frozen player (a hint waiting for a button, a
+            // door opening) and the world stays for as long as it lasts; one that jumps is a cut to a scene's camera, at
+            // once on the screen; one that after four seconds has gone elsewhere is a scene too. (Four seconds alone, as
+            // before, put every long hint on the screen.) A jump counts when three frames on end stand far from the last
+            // steady place: the camera kept is now and then another view's for a frame.
+            float seen, rows[12];
+            const bool known = auf::ViewCamera(rows);
+            static float start[12] = {}, steady[12] = {};
+            static int jumped = 0;
+            const auto from = [&](const float* was, float& far, float& turned) {
+                float d = 0, dot = 0, a = 0, b = 0;
+                for (int c = 0; c < 3; c++) {
+                    d += (rows[9 + c] - was[9 + c]) * (rows[9 + c] - was[9 + c]);
+                    dot += rows[6 + c] * was[6 + c], a += rows[6 + c] * rows[6 + c], b += was[6 + c] * was[6 + c];
+                }
+                far = std::sqrt(d) / vr::Units();  // metres
+                turned = a > 0 && b > 0 ? std::acos(std::clamp(dot / std::sqrt(a * b), -1.0f, 1.0f)) * 180 / 3.14159265f : 0;
+            };
+            if (away == 0) {
+                away = had && !auf::MenuUp() ? 1 : 2;
+                jumped = 0;
+                if (known) std::memcpy(start, rows, sizeof(rows)), std::memcpy(steady, rows, sizeof(rows));
+                if (away == 1) LOGR("auf: the game has the view: the world stays around the player");
+            }
+            if (away == 1) {
+                const char* why = nullptr;
+                float far = 0, turned = 0;
+                const bool late = std::chrono::steady_clock::now() - free_at > std::chrono::seconds(4);
+                if (auf::MenuUp()) {
+                    why = "a menu";
+                } else if (!known) {
+                    if (late) why = "no camera known";
+                } else {
+                    from(steady, far, turned);
+                    if (far > 3.0f || turned > 45.0f) {
+                        if (++jumped >= 3) why = "the camera jumped";
+                    } else {
+                        jumped = 0;
+                        std::memcpy(steady, rows, sizeof(rows));
+                        from(start, far, turned);
+                        if (late && (far > 1.5f || turned > 30.0f)) why = "the camera has gone elsewhere";
+                    }
+                }
+                if (why) {
+                    away = 2;
+                    LOGR("auf: the game's view goes on the screen: %s (%.1f m, %.0f degrees)", why, far, turned);
+                }
+            }
+            if (away == 1) {
                 vr::Hold();
                 if (auf::ViewPitch(seen)) vr::Pitch(-seen);
             } else {

@@ -161,7 +161,11 @@ void MenuMouse(int port, input::Pad& p) {
         if (p.analog[input::kWhite - input::kA] > 128) Press(p, input::kDown);
         // the next gadget: the right stick pulled back or pressed in (vr.cpp plays both as the right thumb button). The right
         // hand's A stays the game's action button: taking it for the gadgets left the player without one
-        if (p.buttons & (1u << input::kRThumb)) Press(p, input::kRight);
+        if (p.buttons & (1u << input::kRThumb)) {
+            Press(p, input::kRight);
+            // (and not the game's own use of that button besides, which in its second stick layout is aiming)
+            if (vr::Running()) p.buttons &= ~(1u << input::kRThumb);
+        }
         // In a headset the trigger works what is in the hand: once a gadget has been chosen (the d-pad's left or right) it is
         // the game's use-gadget button (B) and not fire, until a weapon is chosen again (up or down). What is in Bond's hand
         // is not read from the game: it is what the player last chose here.

@@ -93,3 +93,7 @@ Status: [x] done and confirmed in the headset, [~] built but not yet confirmed, 
 - [x] A complete save that loads, so any mission can be started (`.local/save_dl/working`)
 - [x] Weapon and gadget cycling on the controllers; the trigger uses a chosen gadget
 - [ ] Shots leave from the gun in the hand, not the centre of the view
+- [x] Shots leave from the gun in the hand and land on the crosshair (USA)
+- [~] Muzzle flash and tracers from the hand (USA)
+- [~] No drops to the screen in play: short 2D-only gaps kept in the world, a frozen player kept in the world, a cut of the camera on the screen
+- [~] Right stick back or pressed: the next gadget only
